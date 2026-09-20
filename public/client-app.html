@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>معاينة تطبيق العميل</title>
+<style>
+  :root {
+    --green-deep: #0e3b2e;
+    --green-mid: #16543f;
+    --green-darker: #0a2a21;
+    --gold: #c9a24b;
+    --gold-light: #e6c87a;
+    --cream: #f6f2ea;
+    --white: #ffffff;
+    --stone: #7a7468;
+    --line: #e6e0d4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+    background: var(--cream);
+    color: var(--green-deep);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* status bar */
+  .statusbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 18px 6px; font-size: 11px; font-weight: 600;
+    color: var(--green-deep); flex-shrink: 0;
+  }
+  .statusbar .icons { display: flex; gap: 5px; align-items: center; }
+  .statusbar svg { width: 14px; height: 14px; fill: currentColor; }
+
+  .screen { flex: 1; overflow-y: auto; padding: 14px 16px 80px; }
+  .screen::-webkit-scrollbar { width: 0; }
+
+  /* app header */
+  .app-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  }
+  .app-header img { width: 34px; height: 34px; object-fit: contain; }
+  .app-header .t { font-weight: 700; font-size: 14px; }
+  .app-header .s { font-size: 10px; color: var(--stone); }
+
+  /* generic */
+  .card {
+    background: var(--white); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px; margin-bottom: 12px;
+  }
+  .card h4 { font-size: 12px; margin-bottom: 8px; }
+  .muted { color: var(--stone); font-size: 11px; line-height: 1.7; }
+  .row { display: flex; justify-content: space-between; align-items: center; }
+  .badge {
+    display: inline-block; background: var(--cream); color: var(--green-mid);
+    border: 1px solid var(--line); border-radius: 999px;
+    font-size: 9px; padding: 2px 8px; font-weight: 600;
+  }
+  .badge.gold { background: #f7ecd2; color: #8a6a1f; border-color: #ecd9a8; }
+  .btn {
+    display: block; width: 100%; text-align: center; border: 0; cursor: pointer;
+    background: var(--green-deep); color: var(--white); font-family: inherit;
+    font-size: 12px; font-weight: 700; padding: 11px; border-radius: 8px;
+  }
+  .btn.gold { background: var(--gold); color: var(--green-darker); }
+  .btn.outline { background: transparent; color: var(--green-deep); border: 1px solid var(--green-deep); }
+
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 10px; font-weight: 600; margin-bottom: 4px; color: var(--green-mid); }
+  .field input, .field select {
+    width: 100%; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--white); padding: 9px 10px; font-family: inherit;
+    font-size: 11px; color: var(--green-deep);
+  }
+
+  /* login */
+  .login-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 34px; }
+  .login-wrap img { width: 64px; height: 64px; object-fit: contain; margin-bottom: 12px; }
+  .login-wrap h1 { font-size: 17px; }
+  .login-wrap .sub { font-size: 10px; color: var(--stone); margin: 6px 0 18px; }
+  .login-card { width: 100%; background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .tabs { display: flex; background: var(--cream); border-radius: 8px; padding: 3px; margin-bottom: 14px; }
+  .tabs span { flex: 1; text-align: center; font-size: 10px; font-weight: 700; padding: 7px; border-radius: 6px; color: var(--stone); }
+  .tabs span.on { background: var(--white); color: var(--green-deep); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+  /* stats */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat { background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 10px 6px; text-align: center; }
+  .stat .n { font-size: 15px; font-weight: 800; color: var(--green-deep); }
+  .stat .l { font-size: 8.5px; color: var(--stone); margin-top: 3px; }
+
+  /* packages */
+  .pkg { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 10px; background: var(--white); }
+  .pkg.hot { border-color: var(--gold); background: linear-gradient(180deg, #fffdf6, var(--white)); }
+  .pkg .price { font-size: 16px; font-weight: 800; }
+  .pkg .price small { font-size: 9px; font-weight: 400; color: var(--stone); }
+  .pkg ul { list-style: none; margin: 8px 0 10px; }
+  .pkg li { font-size: 10px; color: var(--stone); padding: 3px 0; }
+  .pkg li::before { content: "✓"; color: var(--gold); margin-left: 6px; font-weight: 700; }
+
+  /* contact */
+  .c-item { display: flex; gap: 10px; align-items: center; padding: 11px 12px; background: var(--white); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 9px; }
+  .c-item .ic { width: 30px; height: 30px; border-radius: 50%; background: var(--green-deep); color: var(--gold-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .c-item .ic svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+  .c-item .v { font-size: 11px; font-weight: 600; }
+  .c-item .k { font-size: 9px; color: var(--stone); }
+
+  /* bottom nav */
+  .tabbar {
+    position: fixed; bottom: 0; inset-inline: 0; height: 56px;
+    background: var(--white); border-top: 1px solid var(--line);
+    display: flex; justify-content: space-around; align-items: center;
+  }
+  .tabbar .tb { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 8.5px; color: var(--stone); }
+  .tabbar .tb.on { color: var(--green-deep); font-weight: 700; }
+  .tabbar svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+<div class="statusbar">
+  <span>9:41</span>
+  <span class="icons">
+    <svg viewBox="0 0 24 24"><path d="M2 17h4v4H2zM8 13h4v8H8zM14 9h4v12h-4zM20 5h4v16h-4z" transform="scale(.8)"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M12 21l-1.5-1.4C5.4 15 2 12 2 8.5 2 6 4 4 6.5 4c1.7 0 3.4.9 4.3 2.3h2.4C14.1 4.9 15.8 4 17.5 4 20 4 22 6 22 8.5c0 3.5-3.4 6.5-8.5 11.1z" transform="scale(.7) translate(4 2)" opacity="0"/></svg>
+    <svg viewBox="0 0 24 24"><rect x="2" y="8" width="17" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="10" width="11" height="5" rx="1"/><rect x="20" y="10.5" width="2.5" height="4" rx="1"/></svg>
+  </span>
+</div>
+<div class="screen" id="screen"></div>
+<nav class="tabbar" id="tabbar"></nav>
+
+<script>
+  var LOGO = "/logo_icon.png";
+
+  var ICONS = {
+    home: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+    pkg: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    cal: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    chat: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    phone: '<svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
+    mail: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/><polyline points="3,6 12,13 21,6"/></svg>',
+    pin: '<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    user: '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+  };
+
+  function header(sub) {
+    return '<div class="app-header"><img src="' + LOGO + '" alt=""><div><div class="t">المتخصصون في الحوكمة والامتثال</div><div class="s">' + sub + '</div></div></div>';
+  }
+
+  var SCREENS = {
+    login: function () {
+      return '<div class="login-wrap">' +
+        '<img src="' + LOGO + '" alt="">' +
+        '<h1>بوابة العميل</h1>' +
+        '<div class="sub">سجّل دخولك لإدارة استشاراتك وباقاتك</div>' +
+        '<div class="login-card">' +
+          '<div class="tabs"><span class="on">تسجيل الدخول</span><span>إنشاء حساب</span></div>' +
+          '<div class="field"><label>البريد الإلكتروني</label><input value="client@company.sa" readonly></div>' +
+          '<div class="field"><label>كلمة المرور</label><input type="password" value="••••••••" readonly></div>' +
+          '<button class="btn">تسجيل الدخول</button>' +
+        '</div></div>';
+    },
+    "scr-home": function () {
+      return header("لوحة التحكم") +
+        '<div class="card"><h4>مرحباً، أحمد 👋</h4><div class="muted">إليك ملخص نشاطك لهذا الأسبوع</div></div>' +
+        '<div class="stats">' +
+          '<div class="stat"><div class="n">٤</div><div class="l">تقارير</div></div>' +
+          '<div class="stat"><div class="n">٢</div><div class="l">مواعيد قادمة</div></div>' +
+          '<div class="stat"><div class="n">الفضية</div><div class="l">الباقة الحالية</div></div>' +
+        '</div>' +
+        '<div class="card"><div class="row"><h4>التقرير القادم</h4><span class="badge gold">قريباً</span></div><div class="muted">تقرير الأداء الشهري — ٢٥ سبتمبر</div></div>' +
+        '<div class="card"><div class="row"><h4>الموعد القادم</h4><span class="badge">مجدول</span></div><div class="muted">استشارة امتثال مع د. سارة الدوسري — الثلاثاء ١٠:٠٠ ص</div></div>' +
+        '<button class="btn gold">حجز استشارة جديدة</button>';
+    },
+    "scr-packages": function () {
+      return header("باقات الاشتراك") +
+        '<div class="pkg"><div class="row"><h4>الباقة البرونزية</h4><div class="price">١,٩٠٠ <small>ر.س/شهر</small></div></div>' +
+          '<ul><li>استشارتان شهرياً</li><li>مراجعة مستندين</li><li>تقرير ربع سنوي</li></ul><button class="btn outline">اختر الباقة</button></div>' +
+        '<div class="pkg hot"><div class="row"><h4>الباقة الفضية <span class="badge gold">الحالية</span></h4><div class="price">٤,٥٠٠ <small>ر.س/شهر</small></div></div>' +
+          '<ul><li>٥ استشارات شهرياً</li><li>مراجعة ٨ مستندات</li><li>تقرير أداء شهري</li></ul><button class="btn">باقتك الحالية</button></div>' +
+        '<div class="pkg"><div class="row"><h4>الباقة الذهبية</h4><div class="price">٩,٨٠٠ <small>ر.س/شهر</small></div></div>' +
+          '<ul><li>استشارات غير محدودة</li><li>مستشار مخصص</li><li>دعم 24/7</li></ul><button class="btn gold">ترقية الباقة</button></div>';
+    },
+    "scr-booking": function () {
+      return header("حجز استشارة") +
+        '<div class="card"><h4>احجز موعدك</h4>' +
+          '<div class="field"><label>نوع الاستشارة</label><select><option>استشارات الحوكمة والامتثال</option><option>الاستشارات الإدارية</option></select></div>' +
+          '<div class="field"><label>المستشار</label><select><option>د. سارة الدوسري — امتثال</option><option>أ. أحمد العتيبي — حوكمة</option></select></div>' +
+          '<div class="field"><label>التاريخ</label><input type="date" value="2026-09-25"></div>' +
+          '<div class="field"><label>الوقت</label><select><option>١٠:٠٠ صباحاً</option><option>١٢:٠٠ ظهراً</option></select></div>' +
+          '<button class="btn">تأكيد الحجز</button></div>' +
+        '<div class="card"><div class="muted">✓ تأكيد الموعد خلال يوم عمل واحد<br>✓ الجلسة حضورياً أو عن بُعد عبر Google Meet</div></div>';
+    },
+    "scr-contact": function () {
+      return header("تواصل معنا") +
+        '<div class="c-item"><div class="ic">' + ICONS.phone + '</div><div><div class="v">+966 550181166</div><div class="k">اتصال مباشر</div></div></div>' +
+        '<div class="c-item"><div class="ic">' + ICONS.mail + '</div><div><div class="v">GCMC@GCMC.SA</div><div class="k">البريد الإلكتروني</div></div></div>' +
+        '<div class="c-item"><div class="ic">' + ICONS.pin + '</div><div><div class="v">الرياض — طريق العروبة</div><div class="k">الفرع الرئيسي</div></div></div>' +
+        '<div class="card"><h4>أرسل رسالة</h4>' +
+          '<div class="field"><label>الموضوع</label><input placeholder="موضوع الرسالة"></div>' +
+          '<div class="field"><label>الرسالة</label><input placeholder="اكتب رسالتك هنا..."></div>' +
+          '<button class="btn gold">إرسال</button></div>';
+    }
+  };
+
+  var TABS = [
+    { id: "scr-home", label: "الرئيسية", icon: ICONS.home },
+    { id: "scr-packages", label: "الباقات", icon: ICONS.pkg },
+    { id: "scr-booking", label: "الحجز", icon: ICONS.cal },
+    { id: "scr-contact", label: "تواصل", icon: ICONS.chat }
+  ];
+
+  var q = new URLSearchParams(location.search);
+  var key = q.get("screen") || (q.get("preview") === "login" ? "login" : "scr-home");
+  var render = SCREENS[key] || SCREENS["scr-home"];
+  document.getElementById("screen").innerHTML = render();
+
+  var tabbar = document.getElementById("tabbar");
+  if (key === "login") {
+    tabbar.style.display = "none";
+  } else {
+    tabbar.innerHTML = TABS.map(function (t) {
+      return '<div class="tb' + (t.id === key ? " on" : "") + '">' + t.icon + '<span>' + t.label + '</span></div>';
+    }).join("");
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "../styles/theme.css";
+
+/* Legacy `html[data-theme="dark"]` selectors from theme.css drive dark mode
+   directly (matching the original theme.js behavior) — no Tailwind dark
+   variant is required for ported sections. */

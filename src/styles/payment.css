@@ -1,0 +1,101 @@
+/* ===== Payment page (ported from payment.html) ===== */
+.payment-page .page-hero{padding:30px 0 24px;}
+
+.payment-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:32px;align-items:start;}
+
+/* ===== Order summary ===== */
+.order-summary{
+  background:var(--white);border:1px solid var(--line);
+  padding:24px;border-radius:6px;box-shadow:var(--shadow);
+}
+.order-summary h2{font-size:1.4rem;margin-bottom:14px;}
+.summary-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px dashed var(--line);font-size:.9rem;
+}
+.summary-row:last-child{border-bottom:0;}
+.summary-row .label{color:var(--stone);}
+.summary-row .value{font-weight:600;color:var(--green-deep);}
+.summary-row.total{padding-top:14px;margin-top:6px;border-top:2px solid var(--line);border-bottom:0;}
+.summary-row.total .value{font-size:1.2rem;font-family:'Amiri',serif;color:var(--green-deep);}
+.summary-row.total .value small{font-size:.65rem;font-weight:400;font-family:'IBM Plex Sans Arabic',sans-serif;color:var(--stone);margin-right:6px;}
+
+/* ===== Payment form (tighter field styling than shared forms) ===== */
+.payment-page .booking-form{
+  background:var(--white);border:1px solid var(--line);
+  padding:24px;border-radius:6px;box-shadow:var(--shadow);
+}
+.payment-page .booking-form h2{font-size:1.4rem;margin-bottom:14px;}
+.payment-page .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.payment-page .field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+.payment-page .field.full{grid-column:1/-1;}
+.payment-page .field label{font-size:.8rem;color:var(--stone);}
+.payment-page .field input,.payment-page .field select,.payment-page .field textarea{
+  border:1px solid var(--line);background:var(--cream);color:var(--ink);
+  padding:8px 10px;font-size:.86rem;border-radius:2px;font-family:inherit;
+}
+.payment-page .field textarea{min-height:60px;resize:vertical;}
+.payment-page .field input:focus,.payment-page .field select:focus,.payment-page .field textarea:focus{background:var(--white);border-color:var(--gold);}
+.payment-page .form-note{font-size:.72rem;color:var(--stone);margin-top:10px;}
+.payment-page .form-msg{display:none;margin-top:12px;padding:8px 12px;background:var(--gold-light);color:var(--green-darker);font-size:.82rem;border-radius:2px;}
+.payment-page .form-msg.show{display:block;}
+.payment-page .form-msg.error{background:#f8d7da !important;color:#721c24 !important;}
+
+/* ===== Payment methods ===== */
+.payment-methods{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:10px;margin-bottom:16px;}
+.payment-option{position:relative;}
+.payment-option input{position:absolute;opacity:0;pointer-events:none;}
+.payment-option .pay-card{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 4px;border:1px solid var(--line);border-radius:6px;
+  background:var(--cream);cursor:pointer;transition:all .2s ease;text-align:center;
+}
+.payment-option .pay-card:hover{border-color:var(--gold);background:var(--white);}
+.payment-option input:checked + .pay-card{
+  border-color:var(--gold);background:var(--white);box-shadow:0 0 0 1px var(--gold);
+}
+.payment-option .pay-card .pay-icon{
+  width:auto;height:22px;display:flex;align-items:center;justify-content:center;
+  padding:2px 4px;background:var(--white);border:1px solid var(--line);border-radius:4px;
+  color:var(--green-deep);
+}
+.payment-option .pay-card .pay-icon svg{width:auto;height:auto;max-width:100%;max-height:100%;}
+.payment-option .pay-card span{font-size:.7rem;font-weight:500;color:var(--green-deep);}
+
+.pay-fields{display:none;margin-bottom:12px;}
+.pay-fields.active{display:block;}
+.pay-hint{
+  display:none;padding:10px;background:var(--gold-light);color:var(--green-darker);
+  border-radius:2px;font-size:.84rem;margin-bottom:12px;
+}
+.pay-hint.active{display:block;}
+
+/* ===== Bank transfer details ===== */
+.bank-details{
+  display:none;background:var(--cream);border:1px solid var(--line);
+  border-radius:6px;padding:14px 16px;margin-bottom:12px;
+}
+.bank-details.active{display:block;}
+.bd-row{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:8px 0;border-bottom:1px dashed var(--line);font-size:.84rem;
+}
+.bd-row:last-of-type{border-bottom:0;}
+.bd-label{color:var(--stone);flex-shrink:0;}
+.bd-value{font-weight:600;color:var(--green-deep);text-align:end;}
+.bd-iban{direction:ltr;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem;letter-spacing:.4px;display:flex;align-items:center;gap:8px;}
+.bank-copy{
+  border:1px solid var(--gold);background:transparent;color:var(--green-deep);
+  font-family:inherit;font-size:.68rem;font-weight:600;padding:3px 10px;
+  border-radius:20px;cursor:pointer;transition:all .2s ease;flex-shrink:0;
+}
+.bank-copy:hover{background:var(--gold);color:var(--green-darker);}
+.bd-note{font-size:.72rem;color:var(--stone);margin-top:10px;line-height:1.7;}
+
+@media (max-width:1000px){
+  .payment-grid{grid-template-columns:1fr;}
+}
+@media (max-width:680px){
+  .payment-page .field-grid{grid-template-columns:1fr;}
+  .payment-methods{grid-template-columns:repeat(2,1fr);}
+}
