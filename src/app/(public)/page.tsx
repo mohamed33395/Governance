@@ -381,7 +381,7 @@ export default function HomePage() {
               <Link href="/details#package-1" className="btn btn-outline btn-sm" style={{ marginBottom: 12 }}>
                 {t("packageDetails")}
               </Link>
-              <Link href={`/booking-wizard?package=${encodeURIComponent(t("ironPackage"))}&price=1900`} className="btn btn-outline">
+              <Link href="/book/iron" className="btn btn-outline">
                 {t("choosePackage")}
               </Link>
             </div>
@@ -440,7 +440,7 @@ export default function HomePage() {
               <Link href="/details#package-2" className="btn btn-outline btn-sm" style={{ marginBottom: 12 }}>
                 {t("packageDetails")}
               </Link>
-              <Link href={`/payment?package=${encodeURIComponent(t("silverPackage"))}&price=4500`} className="btn btn-outline">
+              <Link href="/book/silver" className="btn btn-outline">
                 {t("choosePackage")}
               </Link>
             </div>
@@ -508,7 +508,7 @@ export default function HomePage() {
               <Link href="/details#package-3" className="btn btn-ghost btn-sm" style={{ marginBottom: 12 }}>
                 {t("packageDetails")}
               </Link>
-              <Link href={`/payment?package=${encodeURIComponent(t("goldPackage"))}&price=9800`} className="btn btn-gold">
+              <Link href="/book/gold" className="btn btn-gold">
                 {t("choosePackage")}
               </Link>
             </div>

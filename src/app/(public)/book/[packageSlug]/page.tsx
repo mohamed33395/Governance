@@ -41,7 +41,8 @@ export default function BookingWizardPage() {
   const wizard = useWizard();
   const { pkg, consultant, date, time, location, paymentMethodId, cardToken, quote } = wizard;
 
-  const [step, setStep] = useState<StepKey>('consultant');
+  // logged-out users start at the account step, logged-in users skip it
+  const [step, setStep] = useState<StepKey>(() => (useClientAuth.getState().token ? 'consultant' : 'account'));
   const [terminal, setTerminal] = useState<TerminalState>(null);
 
   // step 1 — load the full package by slug (PUB-02)
@@ -146,7 +147,7 @@ export default function BookingWizardPage() {
       </div>
     );
   }
-  if (pkgQuery.isError || !pkg) {
+  if (pkgQuery.isError || !pkgQuery.data) {
     return (
       <div className="section-padding container">
         {pkgQuery.isError ? (
