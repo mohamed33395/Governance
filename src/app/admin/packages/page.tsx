@@ -12,6 +12,7 @@ import { useI18n } from '@/lib/i18n/i18n-context';
 import { packageSchema, type PackageValues } from '@/schemas/packages';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import {
+  ActionsMenu,
   Badge,
   Button,
   Checkbox,
@@ -172,16 +173,26 @@ function PackagesInner() {
                     onChange={(e) => statusMutation.mutate({ id: pkg.id, is_active: e.target.checked })}
                     aria-label={t('common.status')}
                   />
-                  {can('update-packages') && (
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(pkg)}>
-                      {t('common.edit')}
-                    </Button>
-                  )}
-                  {can('delete-packages') && (
-                    <Button variant="ghost" size="sm" className="text-danger ms-auto" onClick={() => setDeleting(pkg)}>
-                      {t('common.delete')}
-                    </Button>
-                  )}
+                  <span className="ms-auto">
+                    <ActionsMenu
+                      ariaLabel={t('common.actions')}
+                      items={[
+                        ...(can('update-packages')
+                          ? [{ key: 'edit', label: t('common.edit'), onClick: () => setEditing(pkg) }]
+                          : []),
+                        ...(can('delete-packages')
+                          ? [
+                              {
+                                key: 'delete',
+                                label: t('common.delete'),
+                                danger: true,
+                                onClick: () => setDeleting(pkg),
+                              },
+                            ]
+                          : []),
+                      ]}
+                    />
+                  </span>
                 </div>
               </div>
             ))}

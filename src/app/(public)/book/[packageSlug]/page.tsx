@@ -169,8 +169,9 @@ export default function BookingWizardPage() {
 
   return (
     <div className="section-padding container">
+      <div className="max-w-4xl mx-auto mb-16">
       {/* stepper */}
-      <ol className="flex items-center gap-1.5 flex-wrap mb-10" aria-label="steps">
+      <ol className="flex items-center justify-center gap-1.5 flex-wrap mb-8" aria-label="steps">
         {steps.map((s, i) => {
           const done = i < index;
           const current = i === index;
@@ -204,9 +205,11 @@ export default function BookingWizardPage() {
         })}
       </ol>
 
-      <div className="grid lg:grid-cols-[1fr_320px] gap-8 items-start">
-        <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8" style={{ boxShadow: 'var(--shadow)' }}>
-          <h2 className="text-xl mb-6">{t(STEP_LABELS[step])}</h2>
+      <div className="grid lg:grid-cols-[280px_1fr] gap-6 items-start">
+        <WizardSummary />
+
+        <div className="bg-surface border border-border rounded-2xl p-5 sm:p-7 min-h-[480px]" style={{ boxShadow: 'var(--shadow)' }}>
+          <h2 className="text-lg mb-5">{t(STEP_LABELS[step])}</h2>
 
           {step === 'account' && <StepAccount onDone={goNext} />}
           {step === 'consultant' && <StepConsultant />}
@@ -224,7 +227,7 @@ export default function BookingWizardPage() {
           )}
 
           {step !== 'account' && step !== 'confirm' && (
-            <div className="flex justify-between mt-8 pt-6 border-t border-border">
+            <div className="flex justify-between mt-6 pt-5 border-t border-border">
               <button
                 type="button"
                 onClick={goPrev}
@@ -255,7 +258,7 @@ export default function BookingWizardPage() {
           )}
         </div>
 
-        <WizardSummary />
+      </div>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { isApiError } from '@/lib/errors';
 import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import {
+  ActionsMenu,
   Avatar,
   Badge,
   Button,
@@ -125,19 +126,25 @@ function RolesInner() {
                 key: 'actions',
                 header: t('common.actions'),
                 render: (r) => (
-                  <span className="flex gap-2">
-                    {/* the admin role is fully protected; consultant: name locked, permissions editable */}
-                    {can('update-roles') && r.name !== 'admin' && (
-                      <Button variant="ghost" size="sm" onClick={() => setEditing(r)}>
-                        {t('common.edit')}
-                      </Button>
-                    )}
-                    {can('delete-roles') && !r.is_protected && (
-                      <Button variant="ghost" size="sm" className="text-danger" onClick={() => setDeleting(r)}>
-                        {t('common.delete')}
-                      </Button>
-                    )}
-                  </span>
+                  // the admin role is fully protected; consultant: name locked, permissions editable
+                  <ActionsMenu
+                    ariaLabel={t('common.actions')}
+                    items={[
+                      ...(can('update-roles') && r.name !== 'admin'
+                        ? [{ key: 'edit', label: t('common.edit'), onClick: () => setEditing(r) }]
+                        : []),
+                      ...(can('delete-roles') && !r.is_protected
+                        ? [
+                            {
+                              key: 'delete',
+                              label: t('common.delete'),
+                              danger: true,
+                              onClick: () => setDeleting(r),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
                 ),
               },
             ]}

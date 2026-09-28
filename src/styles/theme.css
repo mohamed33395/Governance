@@ -656,7 +656,7 @@ html[data-theme="dark"] .client-header-avatar {
 .client-user-dropdown {
   position: absolute;
   top: calc(100% + 10px);
-  right: 0;
+  inset-inline-end: 0;
   min-width: 180px;
   background: var(--white);
   border: 1px solid var(--line);

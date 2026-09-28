@@ -9,9 +9,9 @@ import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import {
+  ActionsMenu,
   Avatar,
   Badge,
-  Button,
   ConfirmDialog,
   EmptyState,
   ErrorState,
@@ -217,16 +217,26 @@ function ClientsInner() {
                 key: 'actions',
                 header: t('common.actions'),
                 render: (c) => (
-                  <span className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm" onClick={() => router.push(`/admin/clients/${c.id}`)}>
-                      {t('common.view')}
-                    </Button>
-                    {can('delete-clients') && (
-                      <Button variant="ghost" size="sm" className="text-danger" onClick={() => setDeleting(c)}>
-                        {t('common.delete')}
-                      </Button>
-                    )}
-                  </span>
+                  <ActionsMenu
+                    ariaLabel={t('common.actions')}
+                    items={[
+                      {
+                        key: 'view',
+                        label: t('common.view'),
+                        onClick: () => router.push(`/admin/clients/${c.id}`),
+                      },
+                      ...(can('delete-clients')
+                        ? [
+                            {
+                              key: 'delete',
+                              label: t('common.delete'),
+                              danger: true as const,
+                              onClick: () => setDeleting(c),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
                 ),
               },
             ]}

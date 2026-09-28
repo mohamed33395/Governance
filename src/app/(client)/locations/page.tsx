@@ -10,6 +10,7 @@ import { applyValidationErrors } from '@/lib/form-errors';
 import { locationSchema, type LocationValues } from '@/schemas/locations';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import {
+  ActionsMenu,
   Button,
   ConfirmDialog,
   EmptyState,
@@ -95,17 +96,30 @@ export default function LocationsPage() {
                 </div>
               </div>
               <div className="flex gap-2 mt-4 pt-4 border-t border-border/60 flex-wrap">
-                <Button variant="ghost" size="sm" onClick={() => setEditing(loc)}>
-                  {t('common.edit')}
-                </Button>
-                {!loc.is_default && (
-                  <Button variant="ghost" size="sm" onClick={() => setDefault.mutate(loc.id)} loading={setDefault.isPending}>
-                    {t('locations.setDefault')}
-                  </Button>
-                )}
-                <Button variant="ghost" size="sm" className="text-danger ms-auto" onClick={() => setDeleting(loc)}>
-                  {t('common.delete')}
-                </Button>
+                <span className="ms-auto">
+                  <ActionsMenu
+                    ariaLabel={t('common.actions')}
+                    items={[
+                      { key: 'edit', label: t('common.edit'), onClick: () => setEditing(loc) },
+                      ...(!loc.is_default
+                        ? [
+                            {
+                              key: 'default',
+                              label: t('locations.setDefault'),
+                              onClick: () => setDefault.mutate(loc.id),
+                              disabled: setDefault.isPending,
+                            },
+                          ]
+                        : []),
+                      {
+                        key: 'delete',
+                        label: t('common.delete'),
+                        danger: true,
+                        onClick: () => setDeleting(loc),
+                      },
+                    ]}
+                  />
+                </span>
               </div>
             </div>
           ))}

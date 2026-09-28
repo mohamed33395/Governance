@@ -130,6 +130,36 @@ html[data-theme="dark"] .ui-badge[data-color="purple"] { background: rgba(179, 1
 .ui-input[data-invalid="true"] {
   border-color: var(--danger);
 }
+.ui-input-wrap {
+  position: relative;
+}
+.ui-input-wrap > .ui-input {
+  padding-inline-end: 2.75rem;
+}
+.ui-password-toggle {
+  position: absolute;
+  inset-inline-end: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+}
+.ui-password-toggle:hover,
+.ui-password-toggle:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+.ui-password-toggle svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
 
 /* ===== auth screens (client + admin) — matches the legacy login card ===== */
 .auth-wrap {

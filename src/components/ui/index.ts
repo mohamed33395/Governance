@@ -30,3 +30,5 @@ export { PageHeader } from './PageHeader';
 export { Alert } from './Alert';
 export { PriceTag } from './PriceTag';
 export { CopyButton } from './CopyButton';
+export { ActionsMenu } from './ActionsMenu';
+export type { ActionsMenuItem } from './ActionsMenu';

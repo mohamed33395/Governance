@@ -15,12 +15,11 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
       <input ref={ref} id={id} type="checkbox" className="peer sr-only" {...rest} />
       <span
         aria-hidden="true"
-        className="absolute inset-0 rounded-full transition-colors peer-checked:bg-primary peer-disabled:opacity-50"
-        style={{ background: 'var(--border)' }}
+        className="absolute inset-0 rounded-full bg-border transition-colors peer-checked:bg-primary peer-disabled:opacity-50"
       />
       <span
         aria-hidden="true"
-        className="absolute top-[3px] start-[3px] rounded-full bg-white shadow transition-transform peer-checked:-translate-x-[18px] rtl:peer-checked:translate-x-[18px]"
+        className="absolute top-[3px] start-[3px] rounded-full bg-white shadow transition-transform peer-checked:translate-x-[18px] rtl:peer-checked:-translate-x-[18px]"
         style={{ width: 18, height: 18 }}
       />
     </span>

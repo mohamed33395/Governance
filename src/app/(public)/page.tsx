@@ -2,7 +2,23 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/i18n-context";
+import { EmptyState, ErrorState } from "@/components/ui";
+import type { Package } from "@/types/api";
+
+const MEDALS = ["medal-bronze", "medal-silver", "medal-gold"] as const;
+
+function Check() {
+  return (
+    <span className="check">
+      <svg viewBox="0 0 24 24">
+        <polyline points="4,12.5 9.5,18 20,6.5" />
+      </svg>
+    </span>
+  );
+}
 
 const SERVICE_TABS = [
   { id: "t7", n: "01", featured: true },
@@ -17,6 +33,13 @@ const SERVICE_TABS = [
 export default function HomePage() {
   const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<string>("t7");
+
+  // Packages come from the dashboard — GET /public/packages (PUB-01)
+  const packagesQuery = useQuery({
+    queryKey: ["public", "packages"],
+    queryFn: () => api.get("/public/packages").then((r) => r.data.data as Package[]),
+  });
+  const packages = packagesQuery.data;
 
   return (
     <>
@@ -334,185 +357,61 @@ export default function HomePage() {
             <h2>{t("packagesTitle")}</h2>
             <p>{t("packagesDesc")}</p>
           </div>
-          <div className="pricing-grid">
-            <div className="price-card">
-              <div className="tier">
-                <span className="medal medal-bronze" /> {t("ironPackage")}
-              </div>
-              <div className="price">
-                {t("priceIron")} <svg className="riyal-icon" aria-hidden="true"><use href="#riyal-symbol" /></svg>{" "}
-                <small>{t("perMonth")}</small>
-              </div>
-              <p className="desc">{t("ironPackageDesc")}</p>
-              <ul>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("ironBenefit1")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("ironBenefit2")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("ironBenefit3")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("ironBenefit4")}
-                </li>
-              </ul>
-              <Link href="/details#package-1" className="btn btn-outline btn-sm" style={{ marginBottom: 12 }}>
-                {t("packageDetails")}
-              </Link>
-              <Link href="/book/iron" className="btn btn-outline">
-                {t("choosePackage")}
-              </Link>
+          {packagesQuery.isLoading ? (
+            <div className="pricing-grid">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="price-card animate-pulse" style={{ minHeight: 420 }} />
+              ))}
             </div>
-
-            <div className="price-card">
-              <div className="tier">
-                <span className="medal medal-silver" /> {t("silverPackage")}
-              </div>
-              <div className="price">
-                {t("priceSilver")} <svg className="riyal-icon" aria-hidden="true"><use href="#riyal-symbol" /></svg>{" "}
-                <small>{t("perMonth")}</small>
-              </div>
-              <p className="desc">{t("silverPackageDesc")}</p>
-              <ul>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("silverBenefit1")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("silverBenefit2")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("silverBenefit3")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("silverBenefit4")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("silverBenefit5")}
-                </li>
-              </ul>
-              <Link href="/details#package-2" className="btn btn-outline btn-sm" style={{ marginBottom: 12 }}>
-                {t("packageDetails")}
-              </Link>
-              <Link href="/book/silver" className="btn btn-outline">
-                {t("choosePackage")}
-              </Link>
+          ) : packagesQuery.isError ? (
+            <ErrorState onRetry={() => packagesQuery.refetch()} />
+          ) : !packages || packages.length === 0 ? (
+            <EmptyState title={t("common.empty")} />
+          ) : (
+            <div className="pricing-grid">
+              {packages.map((pkg, i) => (
+                <div key={pkg.id} className={`price-card${pkg.is_featured ? " featured" : ""}`}>
+                  {pkg.is_featured && <span className="featured-tag">{t("featuredTag")}</span>}
+                  <div className="tier">
+                    <span className={`medal ${MEDALS[i % MEDALS.length]}`} /> {pkg.name}
+                  </div>
+                  <div className="price">
+                    {pkg.price_formatted.replace(/\s*SAR\s*$/u, "")}{" "}
+                    <svg className="riyal-icon" aria-hidden="true">
+                      <use href="#riyal-symbol" />
+                    </svg>{" "}
+                    <small>
+                      / {pkg.billing_period_days} {t("packages.days")}
+                    </small>
+                  </div>
+                  {pkg.description && <p className="desc">{pkg.description}</p>}
+                  <ul>
+                    <li>
+                      <Check />{" "}
+                      {pkg.is_unlimited || pkg.consultations_limit === null
+                        ? t("packages.unlimitedConsultations")
+                        : t("packages.consultationsMonthly").replace("{n}", String(pkg.consultations_limit))}
+                    </li>
+                    {pkg.features_localized.map((feature, fi) => (
+                      <li key={fi}>
+                        <Check /> {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={`/details#package-${i + 1}`}
+                    className={`btn ${pkg.is_featured ? "btn-ghost" : "btn-outline"} btn-sm`}
+                    style={{ marginBottom: 12 }}
+                  >
+                    {t("packageDetails")}
+                  </Link>
+                  <Link href={`/book/${pkg.slug}`} className={`btn ${pkg.is_featured ? "btn-gold" : "btn-outline"}`}>
+                    {t("choosePackage")}
+                  </Link>
+                </div>
+              ))}
             </div>
-
-            <div className="price-card featured">
-              <span className="featured-tag">{t("featuredTag")}</span>
-              <div className="tier">
-                <span className="medal medal-gold" /> {t("goldPackage")}
-              </div>
-              <div className="price">
-                {t("priceGold")} <svg className="riyal-icon" aria-hidden="true"><use href="#riyal-symbol" /></svg>{" "}
-                <small>{t("perMonth")}</small>
-              </div>
-              <p className="desc">{t("goldPackageDesc")}</p>
-              <ul>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("goldBenefit1")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("goldBenefit2")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("goldBenefit3")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("goldBenefit4")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("goldBenefit5")}
-                </li>
-                <li>
-                  <span className="check">
-                    <svg viewBox="0 0 24 24">
-                      <polyline points="4,12.5 9.5,18 20,6.5" />
-                    </svg>
-                  </span>{" "}
-                  {t("goldBenefit6")}
-                </li>
-              </ul>
-              <Link href="/details#package-3" className="btn btn-ghost btn-sm" style={{ marginBottom: 12 }}>
-                {t("packageDetails")}
-              </Link>
-              <Link href="/book/gold" className="btn btn-gold">
-                {t("choosePackage")}
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 

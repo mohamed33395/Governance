@@ -23,6 +23,7 @@ import {
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import {
   Avatar,
+  ActionsMenu,
   Button,
   ConfirmDialog,
   EmptyState,
@@ -234,16 +235,26 @@ function ConsultantsInner() {
                 key: 'actions',
                 header: t('common.actions'),
                 render: (c) => (
-                  <span className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm" onClick={() => router.push(`/admin/consultants/${c.id}`)}>
-                      {t('common.view')}
-                    </Button>
-                    {can('delete-consultants') && (
-                      <Button variant="ghost" size="sm" className="text-danger" onClick={() => setDeleting(c)}>
-                        {t('common.delete')}
-                      </Button>
-                    )}
-                  </span>
+                  <ActionsMenu
+                    ariaLabel={t('common.actions')}
+                    items={[
+                      {
+                        key: 'view',
+                        label: t('common.view'),
+                        onClick: () => router.push(`/admin/consultants/${c.id}`),
+                      },
+                      ...(can('delete-consultants')
+                        ? [
+                            {
+                              key: 'delete',
+                              label: t('common.delete'),
+                              danger: true,
+                              onClick: () => setDeleting(c),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
                 ),
               },
             ]}

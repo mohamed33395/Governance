@@ -6,7 +6,17 @@ import { api } from '@/lib/api';
 import { isApiError } from '@/lib/errors';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { CardForm } from '@/components/payment/CardForm';
-import { Badge, Button, ConfirmDialog, EmptyState, ErrorState, Modal, PageHeader, useToast } from '@/components/ui';
+import {
+  ActionsMenu,
+  Badge,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  ErrorState,
+  Modal,
+  PageHeader,
+  useToast,
+} from '@/components/ui';
 import type { PaymentMethod } from '@/types/api';
 
 // §12.7 — saved payment methods (CLI-PM-01..04). The raw gateway token is
@@ -86,14 +96,29 @@ export default function PaymentMethodsPage() {
                 </span>
               </div>
               <div className="flex gap-2 mt-4 pt-4 border-t border-border/60 flex-wrap">
-                {!card.is_default && !card.is_expired && (
-                  <Button variant="ghost" size="sm" onClick={() => setDefault.mutate(card.id)} loading={setDefault.isPending}>
-                    {t('paymentMethods.setDefault')}
-                  </Button>
-                )}
-                <Button variant="ghost" size="sm" className="text-danger ms-auto" onClick={() => setDeleting(card)}>
-                  {t('common.delete')}
-                </Button>
+                <span className="ms-auto">
+                  <ActionsMenu
+                    ariaLabel={t('common.actions')}
+                    items={[
+                      ...(!card.is_default && !card.is_expired
+                        ? [
+                            {
+                              key: 'default',
+                              label: t('paymentMethods.setDefault'),
+                              onClick: () => setDefault.mutate(card.id),
+                              disabled: setDefault.isPending,
+                            },
+                          ]
+                        : []),
+                      {
+                        key: 'delete',
+                        label: t('common.delete'),
+                        danger: true,
+                        onClick: () => setDeleting(card),
+                      },
+                    ]}
+                  />
+                </span>
               </div>
             </div>
           ))}

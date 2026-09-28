@@ -9,6 +9,7 @@ import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import {
+  ActionsMenu,
   Badge,
   Button,
   ConfirmDialog,
@@ -199,27 +200,40 @@ function ReportsInner() {
                 key: 'actions',
                 header: t('common.actions'),
                 render: (r) => (
-                  <span className="flex gap-1.5 flex-wrap">
-                    {can('download-reports') && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => downloadFile(`/admin/reports/${r.id}/download`, r.file.name)}
-                      >
-                        {t('common.download')}
-                      </Button>
-                    )}
-                    {can('upload-reports') && (
-                      <Button variant="ghost" size="sm" onClick={() => resend.mutate(r.id)} loading={resend.isPending}>
-                        {t('reportsAdmin.resend')}
-                      </Button>
-                    )}
-                    {can('delete-reports') && (
-                      <Button variant="ghost" size="sm" className="text-danger" onClick={() => setDeleting(r)}>
-                        {t('common.delete')}
-                      </Button>
-                    )}
-                  </span>
+                  <ActionsMenu
+                    ariaLabel={t('common.actions')}
+                    items={[
+                      ...(can('download-reports')
+                        ? [
+                            {
+                              key: 'download',
+                              label: t('common.download'),
+                              onClick: () => downloadFile(`/admin/reports/${r.id}/download`, r.file.name),
+                            },
+                          ]
+                        : []),
+                      ...(can('upload-reports')
+                        ? [
+                            {
+                              key: 'resend',
+                              label: t('reportsAdmin.resend'),
+                              disabled: resend.isPending,
+                              onClick: () => resend.mutate(r.id),
+                            },
+                          ]
+                        : []),
+                      ...(can('delete-reports')
+                        ? [
+                            {
+                              key: 'delete',
+                              label: t('common.delete'),
+                              danger: true,
+                              onClick: () => setDeleting(r),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
                 ),
               },
             ]}

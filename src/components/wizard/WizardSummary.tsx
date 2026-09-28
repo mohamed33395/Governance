@@ -11,10 +11,10 @@ export function WizardSummary({ className = '' }: { className?: string }) {
 
   return (
     <aside
-      className={`bg-surface border border-border rounded-2xl p-6 h-fit sticky top-24 ${className}`}
+      className={`bg-surface border border-border rounded-2xl p-5 h-fit sticky top-24 ${className}`}
       style={{ boxShadow: 'var(--shadow)' }}
     >
-      <h3 className="text-lg mb-5 pb-4 border-b border-border">{t('wizard.summary')}</h3>
+      <h3 className="text-lg mb-4 pb-3 border-b border-border">{t('wizard.summary')}</h3>
       <dl className="flex flex-col gap-4 text-[0.9rem]">
         {pkg && (
           <div className="flex items-start justify-between gap-3">

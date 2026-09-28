@@ -15,6 +15,7 @@ import { useI18n } from '@/lib/i18n/i18n-context';
 import { clientProfileSchema, type ClientProfileValues } from '@/schemas/profile';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import {
+  ActionsMenu,
   Avatar,
   Badge,
   Button,
@@ -286,12 +287,22 @@ function ClientReportsTab({ clientId }: { clientId: number }) {
           {
             key: 'actions',
             header: t('common.actions'),
-            render: (r) =>
-              can('download-reports') ? (
-                <Button variant="outline" size="sm" onClick={() => downloadFile(`/admin/reports/${r.id}/download`, r.file.name)}>
-                  {t('common.download')}
-                </Button>
-              ) : null,
+            render: (r) => (
+              <ActionsMenu
+                ariaLabel={t('common.actions')}
+                items={[
+                  ...(can('download-reports')
+                    ? [
+                        {
+                          key: 'download',
+                          label: t('common.download'),
+                          onClick: () => downloadFile(`/admin/reports/${r.id}/download`, r.file.name),
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            ),
           },
         ]}
         rows={data.data}

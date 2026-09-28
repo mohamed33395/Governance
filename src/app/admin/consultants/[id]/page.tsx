@@ -18,6 +18,7 @@ import { SlotPreviewTab } from '@/components/admin/SlotPreviewTab';
 import { ReportUploadModal } from '@/components/admin/ReportUploadModal';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import {
+  ActionsMenu,
   Avatar,
   Badge,
   Button,
@@ -483,12 +484,22 @@ function PendingReportsTab({ basePath }: { basePath: string }) {
               {
                 key: 'actions',
                 header: t('common.actions'),
-                render: (b) =>
-                  can('upload-reports') ? (
-                    <Button size="sm" variant="outline" onClick={() => setUploadFor(b)}>
-                      {t('reportsAdmin.upload')}
-                    </Button>
-                  ) : null,
+                render: (b) => (
+                  <ActionsMenu
+                    ariaLabel={t('common.actions')}
+                    items={[
+                      ...(can('upload-reports')
+                        ? [
+                            {
+                              key: 'upload',
+                              label: t('reportsAdmin.upload'),
+                              onClick: () => setUploadFor(b),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
+                ),
               },
             ]}
             rows={data.data}
@@ -556,16 +567,22 @@ function ReportsTab({ basePath }: { basePath: string }) {
               {
                 key: 'actions',
                 header: t('common.actions'),
-                render: (r) =>
-                  can('download-reports') ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => downloadFile(`/admin/reports/${r.id}/download`, r.file.name)}
-                    >
-                      {t('common.download')}
-                    </Button>
-                  ) : null,
+                render: (r) => (
+                  <ActionsMenu
+                    ariaLabel={t('common.actions')}
+                    items={[
+                      ...(can('download-reports')
+                        ? [
+                            {
+                              key: 'download',
+                              label: t('common.download'),
+                              onClick: () => downloadFile(`/admin/reports/${r.id}/download`, r.file.name),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
+                ),
               },
             ]}
             rows={data.data}

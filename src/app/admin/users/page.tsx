@@ -12,6 +12,7 @@ import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { userSchema, userRolesSchema, type UserValues, type UserRolesValues } from '@/schemas/admin';
 import {
+  ActionsMenu,
   Avatar,
   Badge,
   Button,
@@ -249,18 +250,24 @@ function UsersInner() {
                 key: 'actions',
                 header: t('common.actions'),
                 render: (u) => (
-                  <span className="flex gap-2">
-                    {can('update-users') && (
-                      <Button variant="ghost" size="sm" onClick={() => setEditing(u)}>
-                        {t('common.edit')}
-                      </Button>
-                    )}
-                    {can('delete-users') && (
-                      <Button variant="ghost" size="sm" className="text-danger" onClick={() => setDeleting(u)}>
-                        {t('common.delete')}
-                      </Button>
-                    )}
-                  </span>
+                  <ActionsMenu
+                    ariaLabel={t('common.actions')}
+                    items={[
+                      ...(can('update-users')
+                        ? [{ key: 'edit', label: t('common.edit'), onClick: () => setEditing(u) }]
+                        : []),
+                      ...(can('delete-users')
+                        ? [
+                            {
+                              key: 'delete',
+                              label: t('common.delete'),
+                              danger: true,
+                              onClick: () => setDeleting(u),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
                 ),
               },
             ]}
