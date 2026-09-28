@@ -1,387 +1,263 @@
-"use client";
+'use client';
 
-import { useCallback, useMemo, useRef, useState, type FormEvent } from "react";
-import { useAdminAuth } from "@/lib/auth/admin-auth-context";
-import { useI18n } from "@/lib/i18n/i18n-context";
-import { adminDashboardService } from "@/services/admin-dashboard.service";
-import { useApiData } from "@/lib/use-api-data";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import { isApiError } from '@/lib/errors';
+import { usePermissions } from '@/lib/permissions';
+import { useI18n } from '@/lib/i18n/i18n-context';
+import { RequirePermission } from '@/components/admin/RequirePermission';
 import {
-  ActionsCell,
-  AdminModal,
-  ModalCancelButton,
-  StatusBadge,
-  TablePagination,
-  TableSearch,
-  useRecordDetail,
-  useTablePager,
-  type TableAction,
-} from "@/components/admin/table";
-import type { ClientRecord } from "@/types/admin-dashboard";
+  Avatar,
+  Badge,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  ErrorState,
+  PageHeader,
+  Pagination,
+  SearchInput,
+  Select,
+  Switch,
+  Table,
+  TableSkeleton,
+  useToast,
+} from '@/components/ui';
+import type { Client, Consultant, Paginated } from '@/types/api';
 
-const DEMO_CLIENTS: ClientRecord[] = [
-  { id: "c1", name: "شركة الرياض للتطوير العقاري", sector: "عقارات", field: "استشارات الحوكمة", city: "الرياض", contractDate: "١٢ يناير ٢٠٢٦", status: "نشط" },
-  { id: "c2", name: "مؤسسة أفق التقنية", sector: "تقنية المعلومات", field: "استشارات الامتثال", city: "جدة", contractDate: "٣ مارس ٢٠٢٦", status: "نشط" },
-  { id: "c3", name: "مجموعة الخليج التجارية", sector: "تجارة التجزئة", field: "الاستشارات الإدارية", city: "الدمام", contractDate: "٢٠ فبراير ٢٠٢٦", status: "نشط" },
-  { id: "c4", name: "شركة نمو للاستثمار", sector: "خدمات مالية", field: "تحليل الأعمال والتخطيط", city: "الرياض", contractDate: "٥ أبريل ٢٠٢٦", status: "تجديد العقد" },
-  { id: "c5", name: "مصنع اليمامة للأغذية", sector: "صناعة", field: "استقطاب المواهب", city: "القصيم", contractDate: "١٤ نوفمبر ٢٠٢٥", status: "منتهي" },
-  { id: "c6", name: "شركة المسار اللوجستي", sector: "نقل وخدمات لوجستية", field: "شبكات الأعمال", city: "جدة", contractDate: "٨ يونيو ٢٠٢٦", status: "نشط" },
-  { id: "c7", name: "عيادات الشفاء التخصصية", sector: "رعاية صحية", field: "استشارات الامتثال", city: "مكة المكرمة", contractDate: "٢٥ ديسمبر ٢٠٢٥", status: "منتهي" },
-];
-
-const FILTERS = ["", "نشط", "منتهي"];
-const FILTER_KEYS = ["all", "active", "expired"];
-
-const STAT_CARDS = [
-  {
-    num: "57",
-    labelKey: "totalClients",
-    trendKey: "newClientsThisMonth",
-    trendClass: "up",
-    icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <circle cx="9" cy="8" r="3.2" />
-        <path d="M3 20c0-3.5 2.7-5.5 6-5.5s6 2 6 5.5" />
-        <circle cx="17.5" cy="9" r="2.5" />
-        <path d="M15.5 14.3c2.8.3 4.5 2.1 4.5 5.7" />
-      </svg>
-    ),
-  },
-  {
-    num: "41",
-    labelKey: "activeContracts",
-    trendKey: "upFromLastQuarterPercent",
-    trendClass: "up",
-    icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <rect x="4" y="3" width="16" height="18" rx="1" />
-        <line x1="8" y1="8" x2="16" y2="8" />
-        <line x1="8" y1="12" x2="16" y2="12" />
-      </svg>
-    ),
-  },
-  {
-    num: "16",
-    labelKey: "expiredContracts",
-    trendKey: "noChange",
-    trendClass: "flat",
-    icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <circle cx="12" cy="12" r="9" />
-        <polyline points="12,7 12,12 15,14" />
-      </svg>
-    ),
-  },
-  {
-    num: "92%",
-    labelKey: "retentionRate",
-    trendKey: "improvement",
-    trendClass: "up",
-    icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <circle cx="12" cy="12" r="9" />
-        <polyline points="8,12 11,15 16,9" />
-      </svg>
-    ),
-  },
-];
-
+// §13.10 — clients (ADM-CL-01..08)
 export default function AdminClientsPage() {
-  const { token } = useAdminAuth();
+  return (
+    <RequirePermission perm="view-clients">
+      <ClientsInner />
+    </RequirePermission>
+  );
+}
+
+function ClientsInner() {
   const { t } = useI18n();
-  const openDetail = useRecordDetail();
+  const toast = useToast();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { can, type } = usePermissions();
 
-  const fetcher = useCallback(
-    () => (token ? adminDashboardService.getClients(token) : Promise.reject()),
-    [token]
-  );
-  const { data: rows, setData: setRows } = useApiData<ClientRecord[]>(fetcher, DEMO_CLIENTS);
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState('');
+  const [consultantId, setConsultantId] = useState('');
+  const [hasSub, setHasSub] = useState('');
+  const [page, setPage] = useState(1);
+  const [toggling, setToggling] = useState<Client | null>(null);
+  const [deleting, setDeleting] = useState<Client | null>(null);
 
-  const [filter, setFilter] = useState("");
-  const [search, setSearch] = useState("");
-  const filtered = useMemo(() => rows.filter((r) => !filter || r.status === filter), [rows, filter]);
-  const pager = useTablePager(filtered, search, (r) =>
-    [r.name, r.sector, r.field, r.city, r.contractDate, r.status].join(" ")
-  );
+  const query = useQuery({
+    queryKey: ['admin', 'clients', { search, activeFilter, consultantId, hasSub, page }],
+    queryFn: () =>
+      api
+        .get('/admin/clients', {
+          params: {
+            search: search || undefined,
+            is_active: activeFilter || undefined,
+            consultant_id: consultantId || undefined,
+            has_active_subscription: hasSub || undefined,
+            page,
+          },
+        })
+        .then((r) => r.data as Paginated<Client>),
+  });
+  const data = query.data;
 
-  const [editing, setEditing] = useState<ClientRecord | null>(null);
-  const [editFeedback, setEditFeedback] = useState("");
-  const [editAccount, setEditAccount] = useState({ email: "", password: "" });
+  const consultantsQuery = useQuery({
+    queryKey: ['admin', 'consultants', 'options'],
+    queryFn: () =>
+      api.get('/admin/consultants', { params: { per_page: 100 } }).then((r) => (r.data as Paginated<Consultant>).data),
+    enabled: type === 'admin',
+    staleTime: 60_000,
+  });
 
-  const [addOpen, setAddOpen] = useState(false);
-  const [addFeedback, setAddFeedback] = useState<{ text: string; ok: boolean }>({ text: "", ok: false });
-  const [clientImage, setClientImage] = useState("");
-  const addFormRef = useRef<HTMLFormElement>(null);
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin', 'clients'] });
 
-  const handleAction = (row: ClientRecord, action: TableAction) => {
-    if (action === "view") {
-      openDetail({
-        name: row.name,
-        image: row.image || undefined,
-        fields: [
-          { label: t("client"), value: row.name },
-          { label: t("sector"), value: row.sector },
-          { label: t("consultingField"), value: row.field },
-          { label: t("city"), value: row.city },
-          { label: t("contractDate"), value: row.contractDate },
-          { label: t("status"), value: row.status },
-        ],
-        extra: { client: { reports: [], bookings: [], consultations: [] } },
-      });
-    } else if (action === "edit") {
-      setEditing({ ...row });
-      setEditAccount({ email: row.email || "", password: "" });
-      setEditFeedback("");
-    } else if (action === "delete") {
-      if (confirm(t("deleteConfirm"))) {
-        setRows((prev) => prev.filter((r) => r.id !== row.id));
-        if (token) adminDashboardService.deleteClient(token, row.id).catch(() => {});
-      }
-    }
-  };
+  const statusMutation = useMutation({
+    mutationFn: ({ id, is_active }: { id: number; is_active: boolean }) =>
+      api.patch(`/admin/clients/${id}/status`, { is_active }),
+    onSuccess: () => {
+      setToggling(null);
+      invalidate();
+      toast.success(t('profile.saved'));
+    },
+    onError: (e) => {
+      if (isApiError(e)) toast.error(e.message);
+      setToggling(null);
+    },
+  });
 
-  const saveEdit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!editing) return;
-    setRows((prev) => prev.map((r) => (r.id === editing.id ? editing : r)));
-    if (token) adminDashboardService.updateClient(token, editing.id, editing).catch(() => {});
-    setEditFeedback(t("saveChanges"));
-    setTimeout(() => setEditing(null), 800);
-  };
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/admin/clients/${id}`),
+    onSuccess: () => {
+      toast.success(t('clientsAdmin.deleted'));
+      setDeleting(null);
+      invalidate();
+    },
+    onError: (e) => {
+      // 409 CLIENT_HAS_FUTURE_BOOKINGS
+      if (isApiError(e)) toast.error(e.message);
+      setDeleting(null);
+    },
+  });
 
-  const submitAdd = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const client = String(fd.get("client") || "").trim();
-    const email = String(fd.get("email") || "").trim();
-    const password = String(fd.get("password") || "").trim();
-    const sector = String(fd.get("sector") || "").trim();
-    const field = String(fd.get("field") || "").trim();
-    const city = String(fd.get("city") || "").trim();
-    const date = String(fd.get("date") || "").trim();
-    const status = String(fd.get("status") || "").trim();
-    if (!client || !email || !password || !sector || !field || !city || !date || !status) return;
-    if (rows.some((r) => r.email === email)) {
-      setAddFeedback({ text: t("emailExists"), ok: false });
-      return;
-    }
-    const record: ClientRecord = {
-      id: `c_${Date.now()}`,
-      name: client,
-      email,
-      sector,
-      field,
-      city,
-      contractDate: date,
-      status,
-      image: clientImage || null,
-    };
-    setRows((prev) => [...prev, record]);
-    if (token) adminDashboardService.createClient(token, record).catch(() => {});
-    setClientImage("");
-    setAddFeedback({ text: t("clientAdded"), ok: true });
-    addFormRef.current?.reset();
-    setTimeout(() => {
-      setAddOpen(false);
-      setAddFeedback({ text: "", ok: false });
-    }, 800);
-  };
+  const resetPage = () => setPage(1);
 
   return (
     <>
-      <div className="stat-grid">
-        {STAT_CARDS.map((s) => (
-          <div className="stat-card" key={s.labelKey}>
-            <div className="top">
-              <div className="ic">{s.icon}</div>
-            </div>
-            <div className="num">{s.num}</div>
-            <div className="label">{t(s.labelKey)}</div>
-            <div className={`trend ${s.trendClass}`}>{t(s.trendKey)}</div>
-          </div>
-        ))}
-      </div>
+      <PageHeader title={t('nav.clients')} />
 
-      <div className="panel-card">
-        <div className="table-toolbar">
-          <h3 style={{ margin: 0 }}>{t("clientsRecord")}</h3>
-          <TableSearch
-            value={search}
-            onChange={(v) => {
-              setSearch(v);
-              pager.resetPage();
+      <div className="flex gap-3 flex-wrap mb-6">
+        <SearchInput
+          value={search}
+          onChange={(v) => {
+            setSearch(v);
+            resetPage();
+          }}
+          className="flex-1 min-w-[200px]"
+        />
+        {type === 'admin' && (
+          <Select
+            options={(consultantsQuery.data ?? []).map((c) => ({ value: c.id, label: c.name }))}
+            placeholder={t('bookings.consultant')}
+            value={consultantId}
+            onChange={(e) => {
+              setConsultantId(e.target.value);
+              resetPage();
             }}
+            style={{ maxWidth: 180 }}
           />
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <div className="chip-filters">
-              {FILTERS.map((f, i) => (
-                <button
-                  key={f || "all"}
-                  type="button"
-                  className={filter === f ? "active" : undefined}
-                  onClick={() => {
-                    setFilter(f);
-                    pager.resetPage();
-                  }}
-                >
-                  {t(FILTER_KEYS[i])}
-                </button>
-              ))}
-            </div>
-            <button className="btn btn-primary btn-sm" type="button" onClick={() => setAddOpen(true)}>
-              {t("addClient")}
-            </button>
-          </div>
-        </div>
-        <table className="data-table" id="clientsTable">
-          <thead>
-            <tr>
-              <th>{t("client")}</th>
-              <th>{t("sector")}</th>
-              <th>{t("consultingField")}</th>
-              <th>{t("city")}</th>
-              <th>{t("contractDate")}</th>
-              <th>{t("status")}</th>
-              <th>{t("actions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pager.pagedRows.map((r) => (
-              <tr key={r.id}>
-                <td className="detail-name" onClick={() => handleAction(r, "view")}>
-                  {r.image && <img className="table-avatar" src={r.image} alt={r.name} />}
-                  {r.name}
-                </td>
-                <td>{r.sector}</td>
-                <td>{r.field}</td>
-                <td>{r.city}</td>
-                <td>{r.contractDate}</td>
-                <td>
-                  <StatusBadge text={r.status} />
-                </td>
-                <ActionsCell actions={["view", "edit", "delete"]} onAction={(a) => handleAction(r, a)} />
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <TablePagination
-          page={pager.page}
-          totalPages={pager.totalPages}
-          pageSize={pager.pageSize}
-          count={pager.filtered.length}
-          onPage={pager.setPage}
-          onPageSize={pager.setPageSize}
+        )}
+        <Select
+          options={[
+            { value: '1', label: t('users.active') },
+            { value: '0', label: t('users.inactive') },
+          ]}
+          placeholder={t('common.status')}
+          value={activeFilter}
+          onChange={(e) => {
+            setActiveFilter(e.target.value);
+            resetPage();
+          }}
+          style={{ maxWidth: 150 }}
+        />
+        <Select
+          options={[
+            { value: '1', label: t('clientsAdmin.hasSubscription') },
+            { value: '0', label: t('clientsAdmin.noSubscription') },
+          ]}
+          placeholder={t('clientsAdmin.subscription')}
+          value={hasSub}
+          onChange={(e) => {
+            setHasSub(e.target.value);
+            resetPage();
+          }}
+          style={{ maxWidth: 170 }}
         />
       </div>
 
-      {/* EDIT MODAL */}
-      <AdminModal id="editModal" open={!!editing} onClose={() => setEditing(null)} maxWidth={540}>
-        <h3>{t("editRecord")}</h3>
-        {editing && (
-          <form className="edit-form" onSubmit={saveEdit}>
-            <div className="field">
-              <label>{t("client")}</label>
-              <input type="text" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("sector")}</label>
-              <input type="text" value={editing.sector} onChange={(e) => setEditing({ ...editing, sector: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("consultingField")}</label>
-              <input type="text" value={editing.field} onChange={(e) => setEditing({ ...editing, field: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("city")}</label>
-              <input type="text" value={editing.city} onChange={(e) => setEditing({ ...editing, city: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("contractDate")}</label>
-              <input type="text" value={editing.contractDate} onChange={(e) => setEditing({ ...editing, contractDate: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("status")}</label>
-              <input type="text" value={editing.status} onChange={(e) => setEditing({ ...editing, status: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("email")}</label>
-              <input type="text" value={editAccount.email} onChange={(e) => setEditAccount({ ...editAccount, email: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("password")}</label>
-              <input type="text" value={editAccount.password} onChange={(e) => setEditAccount({ ...editAccount, password: e.target.value })} />
-            </div>
-            <button type="submit" className="btn btn-primary btn-sm">
-              {t("saveChanges")}
-            </button>
-          </form>
-        )}
-        <p className={`form-feedback${editFeedback ? " ok" : ""}`}>{editFeedback}</p>
-        <ModalCancelButton onClose={() => setEditing(null)} style={{ marginTop: 8 }} />
-      </AdminModal>
+      {query.isLoading ? (
+        <TableSkeleton rows={5} cols={6} />
+      ) : query.isError || !data ? (
+        <ErrorState onRetry={() => query.refetch()} />
+      ) : data.data.length === 0 ? (
+        <EmptyState title={t('common.empty')} />
+      ) : (
+        <>
+          <Table
+            columns={[
+              {
+                key: 'client',
+                header: t('auth.name'),
+                render: (c) => (
+                  <span className="flex items-center gap-3">
+                    <Avatar src={c.avatar_thumb_url ?? c.avatar_url} name={c.name} size="sm" />
+                    <span>
+                      <strong className="block">{c.name}</strong>
+                      <span className="text-muted text-[0.8rem]">{c.company_name}</span>
+                    </span>
+                  </span>
+                ),
+              },
+              { key: 'email', header: t('auth.email'), render: (c) => <span dir="ltr">{c.email}</span> },
+              { key: 'phone', header: t('auth.phone'), render: (c) => <span dir="ltr">{c.phone}</span> },
+              { key: 'bookings', header: t('nav.bookings'), render: (c) => c.bookings_count ?? 0 },
+              { key: 'reports', header: t('nav.reports'), render: (c) => c.reports_count ?? 0 },
+              {
+                key: 'subscription',
+                header: t('clientsAdmin.subscription'),
+                render: (c) =>
+                  c.active_subscription ? (
+                    <Badge color="green">{c.active_subscription.package.name}</Badge>
+                  ) : (
+                    <span className="text-muted">—</span>
+                  ),
+              },
+              {
+                key: 'active',
+                header: t('common.status'),
+                render: (c) => (
+                  <Switch
+                    checked={c.is_active}
+                    disabled={!can('update-clients')}
+                    onChange={() =>
+                      c.is_active
+                        ? setToggling(c)
+                        : statusMutation.mutate({ id: c.id, is_active: true })
+                    }
+                    aria-label={t('common.status')}
+                  />
+                ),
+              },
+              {
+                key: 'actions',
+                header: t('common.actions'),
+                render: (c) => (
+                  <span className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="sm" onClick={() => router.push(`/admin/clients/${c.id}`)}>
+                      {t('common.view')}
+                    </Button>
+                    {can('delete-clients') && (
+                      <Button variant="ghost" size="sm" className="text-danger" onClick={() => setDeleting(c)}>
+                        {t('common.delete')}
+                      </Button>
+                    )}
+                  </span>
+                ),
+              },
+            ]}
+            rows={data.data}
+            rowKey={(c) => c.id}
+            onRowClick={(c) => router.push(`/admin/clients/${c.id}`)}
+          />
+          <Pagination meta={data.meta} onPage={setPage} className="mt-6" />
+        </>
+      )}
 
-      {/* ADD CLIENT MODAL */}
-      <AdminModal id="addClientModal" open={addOpen} onClose={() => setAddOpen(false)} maxWidth={540}>
-        <h3>{t("addClientNew")}</h3>
-        <form className="edit-form" ref={addFormRef} onSubmit={submitAdd}>
-          <div className="field" style={{ textAlign: "center" }}>
-            <img
-              className={`avatar-preview${clientImage ? " show" : ""}`}
-              src={clientImage || undefined}
-              alt={t("clientImage")}
-            />
-            <label>{t("clientImage")}</label>
-            <input
-              type="file"
-              name="clientImage"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => setClientImage(String(ev.target?.result || ""));
-                reader.readAsDataURL(file);
-              }}
-            />
-          </div>
-          <div className="field">
-            <label>{t("clientLabel")}</label>
-            <input type="text" name="client" required />
-          </div>
-          <div className="field">
-            <label>{t("email")}</label>
-            <input type="email" name="email" required />
-          </div>
-          <div className="field">
-            <label>{t("password")}</label>
-            <input type="text" name="password" required minLength={4} />
-          </div>
-          <div className="field">
-            <label>{t("sector")}</label>
-            <input type="text" name="sector" required />
-          </div>
-          <div className="field">
-            <label>{t("consultingField")}</label>
-            <input type="text" name="field" required />
-          </div>
-          <div className="field">
-            <label>{t("city")}</label>
-            <input type="text" name="city" required />
-          </div>
-          <div className="field">
-            <label>{t("contractDate")}</label>
-            <input type="text" name="date" required />
-          </div>
-          <div className="field">
-            <label>{t("status")}</label>
-            <input type="text" name="status" defaultValue={t("active")} required />
-          </div>
-          <button type="submit" className="btn btn-primary btn-sm">
-            {t("saveClient")}
-          </button>
-          <ModalCancelButton onClose={() => setAddOpen(false)} style={{ marginTop: 8 }} />
-        </form>
-        <p className={`form-feedback${addFeedback.text ? (addFeedback.ok ? " ok" : " err") : ""}`}>{addFeedback.text}</p>
-      </AdminModal>
+      {/* deactivating revokes the client's tokens */}
+      <ConfirmDialog
+        open={!!toggling}
+        onClose={() => setToggling(null)}
+        onConfirm={() => toggling && statusMutation.mutate({ id: toggling.id, is_active: false })}
+        title={t('clientsAdmin.deactivate')}
+        body={t('clientsAdmin.deactivateConfirm')}
+        danger
+        loading={statusMutation.isPending}
+      />
+
+      <ConfirmDialog
+        open={!!deleting}
+        onClose={() => setDeleting(null)}
+        onConfirm={() => deleting && deleteMutation.mutate(deleting.id)}
+        title={t('common.delete')}
+        body={t('clientsAdmin.deleteConfirm')}
+        danger
+        loading={deleteMutation.isPending}
+      />
     </>
   );
 }

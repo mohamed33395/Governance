@@ -50,10 +50,10 @@ export default function HomePage() {
             </div>
           </div>
           <div className="hero-actions-bottom">
-            <Link href="/booking" className="btn btn-primary">
+            <Link href="/packages" className="btn btn-primary">
               {t("bookConsultation")}
             </Link>
-            <Link href="/client" className="btn btn-outline">
+            <Link href="/login" className="btn btn-outline">
               {t("login")}
             </Link>
           </div>

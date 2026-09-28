@@ -1,339 +1,394 @@
-"use client";
+'use client';
 
-import { useCallback, useRef, useState, type FormEvent } from "react";
-import { useAdminAuth } from "@/lib/auth/admin-auth-context";
-import { useI18n } from "@/lib/i18n/i18n-context";
-import { adminDashboardService } from "@/services/admin-dashboard.service";
-import { useApiData } from "@/lib/use-api-data";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { api } from '@/lib/api';
+import { isApiError } from '@/lib/errors';
+import { applyValidationErrors } from '@/lib/form-errors';
+import { appendFormData } from '@/lib/form-data';
+import { usePermissions } from '@/lib/permissions';
+import { useI18n } from '@/lib/i18n/i18n-context';
+import { usePublicMeta } from '@/lib/meta';
+import { consultantSchema, type ConsultantValues } from '@/schemas/admin';
 import {
-  ActionsCell,
-  AdminModal,
-  ModalCancelButton,
-  StatusBadge,
-  TablePagination,
-  TableSearch,
-  useRecordDetail,
-  useTablePager,
-  type TableAction,
-} from "@/components/admin/table";
-import type { Consultant } from "@/types/admin-dashboard";
+  AvailabilityEditor,
+  daysFromApi,
+  toAvailabilityPayload,
+  validateAvailability,
+  type EditorDay,
+} from '@/components/admin/AvailabilityEditor';
+import { RequirePermission } from '@/components/admin/RequirePermission';
+import {
+  Avatar,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  ErrorState,
+  FileDrop,
+  Input,
+  Modal,
+  PageHeader,
+  Pagination,
+  SearchInput,
+  Select,
+  Switch,
+  Table,
+  TableSkeleton,
+  Textarea,
+  useToast,
+} from '@/components/ui';
+import { AVATAR_ACCEPT, AVATAR_MAX_MB } from '@/lib/files';
+import type { Consultant, Paginated } from '@/types/api';
 
-const DEMO_CONSULTANTS: Consultant[] = [
-  { id: "s1", name: "أروى العنزي", specialty: "استشارات الحوكمة", email: "a.alanazi@example.com", phone: "٠٥٥٥٥٥١٢٣٤٥٦", status: "نشط" },
-  { id: "s2", name: "محمد الشهري", specialty: "استشارات الامتثال", email: "m.alshahri@example.com", phone: "٠٥٥٥٩٨٧٦٥٤", status: "نشط" },
-  { id: "s3", name: "سارة الدوسري", specialty: "الاستشارات الإدارية", email: "s.aldosari@example.com", phone: "٠٥٥٥٥٥١١٢٢٣٣", status: "نشط" },
-  { id: "s4", name: "خالد العتيبي", specialty: "تحليل الأعمال والتخطيط", email: "k.alotaibi@example.com", phone: "٠٥٥٥٣٣٤٤٥٥", status: "نشط" },
-  { id: "s5", name: "نورة القحطاني", specialty: "استقطاب المواهب", email: "n.alqahtani@example.com", phone: "٠٥٥٥٥٥٧٧٨٨٩٩", status: "مشغول" },
-];
+// §13.4 — consultants (CON-01..07)
+export default function ConsultantsPage() {
+  return (
+    <RequirePermission perm="view-consultants">
+      <ConsultantsInner />
+    </RequirePermission>
+  );
+}
 
-const STAT_CARDS = [
-  {
-    num: "5",
-    labelKey: "totalConsultants",
-    trendKey: "newConsultant",
-    trendClass: "up",
-    icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" />
-      </svg>
-    ),
-  },
-  {
-    num: "4",
-    labelKey: "activeConsultants",
-    trendKey: "noChange",
-    trendClass: "flat",
-    icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <circle cx="12" cy="12" r="9" />
-        <polyline points="8,12 11,15 16,9" />
-      </svg>
-    ),
-  },
-  {
-    num: "12",
-    labelKey: "projectsCompleted",
-    trendKey: "twoThisMonth",
-    trendClass: "up",
-    icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <rect x="3" y="4" width="18" height="17" rx="1" />
-        <line x1="3" y1="9" x2="21" y2="9" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-      </svg>
-    ),
-  },
-  {
-    num: "4.9",
-    labelKey: "averageRating",
-    trendKey: "zeroPointTwo",
-    trendClass: "up",
-    icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <circle cx="12" cy="12" r="9" />
-        <polyline points="12,7 12,12 15,14" />
-      </svg>
-    ),
-  },
-];
-
-export default function AdminConsultantsPage() {
-  const { token } = useAdminAuth();
+function ConsultantsInner() {
   const { t } = useI18n();
-  const openDetail = useRecordDetail();
+  const toast = useToast();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { can } = usePermissions();
+  const meta = usePublicMeta();
 
-  const fetcher = useCallback(
-    () => (token ? adminDashboardService.getConsultants(token) : Promise.reject()),
-    [token]
-  );
-  const { data: rows, setData: setRows } = useApiData<Consultant[]>(fetcher, DEMO_CONSULTANTS);
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState('');
+  const [specialization, setSpecialization] = useState('');
+  const [page, setPage] = useState(1);
+  const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<Consultant | null>(null);
+  const [toggling, setToggling] = useState<Consultant | null>(null);
 
-  const [search, setSearch] = useState("");
-  const pager = useTablePager(rows, search, (r) =>
-    [r.name, r.specialty, r.email, r.phone, r.status].join(" ")
-  );
+  const query = useQuery({
+    queryKey: ['admin', 'consultants', { search, activeFilter, specialization, page }],
+    queryFn: () =>
+      api
+        .get('/admin/consultants', {
+          params: {
+            search: search || undefined,
+            is_active: activeFilter || undefined,
+            specialization: specialization || undefined,
+            page,
+          },
+        })
+        .then((r) => r.data as Paginated<Consultant>),
+  });
+  const data = query.data;
 
-  const [editing, setEditing] = useState<Consultant | null>(null);
-  const [editPassword, setEditPassword] = useState("");
-  const [editFeedback, setEditFeedback] = useState("");
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin', 'consultants'] });
 
-  const [addOpen, setAddOpen] = useState(false);
-  const [addFeedback, setAddFeedback] = useState<{ text: string; ok: boolean }>({ text: "", ok: false });
-  const [consultantImage, setConsultantImage] = useState("");
-  const addFormRef = useRef<HTMLFormElement>(null);
+  const statusMutation = useMutation({
+    mutationFn: ({ id, is_active }: { id: number; is_active: boolean }) =>
+      api.patch(`/admin/consultants/${id}/status`, { is_active }),
+    onSuccess: () => {
+      setToggling(null);
+      invalidate();
+      toast.success(t('profile.saved'));
+    },
+    onError: (e) => {
+      if (isApiError(e)) toast.error(e.message);
+      setToggling(null);
+    },
+  });
 
-  const handleAction = (row: Consultant, action: TableAction) => {
-    if (action === "view") {
-      openDetail({
-        name: row.name,
-        image: row.image || undefined,
-        fields: [
-          { label: t("consultant"), value: row.name },
-          { label: t("specialty"), value: row.specialty },
-          { label: t("email"), value: row.email },
-          { label: t("phone"), value: row.phone },
-          { label: t("status"), value: row.status },
-        ],
-        extra: { consultant: { engagements: [], reports: [] } },
-      });
-    } else if (action === "edit") {
-      setEditing({ ...row });
-      setEditPassword("");
-      setEditFeedback("");
-    } else if (action === "delete") {
-      if (confirm(t("deleteConfirm"))) {
-        setRows((prev) => prev.filter((r) => r.id !== row.id));
-        if (token) adminDashboardService.deleteConsultant(token, row.id).catch(() => {});
-      }
-    }
-  };
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/admin/consultants/${id}`),
+    onSuccess: () => {
+      toast.success(t('consultants.deleted'));
+      setDeleting(null);
+      invalidate();
+    },
+    onError: (e) => {
+      // 409 CONSULTANT_HAS_FUTURE_BOOKINGS → cancel his future bookings first
+      if (isApiError(e)) toast.error(e.message);
+      setDeleting(null);
+    },
+  });
 
-  const saveEdit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!editing) return;
-    setRows((prev) => prev.map((r) => (r.id === editing.id ? editing : r)));
-    if (token) adminDashboardService.updateConsultant(token, editing.id, editing).catch(() => {});
-    setEditFeedback(t("saveChanges"));
-    setTimeout(() => setEditing(null), 800);
-  };
-
-  const submitAdd = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const consultant = String(fd.get("consultant") || "").trim();
-    const specialty = String(fd.get("specialty") || "").trim();
-    const email = String(fd.get("email") || "").trim();
-    const password = String(fd.get("password") || "").trim();
-    const phone = String(fd.get("phone") || "").trim();
-    const status = String(fd.get("status") || "").trim();
-    if (!consultant || !specialty || !email || !password || !phone || !status) return;
-    if (rows.some((r) => r.email === email)) {
-      setAddFeedback({ text: t("emailExists"), ok: false });
-      return;
-    }
-    const record: Consultant = {
-      id: `s_${Date.now()}`,
-      name: consultant,
-      specialty,
-      email,
-      phone,
-      status,
-      image: consultantImage || null,
-    };
-    setRows((prev) => [...prev, record]);
-    if (token) adminDashboardService.createConsultant(token, record).catch(() => {});
-    setConsultantImage("");
-    setAddFeedback({ text: t("consultantAdded"), ok: true });
-    addFormRef.current?.reset();
-    setTimeout(() => {
-      setAddOpen(false);
-      setAddFeedback({ text: "", ok: false });
-    }, 800);
+  const dayName = (dow: number) => {
+    const d = meta.data?.days_of_week.find((x) => x.value === dow);
+    return d ? d.name : String(dow); // meta names arrive localized
   };
 
   return (
     <>
-      <div className="stat-grid">
-        {STAT_CARDS.map((s) => (
-          <div className="stat-card" key={s.labelKey}>
-            <div className="top">
-              <div className="ic">{s.icon}</div>
-            </div>
-            <div className="num">{s.num}</div>
-            <div className="label">{t(s.labelKey)}</div>
-            <div className={`trend ${s.trendClass}`}>{t(s.trendKey)}</div>
-          </div>
-        ))}
-      </div>
+      <PageHeader
+        title={t('nav.consultants')}
+        actions={
+          can('create-consultants') ? (
+            <Button size="sm" onClick={() => setCreating(true)}>
+              + {t('consultants.add')}
+            </Button>
+          ) : undefined
+        }
+      />
 
-      <div className="panel-card">
-        <div className="table-toolbar">
-          <h3 style={{ margin: 0 }}>{t("consultantRecord")}</h3>
-          <TableSearch
-            value={search}
-            onChange={(v) => {
-              setSearch(v);
-              pager.resetPage();
-            }}
-          />
-          <button className="btn btn-primary btn-sm" type="button" onClick={() => setAddOpen(true)}>
-            {t("addConsultant")}
-          </button>
-        </div>
-        <table className="data-table" id="consultantsTable">
-          <thead>
-            <tr>
-              <th>{t("consultant")}</th>
-              <th>{t("specialty")}</th>
-              <th>{t("email")}</th>
-              <th>{t("phone")}</th>
-              <th>{t("status")}</th>
-              <th>{t("actions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pager.pagedRows.map((r) => (
-              <tr key={r.id}>
-                <td className="detail-name" onClick={() => handleAction(r, "view")}>
-                  {r.image && <img className="table-avatar" src={r.image} alt={r.name} />}
-                  {r.name}
-                </td>
-                <td>{r.specialty}</td>
-                <td>{r.email}</td>
-                <td>{r.phone}</td>
-                <td>
-                  <StatusBadge text={r.status} />
-                </td>
-                <ActionsCell actions={["view", "edit", "delete"]} onAction={(a) => handleAction(r, a)} />
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <TablePagination
-          page={pager.page}
-          totalPages={pager.totalPages}
-          pageSize={pager.pageSize}
-          count={pager.filtered.length}
-          onPage={pager.setPage}
-          onPageSize={pager.setPageSize}
+      <div className="flex gap-3 flex-wrap mb-6">
+        <SearchInput
+          value={search}
+          onChange={(v) => {
+            setSearch(v);
+            setPage(1);
+          }}
+          className="flex-1 min-w-[200px]"
+        />
+        <Input
+          value={specialization}
+          onChange={(e) => {
+            setSpecialization(e.target.value);
+            setPage(1);
+          }}
+          placeholder={t('consultants.specializationFilter')}
+          style={{ maxWidth: 200 }}
+        />
+        <Select
+          options={[
+            { value: '1', label: t('users.active') },
+            { value: '0', label: t('users.inactive') },
+          ]}
+          placeholder={t('common.status')}
+          value={activeFilter}
+          onChange={(e) => {
+            setActiveFilter(e.target.value);
+            setPage(1);
+          }}
+          style={{ maxWidth: 150 }}
         />
       </div>
 
-      {/* EDIT MODAL */}
-      <AdminModal id="editModal" open={!!editing} onClose={() => setEditing(null)} maxWidth={540}>
-        <h3>{t("editRecord")}</h3>
-        {editing && (
-          <form className="edit-form" onSubmit={saveEdit}>
-            <div className="field">
-              <label>{t("consultant")}</label>
-              <input type="text" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("specialty")}</label>
-              <input type="text" value={editing.specialty} onChange={(e) => setEditing({ ...editing, specialty: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("email")}</label>
-              <input type="text" value={editing.email} onChange={(e) => setEditing({ ...editing, email: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("phone")}</label>
-              <input type="text" value={editing.phone} onChange={(e) => setEditing({ ...editing, phone: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("status")}</label>
-              <input type="text" value={editing.status} onChange={(e) => setEditing({ ...editing, status: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>{t("password")}</label>
-              <input type="text" value={editPassword} onChange={(e) => setEditPassword(e.target.value)} />
-            </div>
-            <button type="submit" className="btn btn-primary btn-sm">
-              {t("saveChanges")}
-            </button>
-          </form>
-        )}
-        <p className={`form-feedback${editFeedback ? " ok" : ""}`}>{editFeedback}</p>
-        <ModalCancelButton onClose={() => setEditing(null)} style={{ marginTop: 8 }} />
-      </AdminModal>
+      {query.isLoading ? (
+        <TableSkeleton rows={4} />
+      ) : query.isError || !data ? (
+        <ErrorState onRetry={() => query.refetch()} />
+      ) : data.data.length === 0 ? (
+        <EmptyState title={t('common.empty')} />
+      ) : (
+        <>
+          <Table
+            columns={[
+              {
+                key: 'consultant',
+                header: t('bookings.consultant'),
+                render: (c) => (
+                  <span className="flex items-center gap-3">
+                    <Avatar src={c.avatar_thumb_url} name={c.name} size="sm" />
+                    <span>
+                      <strong className="block">{c.name}</strong>
+                      {c.title && <span className="text-muted text-[0.8rem]">{c.title}</span>}
+                    </span>
+                  </span>
+                ),
+              },
+              { key: 'spec', header: t('consultants.specializationField'), render: (c) => c.specialization ?? '—' },
+              {
+                key: 'days',
+                header: t('consultants.workingDays'),
+                render: (c) => (
+                  <span className="flex gap-1 flex-wrap">
+                    {(c.working_days ?? []).map((d) => (
+                      <span key={d} className="ui-badge" data-color="green">
+                        {dayName(d)}
+                      </span>
+                    ))}
+                  </span>
+                ),
+              },
+              {
+                key: 'stats',
+                header: t('consultants.stats'),
+                render: (c) =>
+                  c.stats ? (
+                    <span className="text-muted text-[0.82rem]">
+                      {t('admin.statsPending')}: {c.stats.pending_bookings} · {t('nav.reports')}: {c.stats.reports}
+                    </span>
+                  ) : (
+                    '—'
+                  ),
+              },
+              {
+                key: 'active',
+                header: t('common.status'),
+                render: (c) => (
+                  <Switch
+                    checked={c.is_active}
+                    disabled={!can('update-consultants')}
+                    onChange={() =>
+                      c.is_active
+                        ? setToggling(c)
+                        : statusMutation.mutate({ id: c.id, is_active: true })
+                    }
+                    aria-label={t('common.status')}
+                  />
+                ),
+              },
+              {
+                key: 'actions',
+                header: t('common.actions'),
+                render: (c) => (
+                  <span className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="sm" onClick={() => router.push(`/admin/consultants/${c.id}`)}>
+                      {t('common.view')}
+                    </Button>
+                    {can('delete-consultants') && (
+                      <Button variant="ghost" size="sm" className="text-danger" onClick={() => setDeleting(c)}>
+                        {t('common.delete')}
+                      </Button>
+                    )}
+                  </span>
+                ),
+              },
+            ]}
+            rows={data.data}
+            rowKey={(c) => c.id}
+            onRowClick={(c) => router.push(`/admin/consultants/${c.id}`)}
+          />
+          <Pagination meta={data.meta} onPage={setPage} className="mt-6" />
+        </>
+      )}
 
-      {/* ADD CONSULTANT MODAL */}
-      <AdminModal id="addConsultantModal" open={addOpen} onClose={() => setAddOpen(false)} maxWidth={540}>
-        <h3>{t("addConsultantNew")}</h3>
-        <form className="edit-form" ref={addFormRef} onSubmit={submitAdd}>
-          <div className="field" style={{ textAlign: "center" }}>
-            <img
-              className={`avatar-preview${consultantImage ? " show" : ""}`}
-              src={consultantImage || undefined}
-              alt={t("consultantImage")}
-            />
-            <label>{t("consultantImage")}</label>
-            <input
-              type="file"
-              name="consultantImage"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => setConsultantImage(String(ev.target?.result || ""));
-                reader.readAsDataURL(file);
-              }}
-            />
-          </div>
-          <div className="field">
-            <label>{t("consultantLabel")}</label>
-            <input type="text" name="consultant" required />
-          </div>
-          <div className="field">
-            <label>{t("specialty")}</label>
-            <input type="text" name="specialty" required />
-          </div>
-          <div className="field">
-            <label>{t("email")}</label>
-            <input type="email" name="email" required />
-          </div>
-          <div className="field">
-            <label>{t("password")}</label>
-            <input type="text" name="password" required minLength={4} />
-          </div>
-          <div className="field">
-            <label>{t("phone")}</label>
-            <input type="text" name="phone" required />
-          </div>
-          <div className="field">
-            <label>{t("status")}</label>
-            <input type="text" name="status" defaultValue={t("active")} required />
-          </div>
-          <button type="submit" className="btn btn-primary btn-sm">
-            {t("saveConsultant")}
-          </button>
-          <ModalCancelButton onClose={() => setAddOpen(false)} style={{ marginTop: 8 }} />
-        </form>
-        <p className={`form-feedback${addFeedback.text ? (addFeedback.ok ? " ok" : " err") : ""}`}>{addFeedback.text}</p>
-      </AdminModal>
+      {creating && (
+        <ConsultantCreateModal
+          onClose={() => setCreating(false)}
+          onSaved={() => {
+            setCreating(false);
+            invalidate();
+          }}
+        />
+      )}
+
+      <ConfirmDialog
+        open={!!toggling}
+        onClose={() => setToggling(null)}
+        onConfirm={() => toggling && statusMutation.mutate({ id: toggling.id, is_active: false })}
+        title={t('users.deactivate')}
+        body={t('users.deactivateConfirm')}
+        danger
+        loading={statusMutation.isPending}
+      />
+
+      <ConfirmDialog
+        open={!!deleting}
+        onClose={() => setDeleting(null)}
+        onConfirm={() => deleting && deleteMutation.mutate(deleting.id)}
+        title={t('common.delete')}
+        body={t('consultants.deleteConfirm')}
+        danger
+        loading={deleteMutation.isPending}
+      />
     </>
+  );
+}
+
+// ---------- create modal (CON-02): always FormData because of the photo ----------
+function ConsultantCreateModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+  const { t } = useI18n();
+  const toast = useToast();
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [days, setDays] = useState<EditorDay[]>(daysFromApi([]));
+  const [availErrors, setAvailErrors] = useState<Record<string, string>>({});
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<ConsultantValues>({
+    resolver: zodResolver(consultantSchema),
+    defaultValues: { is_active: true },
+  });
+
+  const onSubmit = handleSubmit(async (values) => {
+    const vErrors = validateAvailability(days);
+    setAvailErrors(vErrors);
+    if (Object.keys(vErrors).length > 0) return;
+
+    try {
+      const fd = new FormData();
+      Object.entries(values).forEach(([k, v]) => {
+        if (k === 'password' && !v) return; // empty → set-password email
+        appendFormData(fd, v, k);
+      });
+      // backend requires confirmation whenever a password is sent
+      if (values.password) appendFormData(fd, values.password, 'password_confirmation');
+      if (photo) appendFormData(fd, photo, 'photo');
+      // optional availability — serialized as bracket-notation fields (§14.3)
+      const payload = toAvailabilityPayload(days);
+      if (payload.days.length > 0) appendFormData(fd, payload.days, 'availability[days]');
+
+      await api.post('/admin/consultants', fd);
+      toast.success(t('consultants.created'));
+      onSaved();
+    } catch (e) {
+      if (isApiError(e) && e.code === 'VALIDATION_ERROR') applyValidationErrors(setError, e);
+      else if (isApiError(e)) toast.error(e.message);
+    }
+  });
+
+  const err = (key?: string) => (key ? t(key) : undefined);
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title={t('consultants.add')}
+      size="xl"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
+            {t('common.cancel')}
+          </Button>
+          <Button onClick={onSubmit} loading={isSubmitting}>
+            {t('common.save')}
+          </Button>
+        </>
+      }
+    >
+      <form onSubmit={onSubmit} noValidate className="grid sm:grid-cols-2 gap-4">
+        <Input label={t('auth.name')} required error={err(errors.name?.message)} {...register('name')} />
+        <Input label={t('auth.email')} type="email" dir="ltr" required error={err(errors.email?.message)} {...register('email')} />
+        <Input label={t('auth.phone')} dir="ltr" error={err(errors.phone?.message)} {...register('phone')} />
+        <Input
+          label={t('auth.password')}
+          type="password"
+          autoComplete="new-password"
+          hint={t('users.passwordHint')}
+          error={err(errors.password?.message)}
+          {...register('password')}
+        />
+        <Input label={t('consultants.titleField')} error={err(errors.title?.message)} {...register('title')} />
+        <Input
+          label={t('consultants.specializationField')}
+          error={err(errors.specialization?.message)}
+          {...register('specialization')}
+        />
+        <Textarea
+          label={t('consultants.bio')}
+          className="sm:col-span-2"
+          rows={3}
+          error={err(errors.bio?.message)}
+          {...register('bio')}
+        />
+        <div className="sm:col-span-2">
+          <span className="text-[0.82rem] text-muted block mb-2">{t('consultants.photo')}</span>
+          <FileDrop accept={AVATAR_ACCEPT} maxMb={AVATAR_MAX_MB} onFile={setPhoto} label={photo?.name} />
+        </div>
+        <div className="sm:col-span-2">
+          <Switch label={t('users.active')} {...register('is_active')} />
+        </div>
+        <div className="sm:col-span-2">
+          <span className="text-[0.82rem] text-muted block mb-2">{t('availability.title')}</span>
+          <AvailabilityEditor value={days} onChange={setDays} errors={availErrors} />
+        </div>
+      </form>
+    </Modal>
   );
 }

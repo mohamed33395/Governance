@@ -1,7 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import Link from "next/link";
+import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/i18n-context';
+import { EmptyState, ErrorState } from '@/components/ui';
+import type { Package } from '@/types/api';
 
 function Check() {
   return (
@@ -13,15 +17,21 @@ function Check() {
   );
 }
 
+const MEDALS = ['medal-bronze', 'medal-silver', 'medal-gold'] as const;
+
+// §10.1 — public pricing (wizard step 1). Data: GET /public/packages (PUB-01)
 export default function PackagesPage() {
-  useEffect(() => {
-    document.title = "الباقات — مكتب المتخصصون في الحوكمة والامتثال للاستشارات الإدارية";
-  }, []);
+  const { t } = useI18n();
+  const packagesQuery = useQuery({
+    queryKey: ['public', 'packages'],
+    queryFn: () => api.get('/public/packages').then((r) => r.data.data as Package[]),
+  });
+  const packages = packagesQuery.data;
 
   return (
     <>
       {/* Saudi Riyal symbol (official SAMA glyph) */}
-      <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
+      <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
         <defs>
           <symbol id="riyal-symbol" viewBox="0 0 1124.14 1256.39">
             <path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z" />
@@ -33,123 +43,59 @@ export default function PackagesPage() {
       <section className="section" id="packages">
         <div className="wrap">
           <div className="section-head">
-            <span className="eyebrow">الباقات</span>
-            <h2>باقات استشارية لكل مرحلة نمو</h2>
-            <p>ثلاث باقات مصممة بعناية لتناسب حجم منشأتكم — جميعها تشمل متابعة دورية وتقارير أداء موثقة.</p>
+            <span className="eyebrow">{t('packages.eyebrow')}</span>
+            <h2>{t('packages.title')}</h2>
+            <p>{t('packages.subtitle')}</p>
           </div>
-          <div className="pricing-grid">
-            <div className="price-card">
-              <div className="tier">
-                <span className="medal medal-bronze" /> الباقة البرونزية
-              </div>
-              <div className="price">
-                ١,٩٠٠{" "}
-                <svg className="riyal-icon" aria-hidden="true">
-                  <use href="#riyal-symbol" />
-                </svg>{" "}
-                <small>/ شهرياً</small>
-              </div>
-              <p className="desc">للمنشآت الناشئة التي تبدأ رحلة الحوكمة والامتثال.</p>
-              <ul>
-                <li>
-                  <Check /> استشارتان شهرياً
-                </li>
-                <li>
-                  <Check /> مراجعة مستندين شهرياً
-                </li>
-                <li>
-                  <Check /> دعم عبر البريد الإلكتروني
-                </li>
-                <li>
-                  <Check /> تقرير متابعة ربع سنوي
-                </li>
-              </ul>
-              <Link href="/details#package-1" className="btn btn-outline btn-sm" style={{ marginBottom: 12 }}>
-                تفاصيل الباقة
-              </Link>
-              <Link href="/booking-wizard?package=الباقة%20البرونزية&price=1900" className="btn btn-outline">
-                اختر الباقة
-              </Link>
-            </div>
 
-            <div className="price-card">
-              <div className="tier">
-                <span className="medal medal-silver" /> الباقة الفضية
-              </div>
-              <div className="price">
-                ٤,٥٠٠{" "}
-                <svg className="riyal-icon" aria-hidden="true">
-                  <use href="#riyal-symbol" />
-                </svg>{" "}
-                <small>/ شهرياً</small>
-              </div>
-              <p className="desc">للمنشآت المتنامية التي تحتاج مرافقة استشارية أعمق.</p>
-              <ul>
-                <li>
-                  <Check /> ٥ استشارات شهرياً
-                </li>
-                <li>
-                  <Check /> مراجعة حتى ٨ مستندات شهرياً
-                </li>
-                <li>
-                  <Check /> دعم عبر الجوال والبريد
-                </li>
-                <li>
-                  <Check /> تقرير أداء شهري
-                </li>
-                <li>
-                  <Check /> جلسة تدريبية ربع سنوية
-                </li>
-              </ul>
-              <Link href="/details#package-2" className="btn btn-outline btn-sm" style={{ marginBottom: 12 }}>
-                تفاصيل الباقة
-              </Link>
-              <Link href="/booking-wizard?package=الباقة%20الفضية&price=4500" className="btn btn-outline">
-                اختر الباقة
-              </Link>
+          {packagesQuery.isLoading ? (
+            <div className="pricing-grid">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="price-card animate-pulse" style={{ minHeight: 420 }} />
+              ))}
             </div>
-
-            <div className="price-card featured">
-              <span className="featured-tag">الأكثر تميزاً</span>
-              <div className="tier">
-                <span className="medal medal-gold" /> الباقة الذهبية
-              </div>
-              <div className="price">
-                ٩,٨٠٠{" "}
-                <svg className="riyal-icon" aria-hidden="true">
-                  <use href="#riyal-symbol" />
-                </svg>{" "}
-                <small>/ شهرياً</small>
-              </div>
-              <p className="desc">مرافقة شاملة للمنشآت الطامحة للريادة.</p>
-              <ul>
-                <li>
-                  <Check /> استشارات غير محدودة
-                </li>
-                <li>
-                  <Check /> مراجعة مستندات غير محدودة
-                </li>
-                <li>
-                  <Check /> مستشار مخصص لمنشأتكم
-                </li>
-                <li>
-                  <Check /> دعم على مدار الساعة
-                </li>
-                <li>
-                  <Check /> تقارير أداء أسبوعية
-                </li>
-                <li>
-                  <Check /> حضور اجتماعات مجلس الإدارة
-                </li>
-              </ul>
-              <Link href="/details#package-3" className="btn btn-ghost btn-sm" style={{ marginBottom: 12 }}>
-                تفاصيل الباقة
-              </Link>
-              <Link href="/booking-wizard?package=الباقة%20الذهبية&price=9800" className="btn btn-gold">
-                اختر الباقة
-              </Link>
+          ) : packagesQuery.isError ? (
+            <ErrorState onRetry={() => packagesQuery.refetch()} />
+          ) : !packages || packages.length === 0 ? (
+            <EmptyState title={t('common.empty')} />
+          ) : (
+            <div className="pricing-grid">
+              {packages.map((pkg, i) => (
+                <div key={pkg.id} className={`price-card${pkg.is_featured ? ' featured' : ''}`}>
+                  {pkg.is_featured && <span className="featured-tag">{t('packages.mostFeatured')}</span>}
+                  <div className="tier">
+                    <span className={`medal ${MEDALS[i % MEDALS.length]}`} /> {pkg.name}
+                  </div>
+                  <div className="price">
+                    {pkg.price_formatted}{' '}
+                    <small>
+                      / {pkg.billing_period_days} {t('packages.days')}
+                    </small>
+                  </div>
+                  {pkg.description && <p className="desc">{pkg.description}</p>}
+                  <ul>
+                    <li>
+                      <Check />
+                      {pkg.is_unlimited || pkg.consultations_limit === null
+                        ? t('packages.unlimitedConsultations')
+                        : t('packages.consultationsMonthly').replace('{n}', String(pkg.consultations_limit))}
+                    </li>
+                    {pkg.features_localized.map((feature, fi) => (
+                      <li key={fi}>
+                        <Check /> {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={`/book/${pkg.slug}`}
+                    className={`btn ${pkg.is_featured ? 'btn-gold' : 'btn-outline'}`}
+                  >
+                    {t('choosePackage')}
+                  </Link>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
         </div>
       </section>
     </>

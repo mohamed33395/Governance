@@ -30,7 +30,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "ما تحصل عليه",
       points: ["لائحة حوكمة مكتوبة", "خريطة صلاحيات", "تقرير تقييم أداء", "دليل إجراءات العمل"],
     },
-    cta: { text: "احجز استشارة حوكمة", href: "/booking" },
+    cta: { text: "احجز استشارة حوكمة", href: "/packages" },
   },
   "service-2": {
     category: "خدماتنا",
@@ -48,7 +48,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "ما تحصل عليه",
       points: ["سياسات وإجراءات امتثال", "مراجعة عقود العمل", "تقارير إفصاح", "خطة معالجة مخاطر"],
     },
-    cta: { text: "احجز استشارة امتثال", href: "/booking" },
+    cta: { text: "احجز استشارة امتثال", href: "/packages" },
   },
   "service-3": {
     category: "خدماتنا",
@@ -67,7 +67,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "ما تحصل عليه",
       points: ["خطة استراتيجية متكاملة", "هيكل تنظيمي محدث", "أوصاف وظيفية", "مؤشرات أداء متوازنة"],
     },
-    cta: { text: "احجز استشارة إدارية", href: "/booking" },
+    cta: { text: "احجز استشارة إدارية", href: "/packages" },
   },
   "service-4": {
     category: "خدماتنا",
@@ -85,7 +85,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "ما تحصل عليه",
       points: ["تقارير كفاءات مرشحة", "مقابلات تقييمية", "خطط استقطاب", "متابعة ما بعد التعيين"],
     },
-    cta: { text: "احجز استشارة توظيف", href: "/booking" },
+    cta: { text: "احجز استشارة توظيف", href: "/packages" },
   },
   "service-5": {
     category: "خدماتنا",
@@ -103,7 +103,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "ما تحصل عليه",
       points: ["خطة تحليل أعمال", "خرائط العمليات", "متطلبات الأصحاب", "مؤشرات الأداء"],
     },
-    cta: { text: "احجز استشارة تحليل", href: "/booking" },
+    cta: { text: "احجز استشارة تحليل", href: "/packages" },
   },
   "service-6": {
     category: "خدماتنا",
@@ -121,7 +121,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "ما تحصل عليه",
       points: ["خطة تطوير تجاري", "دراسة سوق", "خارطة شراكات", "خطة علاقات عامة"],
     },
-    cta: { text: "احجز استشارة أعمال", href: "/booking" },
+    cta: { text: "احجز استشارة أعمال", href: "/packages" },
   },
 
   "license-1": {
@@ -154,7 +154,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "مجالات الترخيص",
       points: ["حوكمة الشركات", "امتثال نظامي", "تقارير رقابية", "لوائح داخلية"],
     },
-    cta: { text: "اطلب الخدمة", href: "/booking" },
+    cta: { text: "اطلب الخدمة", href: "/packages" },
   },
   "license-3": {
     category: "نطاق الترخيص",
@@ -170,7 +170,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "مجالات الترخيص",
       points: ["تخطيط استراتيجي", "هياكل تنظيمية", "أجور ووظائف", "جودة وأداء"],
     },
-    cta: { text: "اطلب الخدمة", href: "/booking" },
+    cta: { text: "اطلب الخدمة", href: "/packages" },
   },
   "license-4": {
     category: "نطاق الترخيص",
@@ -186,7 +186,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "مجالات الترخيص",
       points: ["مواهب تقنية", "كفاءات إدارية", "تقييم احترافي", "خطط استقطاب"],
     },
-    cta: { text: "اطلب الخدمة", href: "/booking" },
+    cta: { text: "اطلب الخدمة", href: "/packages" },
   },
   "license-5": {
     category: "نطاق الترخيص",
@@ -202,7 +202,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "مجالات الترخيص",
       points: ["تحليل أعمال", "تخطيط متطلبات", "حوكمة المعلومات", "مؤشرات الأداء"],
     },
-    cta: { text: "اطلب الخدمة", href: "/booking" },
+    cta: { text: "اطلب الخدمة", href: "/packages" },
   },
   "license-6": {
     category: "نطاق الترخيص",
@@ -218,7 +218,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       title: "مجالات الترخيص",
       points: ["خدمات تجارية", "بحوث استثمار", "تجارة إلكترونية", "شراكات استراتيجية"],
     },
-    cta: { text: "اطلب الخدمة", href: "/booking" },
+    cta: { text: "اطلب الخدمة", href: "/packages" },
   },
 
   "package-1": {
@@ -238,7 +238,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       period: "ريال / شهرياً",
       points: ["استشارتان شهرياً", "مراجعة مستندين", "دعم بالبريد", "تقرير ربع سنوي"],
     },
-    cta: { text: "اختر الباقة", href: "/booking-wizard?package=الباقة%20البرونزية&price=1900" },
+    cta: { text: "اختر الباقة", href: "/packages" },
   },
   "package-2": {
     category: "الباقات",
@@ -257,7 +257,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       period: "ريال / شهرياً",
       points: ["٥ استشارات شهرياً", "مراجعة ٨ مستندات", "دعم جوال وبريد", "تقرير أداء شهري", "جلسة تدريبية ربع سنوية"],
     },
-    cta: { text: "اختر الباقة", href: "/booking-wizard?package=الباقة%20الفضية&price=4500" },
+    cta: { text: "اختر الباقة", href: "/packages" },
   },
   "package-3": {
     category: "الباقات",
@@ -277,7 +277,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
       period: "ريال / شهرياً",
       points: ["استشارات غير محدودة", "مراجعة مستندات غير محدودة", "مستشار مخصص", "دعم 24/7", "تقارير أسبوعية", "حضور اجتماعات مجلس الإدارة"],
     },
-    cta: { text: "اختر الباقة", href: "/booking-wizard?package=الباقة%20الذهبية&price=9800" },
+    cta: { text: "اختر الباقة", href: "/packages" },
   },
 
   join: {
@@ -323,7 +323,7 @@ export const DETAIL_ITEMS: Record<string, DetailItem> = {
         "شبكات الأعمال والشؤون الاقتصادية والتجارية",
       ],
     },
-    cta: { text: "ابدأ الآن", href: "/booking" },
+    cta: { text: "ابدأ الآن", href: "/packages" },
   },
 };
 

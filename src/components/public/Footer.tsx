@@ -58,7 +58,7 @@ export function Footer() {
                 <Link href="/contact">{t("contact")}</Link>
               </li>
               <li>
-                <Link href="/booking">{t("bookConsultation")}</Link>
+                <Link href="/packages">{t("bookConsultation")}</Link>
               </li>
             </ul>
           </div>

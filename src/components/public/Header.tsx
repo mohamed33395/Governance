@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
+import { useClientAuth } from "@/stores/client-auth";
 
 export function Header() {
   const { t } = useI18n();
+  const clientToken = useClientAuth((s) => s.token);
   const [navOpen, setNavOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -49,10 +51,13 @@ export function Header() {
           <Link href="/packages" onClick={() => setNavOpen(false)}>
             {t("packages")}
           </Link>
+          <Link href="/consultants" onClick={() => setNavOpen(false)}>
+            {t("nav.consultants")}
+          </Link>
           <Link href="/about" onClick={() => setNavOpen(false)}>
             {t("about")}
           </Link>
-          <Link href="/client" onClick={() => setNavOpen(false)}>
+          <Link href="/join" onClick={() => setNavOpen(false)}>
             {t("join")}
           </Link>
           <Link href="/team" onClick={() => setNavOpen(false)}>
@@ -63,6 +68,16 @@ export function Header() {
           </Link>
         </nav>
         <div className="header-actions">
+          {/* §9.2 — client token exists → "My dashboard"; otherwise Login */}
+          {clientToken ? (
+            <Link href="/dashboard" className="client-auth-btn">
+              {t("nav.dashboard")}
+            </Link>
+          ) : (
+            <Link href="/login" className="client-auth-btn">
+              {t("auth.login")}
+            </Link>
+          )}
           <Link href="/app" className="app-download" aria-label={t("appDownloadAria")} title={t("appDownload")}>
             <span className="app-download-text">{t("appDownload")}</span>
           </Link>

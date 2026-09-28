@@ -1,301 +1,235 @@
-"use client";
+'use client';
 
-import { useCallback, useMemo, useState } from "react";
-import { useAdminAuth } from "@/lib/auth/admin-auth-context";
-import { useI18n } from "@/lib/i18n/i18n-context";
-import { adminDashboardService } from "@/services/admin-dashboard.service";
-import { useApiData } from "@/lib/use-api-data";
+import { useState } from 'react';
+import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/i18n-context';
+import { usePublicMeta } from '@/lib/meta';
+import { RequirePermission } from '@/components/admin/RequirePermission';
 import {
-  AdminModal,
-  ModalCancelButton,
-  TablePagination,
-  TableSearch,
-  useTablePager,
-} from "@/components/admin/table";
-import type { AdminPayment, OfficeAccount } from "@/types/admin-dashboard";
+  Button,
+  Drawer,
+  EmptyState,
+  ErrorState,
+  Input,
+  PageHeader,
+  Pagination,
+  PriceTag,
+  SearchInput,
+  Select,
+  StatusBadge,
+  Table,
+  TableSkeleton,
+} from '@/components/ui';
+import type { Booking, Paginated, Payment } from '@/types/api';
 
-const PAY_METHOD_LABELS: Record<string, string> = {
-  visa: "Visa",
-  mastercard: "MasterCard",
-  mada: "مدى",
-  apple: "Apple Pay",
-  google: "Google Pay",
-  stc: "STC Pay",
-  paypal: "PayPal",
-  tabby: "تابي",
-  tamara: "تمارا",
-  card: "بطاقة بنكية",
-  bank: "تحويل بنكي",
-};
-
-const DEMO_PAYMENTS: AdminPayment[] = [
-  { id: "pay1", client: "شركة الرياض للتطوير العقاري", service: "اشتراك — الباقة الذهبية", method: "visa", detail: "Visa **** 4532", amountNum: 9800, date: "١ سبتمبر ٢٠٢٦", status: "مدفوع" },
-  { id: "pay2", client: "مؤسسة أفق التقنية", service: "حجز — استشارة امتثال", method: "mada", detail: "مدى **** 8821", amountNum: 4500, date: "٣ سبتمبر ٢٠٢٦", status: "مدفوع" },
-  { id: "pay3", client: "مجموعة الخليج التجارية", service: "اشتراك — الباقة الفضية", method: "mastercard", detail: "MasterCard **** 7710", amountNum: 4500, date: "٢٨ أغسطس ٢٠٢٦", status: "مدفوع" },
-  { id: "pay4", client: "شركة نمو للاستثمار", service: "حجز — استشارة حوكمة", method: "stc", detail: "STC Pay — 0551234567", amountNum: 1900, date: "٥ سبتمبر ٢٠٢٦", status: "بانتظار السداد" },
-  { id: "pay5", client: "شركة المسار اللوجستي", service: "اشتراك — الباقة البرونزية", method: "apple", detail: "Apple Pay — 0559871234", amountNum: 1900, date: "١٠ سبتمبر ٢٠٢٦", status: "مدفوع" },
-  { id: "pay6", client: "عيادات الشفاء التخصصية", service: "حجز — استشارة إدارية", method: "tabby", detail: "تابي — 0553344556", amountNum: 4500, date: "٧ سبتمبر ٢٠٢٦", status: "بانتظار السداد" },
-];
-
-const FILTERS = ["", "اشتراك", "حجز", "بانتظار"];
-const FILTER_KEYS = ["all", "subscriptions", "bookings", "pendingPayments"];
-
-const STAT_ICONS = [
-  <svg key="i1" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>,
-  <svg key="i2" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="12" r="9" /><polyline points="8,12 11,15 16,9" /></svg>,
-  <svg key="i3" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="12" r="9" /><polyline points="12,7 12,12 15,14" /></svg>,
-  <svg key="i4" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7"><line x1="6" y1="20" x2="6" y2="11" /><line x1="12" y1="20" x2="12" y2="5" /><line x1="18" y1="20" x2="18" y2="14" /></svg>,
-];
-
+// §13.12 — payments (PAY-01/02). gateway_response is never returned.
 export default function AdminPaymentsPage() {
-  const { token } = useAdminAuth();
+  return (
+    <RequirePermission perm="view-payments">
+      <PaymentsInner />
+    </RequirePermission>
+  );
+}
+
+function PaymentsInner() {
   const { t } = useI18n();
+  const meta = usePublicMeta();
 
-  const fetcher = useCallback(
-    () => (token ? adminDashboardService.getPayments(token) : Promise.reject()),
-    [token]
-  );
-  const { data: rows } = useApiData<AdminPayment[]>(fetcher, DEMO_PAYMENTS);
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Payment | null>(null);
 
-  const accountsFetcher = useCallback(
-    () => (token ? adminDashboardService.getOfficeAccounts(token) : Promise.reject()),
-    [token]
-  );
-  const { data: officeAccounts, setData: setOfficeAccounts } = useApiData<OfficeAccount[]>(accountsFetcher, []);
+  const query = useQuery({
+    queryKey: ['admin', 'payments', { search, status, dateFrom, dateTo, page }],
+    queryFn: () =>
+      api
+        .get('/admin/payments', {
+          params: {
+            search: search || undefined,
+            status: status || undefined,
+            date_from: dateFrom || undefined,
+            date_to: dateTo || undefined,
+            page,
+          },
+        })
+        .then((r) => r.data as Paginated<Payment>),
+  });
+  const data = query.data;
 
-  const [filter, setFilter] = useState("");
-  const [search, setSearch] = useState("");
-  const filtered = useMemo(
-    () => rows.filter((r) => !filter || r.service.includes(filter) || r.status.includes(filter)),
-    [rows, filter]
-  );
-  const pager = useTablePager(filtered, search, (r) =>
-    [r.client, r.service, PAY_METHOD_LABELS[r.method] || r.method, r.detail, String(r.amountNum), r.date, r.status].join(" ")
-  );
-
-  const stats = useMemo(() => {
-    let revenue = 0;
-    let paid = 0;
-    let pending = 0;
-    rows.forEach((r) => {
-      if (r.status === "مدفوع") {
-        paid++;
-        revenue += r.amountNum || 0;
-      } else {
-        pending++;
-      }
-    });
-    return { revenue, paid, pending, count: rows.length };
-  }, [rows]);
-
-  const [receipt, setReceipt] = useState<AdminPayment | null>(null);
-  const [accountsOpen, setAccountsOpen] = useState(false);
-  const [openForms, setOpenForms] = useState<Record<string, boolean>>({});
-  const [formValues, setFormValues] = useState<Record<string, { name: string; number: string }>>({});
-
-  const receiptImage = (r: AdminPayment) => {
-    // Placeholder receipt — the original rendered one via SGCReceipt (canvas).
-    // Until the backend provides receipt images we render the same card layout.
-    return `data:image/svg+xml;utf8,${encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="340" height="420"><rect width="100%" height="100%" fill="#FBF9F3"/><text x="50%" y="40" text-anchor="middle" font-size="18" fill="#1A412E" font-family="sans-serif">إيصال</text><text x="50%" y="80" text-anchor="middle" font-size="13" fill="#666" font-family="sans-serif">${r.service}</text><text x="50%" y="110" text-anchor="middle" font-size="13" fill="#666" font-family="sans-serif">${r.client}</text><text x="50%" y="150" text-anchor="middle" font-size="20" fill="#C19B4A" font-family="sans-serif">${r.amountNum.toLocaleString("ar-SA")} ريال</text><text x="50%" y="190" text-anchor="middle" font-size="12" fill="#666" font-family="sans-serif">${r.date}</text></svg>`
-    )}`;
-  };
-
-  const downloadReceipt = () => {
-    if (!receipt) return;
-    const a = document.createElement("a");
-    a.href = receiptImage(receipt);
-    a.download = "receipt.svg";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
-  const deleteAccount = (id: string) => {
-    setOfficeAccounts((prev) => prev.filter((a) => a.id !== id));
-    if (token) adminDashboardService.deleteOfficeAccount(token, id).catch(() => {});
-  };
-
-  const addAccount = (method: string) => {
-    const vals = formValues[method] || { name: "", number: "" };
-    if (!vals.name.trim() || !vals.number.trim()) return;
-    const acc: OfficeAccount = { id: `acc_${Date.now()}`, method, name: vals.name.trim(), number: vals.number.trim() };
-    setOfficeAccounts((prev) => [acc, ...prev]);
-    if (token) adminDashboardService.createOfficeAccount(token, acc).catch(() => {});
-    setFormValues((prev) => ({ ...prev, [method]: { name: "", number: "" } }));
-    setOpenForms((prev) => ({ ...prev, [method]: false }));
-  };
-
-  const statCards = [
-    { num: `${stats.revenue.toLocaleString("ar-SA")} ريال`, labelKey: "totalRevenue", trendClass: "up" },
-    { num: String(stats.paid), labelKey: "paidPayments", trendClass: "up" },
-    { num: String(stats.pending), labelKey: "pendingPayments", trendClass: "flat" },
-    { num: String(stats.count), labelKey: "totalPayments", trendClass: "flat" },
-  ];
+  const resetPage = () => setPage(1);
 
   return (
     <>
-      <div className="stat-grid">
-        {statCards.map((s, i) => (
-          <div className="stat-card" key={s.labelKey}>
-            <div className="top">
-              <div className="ic">{STAT_ICONS[i]}</div>
-            </div>
-            <div className="num">{s.num}</div>
-            <div className="label">{t(s.labelKey)}</div>
-            <div className={`trend ${s.trendClass}`}>{t("noChange")}</div>
-          </div>
-        ))}
-      </div>
+      <PageHeader title={t('nav.payments')} />
 
-      <div className="panel-card">
-        <div className="table-toolbar">
-          <h3 style={{ margin: 0 }}>{t("paymentsRecord")}</h3>
-          <button className="btn btn-primary btn-sm" type="button" onClick={() => setAccountsOpen(true)}>
-            {t("addAccount")}
-          </button>
-          <TableSearch
-            value={search}
-            onChange={(v) => {
-              setSearch(v);
-              pager.resetPage();
-            }}
-          />
-          <div className="chip-filters" id="paymentsFilters">
-            {FILTERS.map((f, i) => (
-              <button
-                key={f || "all"}
-                type="button"
-                className={filter === f ? "active" : undefined}
-                onClick={() => {
-                  setFilter(f);
-                  pager.resetPage();
-                }}
-              >
-                {t(FILTER_KEYS[i])}
-              </button>
-            ))}
-          </div>
-        </div>
-        <table className="data-table no-actions" id="paymentsTable">
-          <thead>
-            <tr>
-              <th>{t("client")}</th>
-              <th>{t("serviceOrPackage")}</th>
-              <th>{t("paymentMethod")}</th>
-              <th>{t("paymentDetails")}</th>
-              <th>{t("amount")}</th>
-              <th>{t("date")}</th>
-              <th>{t("status")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pager.pagedRows.map((r) => (
-              <tr key={r.id}>
-                <td>{r.client}</td>
-                <td>{r.service}</td>
-                <td>{PAY_METHOD_LABELS[r.method] || r.method || "—"}</td>
-                <td>
-                  <button type="button" className="receipt-link" onClick={() => setReceipt(r)}>
-                    {r.detail || "—"}
-                  </button>
-                </td>
-                <td>{r.amountNum ? `${Number(r.amountNum).toLocaleString("ar-SA")} ريال` : "—"}</td>
-                <td>{r.date || "—"}</td>
-                <td>
-                  <span className={`badge ${r.status === "مدفوع" ? "approved" : "pending"}`}>
-                    <span className="d" />
-                    {r.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <TablePagination
-          page={pager.page}
-          totalPages={pager.totalPages}
-          pageSize={pager.pageSize}
-          count={pager.filtered.length}
-          onPage={pager.setPage}
-          onPageSize={pager.setPageSize}
+      <div className="flex gap-3 flex-wrap mb-6">
+        <SearchInput
+          value={search}
+          onChange={(v) => {
+            setSearch(v);
+            resetPage();
+          }}
+          placeholder={t('paymentsAdmin.searchPlaceholder')}
+          className="flex-1 min-w-[220px]"
+        />
+        <Select
+          options={(meta.data?.payment_statuses ?? []).map((s) => ({ value: s.value, label: s.label }))}
+          placeholder={t('common.status')}
+          value={status}
+          onChange={(e) => {
+            setStatus(e.target.value);
+            resetPage();
+          }}
+          style={{ maxWidth: 160 }}
+        />
+        <Input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => {
+            setDateFrom(e.target.value);
+            resetPage();
+          }}
+          aria-label={t('reports.dateFrom')}
+          style={{ maxWidth: 155 }}
+        />
+        <Input
+          type="date"
+          value={dateTo}
+          onChange={(e) => {
+            setDateTo(e.target.value);
+            resetPage();
+          }}
+          aria-label={t('reports.dateTo')}
+          style={{ maxWidth: 155 }}
         />
       </div>
 
-      {/* ADD PAYMENT ACCOUNT MODAL */}
-      <AdminModal id="addPayAccountModal" open={accountsOpen} onClose={() => setAccountsOpen(false)} maxWidth={560}>
-        <h3>{t("addAccount")}</h3>
-        <p style={{ fontSize: ".82rem", color: "var(--stone)", marginBottom: 14 }}>
-          كل وسيلة دفع وحالة حسابها — اضغط إضافة لإدخال بيانات الحساب.
-        </p>
-        <div id="payMethodsAccountsList">
-          {Object.keys(PAY_METHOD_LABELS)
-            .filter((id) => id !== "card")
-            .map((id) => {
-              const methodAccounts = officeAccounts.filter((a) => a.method === id);
-              const added = methodAccounts.length > 0;
-              const formOpen = !!openForms[id];
-              const vals = formValues[id] || { name: "", number: "" };
-              return (
-                <div className="pay-acc-row" key={id}>
-                  <div className="pay-acc-head">
-                    <span className="pay-acc-name">{PAY_METHOD_LABELS[id]}</span>
-                    <span className={`pay-acc-status ${added ? "added" : "missing"}`}>{added ? "مضاف" : "غير مضاف"}</span>
-                  </div>
-                  {methodAccounts.map((a) => (
-                    <div className="pay-acc-item" key={a.id}>
-                      <span>
-                        {a.name} — {a.number}
-                      </span>
-                      <button type="button" className="pay-acc-del" onClick={() => deleteAccount(a.id)}>
-                        {t("delete")}
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    className="btn btn-outline btn-sm pay-acc-add"
-                    onClick={() => setOpenForms((prev) => ({ ...prev, [id]: !formOpen }))}
-                  >
-                    {added ? "+ إضافة حساب آخر" : "+ إضافة حساب"}
-                  </button>
-                  <div className="pay-acc-form" style={{ display: formOpen ? "grid" : "none" }}>
-                    <input
-                      type="text"
-                      className="pa-name"
-                      placeholder="اسم الحساب / البنك"
-                      value={vals.name}
-                      onChange={(e) => setFormValues((prev) => ({ ...prev, [id]: { ...vals, name: e.target.value } }))}
-                    />
-                    <input
-                      type="text"
-                      className="pa-number"
-                      placeholder="رقم الحساب / IBAN"
-                      value={vals.number}
-                      onChange={(e) => setFormValues((prev) => ({ ...prev, [id]: { ...vals, number: e.target.value } }))}
-                    />
-                    <button type="button" className="btn btn-primary btn-sm" onClick={() => addAccount(id)}>
-                      حفظ
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-        <ModalCancelButton onClose={() => setAccountsOpen(false)} style={{ marginTop: 8 }} />
-      </AdminModal>
+      {query.isLoading ? (
+        <TableSkeleton rows={5} cols={6} />
+      ) : query.isError || !data ? (
+        <ErrorState onRetry={() => query.refetch()} />
+      ) : data.data.length === 0 ? (
+        <EmptyState title={t('common.empty')} />
+      ) : (
+        <>
+          <Table
+            columns={[
+              { key: 'id', header: '#', render: (p) => p.id },
+              {
+                key: 'booking',
+                header: t('admin.reference'),
+                render: (p) => <span dir="ltr">{p.booking_reference ?? p.booking_id}</span>,
+              },
+              { key: 'client', header: t('nav.clients'), render: (p) => p.client?.company_name ?? '—' },
+              { key: 'amount', header: t('wizard.total'), render: (p) => <PriceTag formatted={p.amount_formatted} /> },
+              {
+                key: 'card',
+                header: t('paymentMethods.title'),
+                render: (p) =>
+                  p.card_brand ? (
+                    <span dir="ltr">
+                      {p.card_brand} •••• {p.card_last_four}
+                    </span>
+                  ) : (
+                    '—'
+                  ),
+              },
+              {
+                key: 'status',
+                header: t('common.status'),
+                render: (p) => <StatusBadge kind="payment" value={p.status} label={p.status_label ?? t(`paymentStatus.${p.status}`)} />,
+              },
+              { key: 'paid', header: t('bookingsAdmin.paidAt'), render: (p) => (p.paid_at ? p.paid_at.slice(0, 16).replace('T', ' ') : '—') },
+              { key: 'created', header: t('bookingsAdmin.createdAt'), render: (p) => p.created_at.slice(0, 16).replace('T', ' ') },
+            ]}
+            rows={data.data}
+            rowKey={(p) => p.id}
+            onRowClick={(p) => setSelected(p)}
+          />
+          <Pagination meta={data.meta} onPage={setPage} className="mt-6" />
+        </>
+      )}
 
-      {/* RECEIPT MODAL */}
-      <AdminModal id="receiptModal" open={!!receipt} onClose={() => setReceipt(null)} maxWidth={520}>
-        <h3>{t("receipt")}</h3>
-        <div id="receiptContent">{receipt && <img className="receipt-img" src={receiptImage(receipt)} alt="" />}</div>
-        <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-          <button type="button" className="btn btn-primary btn-sm" onClick={downloadReceipt}>
-            {t("downloadReceipt")}
-          </button>
-          <ModalCancelButton onClose={() => setReceipt(null)} />
-        </div>
-      </AdminModal>
+      <PaymentDrawer payment={selected} onClose={() => setSelected(null)} />
     </>
+  );
+}
+
+// ---------- details drawer (PAY-02) ----------
+function PaymentDrawer({ payment, onClose }: { payment: Payment | null; onClose: () => void }) {
+  const { t } = useI18n();
+
+  const query = useQuery({
+    queryKey: ['admin', 'payments', payment?.id],
+    queryFn: () =>
+      api.get(`/admin/payments/${payment!.id}`).then((r) => r.data.data as Payment & { booking?: Booking }),
+    enabled: !!payment,
+  });
+  const details = query.data ?? payment;
+
+  const row = 'flex justify-between gap-3 py-2 border-b border-border/60 text-[0.9rem]';
+
+  return (
+    <Drawer open={!!payment} onClose={onClose} title={`${t('nav.payments')} #${payment?.id ?? ''}`}>
+      {details && (
+        <div className="flex flex-col gap-1">
+          <div className={row}>
+            <span className="text-muted">{t('common.status')}</span>
+            <StatusBadge kind="payment" value={details.status} label={details.status_label ?? t(`paymentStatus.${details.status}`)} />
+          </div>
+          <div className={row}>
+            <span className="text-muted">{t('wizard.total')}</span>
+            <PriceTag formatted={details.amount_formatted} />
+          </div>
+          <div className={row}>
+            <span className="text-muted">{t('paymentsAdmin.gateway')}</span>
+            <span dir="ltr">{details.gateway}</span>
+          </div>
+          {details.card_brand && (
+            <div className={row}>
+              <span className="text-muted">{t('paymentMethods.title')}</span>
+              <span dir="ltr">
+                {details.card_brand} •••• {details.card_last_four}
+              </span>
+            </div>
+          )}
+          {details.failure_reason && (
+            <div className={row}>
+              <span className="text-muted">{t('paymentsAdmin.failureReason')}</span>
+              <span>{details.failure_reason}</span>
+            </div>
+          )}
+          <div className={row}>
+            <span className="text-muted">{t('bookingsAdmin.paidAt')}</span>
+            <span dir="ltr">{details.paid_at ? details.paid_at.slice(0, 16).replace('T', ' ') : '—'}</span>
+          </div>
+          <div className={row}>
+            <span className="text-muted">{t('bookingsAdmin.createdAt')}</span>
+            <span dir="ltr">{details.created_at.slice(0, 16).replace('T', ' ')}</span>
+          </div>
+
+          {/* booking summary card */}
+          <div className="mt-5 rounded-xl border border-border p-4">
+            <span className="text-muted text-[0.82rem] block mb-2">{t('reports.booking')}</span>
+            <strong dir="ltr" className="block">
+              {details.booking_reference ?? `#${details.booking_id}`}
+            </strong>
+            {details.client && <span className="text-muted text-[0.85rem]">{details.client.company_name}</span>}
+            <div className="mt-3">
+              <Link href={`/admin/bookings/${details.booking_id}`}>
+                <Button variant="outline" size="sm">
+                  {t('wizard.viewBooking')}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </Drawer>
   );
 }

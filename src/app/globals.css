@@ -1,6 +1,241 @@
 @import "tailwindcss";
 @import "../styles/theme.css";
 
-/* Legacy `html[data-theme="dark"]` selectors from theme.css drive dark mode
-   directly (matching the original theme.js behavior) — no Tailwind dark
-   variant is required for ported sections. */
+/* ============================================================
+   §3 — Theme integration (CSS variables contract)
+   The brand theme (ported legacy CSS) is mapped into semantic
+   tokens below. New plan components use ONLY these semantic
+   Tailwind classes (bg-primary, text-muted, border-border, …)
+   — never hex values. `@theme inline` keeps utilities pointing
+   at the runtime variables so the existing [data-theme="dark"]
+   toggle flips them too.
+   ============================================================ */
+
+:root {
+  --primary: #1A412E;            /* green-deep   */
+  --primary-foreground: #FFFFFF;
+  --secondary: #0F2A1D;          /* green-darker */
+  --accent: #C19B4A;             /* gold         */
+  --accent-foreground: #0F2A1D;
+  --accent-soft: #E7CE9C;        /* gold-light   */
+  --background: #F6F4EE;         /* cream        */
+  --surface: #FFFFFF;
+  --border: #DED8C7;             /* line         */
+  --text: #1C1B17;               /* ink          */
+  --muted: #6E6A60;              /* stone        */
+
+  --success: #2E7D4F;
+  --success-soft: rgba(46, 125, 79, 0.12);
+  --warning: #8A6A24;
+  --warning-soft: rgba(193, 155, 74, 0.14);
+  --danger: #C0392B;
+  --danger-soft: rgba(192, 57, 43, 0.12);
+  --info: #2563EB;
+  --info-soft: rgba(37, 99, 235, 0.1);
+}
+
+html[data-theme="dark"] {
+  --primary: #4A7A60;            /* green-mid (dark)   */
+  --primary-foreground: #FFFFFF;
+  --secondary: #0B1E15;
+  --accent: #C19B4A;
+  --accent-foreground: #0F2A1D;
+  --accent-soft: #E7CE9C;
+  --background: #0F2A1D;
+  --surface: #1B3A2C;
+  --border: #2A4A3A;
+  --text: #F6F4EE;
+  --muted: #9DB5A6;
+
+  --success: #7BC8A4;
+  --success-soft: rgba(74, 122, 96, 0.25);
+  --warning: #E7CE9C;
+  --warning-soft: rgba(193, 155, 74, 0.16);
+  --danger: #D98880;
+  --danger-soft: rgba(217, 136, 128, 0.14);
+  --info: #8FB4F8;
+  --info-soft: rgba(37, 99, 235, 0.18);
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --radius: 0.75rem;
+  --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Amiri", serif;
+}
+
+/* ===== ui primitives (§8) — semantic, theme-driven ===== */
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ui-badge .ui-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.ui-badge[data-color="gray"] { background: rgba(110, 106, 96, 0.12); color: var(--muted); }
+.ui-badge[data-color="green"] { background: var(--success-soft); color: var(--success); }
+.ui-badge[data-color="amber"] { background: var(--warning-soft); color: var(--warning); }
+.ui-badge[data-color="red"] { background: var(--danger-soft); color: var(--danger); }
+.ui-badge[data-color="blue"] { background: var(--info-soft); color: var(--info); }
+.ui-badge[data-color="purple"] { background: rgba(126, 87, 194, 0.14); color: #7E57C2; }
+html[data-theme="dark"] .ui-badge[data-color="purple"] { background: rgba(179, 136, 255, 0.16); color: #B388FF; }
+
+.ui-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--text);
+  padding: 12px 14px;
+  font-size: 0.92rem;
+  border-radius: 10px;
+  font-family: inherit;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.ui-input:focus {
+  background: var(--surface);
+  border-color: var(--accent);
+  outline: none;
+}
+.ui-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.ui-input[data-invalid="true"] {
+  border-color: var(--danger);
+}
+
+/* ===== auth screens (client + admin) — matches the legacy login card ===== */
+.auth-wrap {
+  min-height: 62vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 20px;
+}
+.auth-wrap-dark {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--green-darker);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.auth-card {
+  background: var(--white);
+  border-radius: 8px;
+  border-top: 3px solid var(--gold);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+.auth-card .auth-logo {
+  height: 52px;
+  margin: 0 auto 16px;
+  display: block;
+}
+.auth-card h1 {
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+}
+.auth-card .sub {
+  color: var(--stone);
+  font-size: 0.88rem;
+  margin-bottom: 24px;
+}
+.auth-card .auth-body {
+  text-align: start;
+}
+.auth-switch {
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: var(--stone);
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.auth-link {
+  background: transparent;
+  border: 0;
+  color: var(--green-deep);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  text-decoration: none;
+}
+.auth-link:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+html[data-theme="dark"] .auth-card {
+  background: var(--green-darker);
+}
+html[data-theme="dark"] .auth-card h1 {
+  color: var(--gold-light);
+}
+html[data-theme="dark"] .auth-link {
+  color: var(--gold-light);
+}
+
+/* ===== shared bits used by the plan components ===== */
+.page-loader {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+.spinner-sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

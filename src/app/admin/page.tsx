@@ -1,190 +1,165 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useI18n } from "@/lib/i18n/i18n-context";
-import { useAdminAuth } from "@/lib/auth/admin-auth-context";
-import { adminDashboardService } from "@/services/admin-dashboard.service";
-import type { AdminOverview } from "@/types/admin-dashboard";
-import { ApiError } from "@/lib/api/client";
-import { StatIcon } from "@/components/admin/StatIcons";
+import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/i18n-context';
+import { usePermissions } from '@/lib/permissions';
+import { EmptyState, ErrorState, StatusBadge } from '@/components/ui';
+import type { AdminStats } from '@/types/api';
 
-export default function AdminOverviewPage() {
+// §13.1 — admin dashboard home (DSH-01). Consultants get no `consultants`/`revenue` keys.
+export default function AdminDashboardPage() {
   const { t } = useI18n();
-  const { token } = useAdminAuth();
-  const [overview, setOverview] = useState<AdminOverview | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { can } = usePermissions();
 
-  useEffect(() => {
-    if (!token) return;
-    let cancelled = false;
-    setIsLoading(true);
-    setError(null);
-    adminDashboardService
-      .getOverview(token)
-      .then((data) => {
-        if (!cancelled) setOverview(data);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err instanceof ApiError ? err.message : t("clientLoginError"));
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [token, t]);
+  const statsQuery = useQuery({
+    queryKey: ['admin', 'dashboard', 'stats'],
+    queryFn: () => api.get('/admin/dashboard/stats').then((r) => r.data.data as AdminStats),
+  });
+  const stats = statsQuery.data;
 
-  if (isLoading) {
+  if (!can('view-dashboard')) {
+    return <EmptyState title={t('admin.forbidden')} />;
+  }
+  if (statsQuery.isLoading) {
     return (
-      <div className="dash-panel active" id="panel-overview">
-        <div className="panel-card">
-          <span className="client-empty">{t("loading")}</span>
-        </div>
+      <div className="page-loader">
+        <span className="spinner" />
       </div>
     );
   }
-
-  if (error) {
-    return (
-      <div className="dash-panel active" id="panel-overview">
-        <div className="panel-card">
-          <span className="client-empty">{error}</span>
-        </div>
-      </div>
-    );
+  if (statsQuery.isError || !stats) {
+    return <ErrorState onRetry={() => statsQuery.refetch()} />;
   }
-
-  const maxMonthly = Math.max(1, ...(overview?.monthlyJoinRequests.map((p) => p.value) ?? [1]));
 
   return (
-    <div className="dash-panel active" id="panel-overview">
+    <>
       <div className="stat-grid">
-        {overview?.stats.length ? (
-          overview.stats.map((stat) => (
-            <div className="stat-card" key={stat.key}>
-              <div className="top">
-                <div className="ic">
-                  <StatIcon statKey={stat.key} />
-                </div>
-              </div>
-              <div className="num">{stat.value}</div>
-              <div className="label">{t(stat.labelKey)}</div>
-              {stat.trend ? <div className={`trend ${stat.trend.direction}`}>{t(stat.trend.textKey)}</div> : null}
+        <div className="stat-card">
+          <div className="top">
+            <span className="ic">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
+            </span>
+          </div>
+          <div className="label">{t('admin.statsBookings')}</div>
+          <div className="num">{stats.bookings.total}</div>
+          <div className="trend flat">
+            {t('admin.statsToday')}: {stats.bookings.today} · {t('admin.statsPending')}: {stats.bookings.pending}
+          </div>
+        </div>
+
+        <div className="stat-card" role="link" style={{ cursor: 'pointer' }} onClick={() => router.push('/admin/reports')}>
+          <div className="top">
+            <span className="ic">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6M16 13H8M16 17H8" />
+              </svg>
+            </span>
+          </div>
+          <div className="label">{t('admin.statsReports')}</div>
+          <div className="num">{stats.reports.total}</div>
+          <div className="trend flat">
+            {t('admin.statsPendingReports')}: {stats.reports.pending}
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="top">
+            <span className="ic">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </span>
+          </div>
+          <div className="label">{t('nav.clients')}</div>
+          <div className="num">{stats.clients.total}</div>
+          <div className="trend up">
+            +{stats.clients.new_this_month} {t('admin.statsNewThisMonth')}
+          </div>
+        </div>
+
+        {/* admins only — the key is absent for consultants */}
+        {stats.consultants && (
+          <div className="stat-card">
+            <div className="top">
+              <span className="ic">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 21v-1a7 7 0 0 1 14 0v1" />
+                </svg>
+              </span>
             </div>
-          ))
-        ) : (
-          <p className="client-empty">{t("clientReportsEmpty")}</p>
+            <div className="label">{t('nav.consultants')}</div>
+            <div className="num">{stats.consultants.total}</div>
+            <div className="trend flat">
+              {t('admin.statsActive')}: {stats.consultants.active}
+            </div>
+          </div>
+        )}
+
+        {stats.revenue && (
+          <div className="stat-card">
+            <div className="top">
+              <span className="ic">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </span>
+            </div>
+            <div className="label">{t('admin.statsRevenueMonth')}</div>
+            <div className="num" style={{ fontSize: '1.5rem' }}>{stats.revenue.this_month_formatted}</div>
+            <div className="trend flat">
+              {t('admin.statsRevenueTotal')}: {stats.revenue.total_formatted}
+            </div>
+          </div>
         )}
       </div>
 
-      <div className="chart-row">
-        <div className="panel-card">
-          <h3>{t("monthlyJoinRequests")}</h3>
-          <div className="bar-chart">
-            {overview?.monthlyJoinRequests.map((point) => (
-              <div className="col" style={{ height: "100%" }} key={point.monthKey}>
-                <div className="bar" style={{ height: `${Math.round((point.value / maxMonthly) * 100)}%` }} />
-                <span>{t(point.monthKey)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="panel-card">
-          <h3>{t("requestDistribution")}</h3>
-          <div className="donut-wrap">
-            <ul className="legend">
-              {overview?.requestDistribution.map((slice) => (
-                <li key={slice.labelKey}>
-                  <span className="sw" style={{ background: slice.color }} />
-                  <span>{t(slice.labelKey)}</span>
-                  <span className="pct">{slice.percent}%</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div className="chart-row" style={{ gridTemplateColumns: "1fr 1fr" }}>
-        <div className="panel-card">
-          <div className="table-toolbar">
-            <h3 style={{ margin: 0 }}>{t("topConsultants")}</h3>
-          </div>
-          <div id="topConsultantsList">
-            {overview?.topConsultants.length ? (
-              overview.topConsultants.map((entry) => (
-                <div key={entry.id}>
-                  {entry.name} — {entry.metric}
-                </div>
-              ))
-            ) : (
-              <p className="client-empty">{t("noRatingsYet")}</p>
-            )}
-          </div>
-        </div>
-        <div className="panel-card">
-          <div className="table-toolbar">
-            <h3 style={{ margin: 0 }}>{t("topClients")}</h3>
-          </div>
-          <div id="topClientsList">
-            {overview?.topClients.length ? (
-              overview.topClients.map((entry) => (
-                <div key={entry.id}>
-                  {entry.name} — {entry.metric}
-                </div>
-              ))
-            ) : (
-              <p className="client-empty">{t("noRatingsYet")}</p>
-            )}
-          </div>
-        </div>
-      </div>
-
+      {/* upcoming bookings mini-table */}
       <div className="panel-card">
-        <div className="table-toolbar">
-          <h3 style={{ margin: 0 }}>{t("latestJoinRequests")}</h3>
-          <button type="button" className="btn btn-outline btn-sm">
-            {t("viewAll")}
-          </button>
-        </div>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>{t("name")}</th>
-              <th>{t("field")}</th>
-              <th>{t("city")}</th>
-              <th>{t("submissionDate")}</th>
-              <th>{t("status")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {overview?.latestJoinRequests.length ? (
-              overview.latestJoinRequests.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.name}</td>
-                  <td>{row.field}</td>
-                  <td>{row.city}</td>
-                  <td>{row.submissionDate}</td>
-                  <td>
-                    <span className={`badge ${row.status}`}>
-                      <span className="d" />
-                      {row.status === "pending" ? t("underReview") : row.status === "approved" ? t("accepted") : t("rejected")}
-                    </span>
-                  </td>
+        <h3>{t('admin.upcomingBookings')}</h3>
+        {stats.upcoming_bookings.length === 0 ? (
+          <EmptyState title={t('common.empty')} />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>{t('admin.reference')}</th>
+                  <th>{t('nav.clients')}</th>
+                  <th>{t('nav.consultants')}</th>
+                  <th>{t('common.date')}</th>
+                  <th>{t('common.status')}</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="client-empty">
-                  {t("clientReportsEmpty")}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {stats.upcoming_bookings.map((b) => (
+                  <tr key={b.id} style={{ cursor: 'pointer' }} onClick={() => router.push(`/admin/bookings/${b.id}`)}>
+                    <td>{b.reference}</td>
+                    <td>{b.client?.company_name ?? '—'}</td>
+                    <td>{b.consultant.name}</td>
+                    <td>
+                      {b.date} · <bdi dir="ltr">{b.time}</bdi>
+                    </td>
+                    <td>
+                      <StatusBadge kind="booking" value={b.status} label={b.status_label} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 }
