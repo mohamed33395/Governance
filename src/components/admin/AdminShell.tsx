@@ -66,32 +66,25 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <Link
               key={item.href}
               href={item.href}
-              className={isActive(item.href) ? 'active' : undefined}
+              className={`dash-nav-link${isActive(item.href) ? ' active' : ''}`}
               onClick={() => setSidebarOpen(false)}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '12px 12px',
-                borderRadius: 3,
-                fontSize: '.9rem',
-                marginBottom: 4,
-                borderRight: '2px solid transparent',
-                color: 'inherit',
-              }}
             >
               {t(item.key)}
             </Link>
           ))}
         </nav>
       </aside>
+      <div
+        className={`dash-sidebar-overlay${sidebarOpen ? ' open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden="true"
+      />
       <div className="dash-main">
         <div className="dash-topbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button
+              type="button"
               className="menu-toggle"
-              style={{ display: 'inline-flex', color: 'var(--green-deep)' }}
               aria-label={t('menu')}
               onClick={() => setSidebarOpen((v) => !v)}
             >
