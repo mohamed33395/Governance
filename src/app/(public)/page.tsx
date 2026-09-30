@@ -54,7 +54,7 @@ export default function HomePage() {
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
-  const heroLines = t("lp.heroTitle").split("|");
+  const heroParts = t("lp.heroTitle").split("{accent}");
 
   return (
     <main>
@@ -73,18 +73,14 @@ export default function HomePage() {
               </Link>
             </Reveal>
             <Reveal delay={100}>
-              <h1 className="mt-6 max-w-[680px] bg-linear-to-r from-black to-[#666666] bg-clip-text text-4xl leading-tight font-bold text-balance text-transparent md:text-5xl dark:from-white dark:to-[#9B9B9B]">
-                {heroLines.map((line, i) => (
+              <h1 className="mt-6 max-w-[680px] bg-linear-to-r from-black to-[#666666] bg-clip-text text-xl leading-relaxed font-bold text-balance text-transparent md:text-2xl dark:from-white dark:to-[#9B9B9B]">
+                {heroParts.map((part, i) => (
                   <span key={i}>
-                    {i > 0 && <br className="hidden md:block" />}
-                    {i > 0 && <span className="md:hidden"> </span>}
-                    {line}
+                    {i > 0 && <span className="text-accent">{t("lp.heroAccent")}</span>}
+                    {part}
                   </span>
                 ))}
               </h1>
-            </Reveal>
-            <Reveal delay={200}>
-              <p className="mt-6 max-w-[680px] text-lg text-muted text-pretty md:text-xl">{t("lp.heroSub")}</p>
             </Reveal>
             <Reveal delay={300}>
               <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -96,7 +92,7 @@ export default function HomePage() {
               </div>
             </Reveal>
             <Reveal delay={400}>
-              <div className="mt-12 grid max-w-[680px] grid-cols-3 gap-6 border-t border-border pt-6">
+              <div className="mt-8 grid max-w-[680px] grid-cols-3 gap-6 border-t border-border pt-6">
                 {(
                   [
                     ["expertStatExp", "expertStat1"],
@@ -113,14 +109,10 @@ export default function HomePage() {
             </Reveal>
           </div>
 
-          <Reveal delay={200} className="w-full max-w-[480px] lg:justify-self-end">
-            <div className="rounded-3xl border border-border bg-surface p-2">
-              {/* outer radius 24 − gap 8 = 16 */}
-              <div className="flex aspect-[5/4] flex-col items-center justify-center gap-4 rounded-2xl bg-white p-8">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/loge_leger-.png" alt={t("fullLogoAlt")} className="max-h-[200px] w-auto object-contain" />
-                <span className="text-lg font-semibold text-black">{t("lp.heroCaption")}</span>
-              </div>
+          <Reveal delay={200} className="w-full max-w-[560px] lg:justify-self-center">
+            <div className="flex flex-col items-center justify-center p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo_mark.png" alt={t("fullLogoAlt")} className="w-full max-w-[440px] h-auto object-contain" />
             </div>
           </Reveal>
         </Container>

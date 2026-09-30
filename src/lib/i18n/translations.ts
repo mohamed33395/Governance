@@ -804,7 +804,8 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // ===== plan keys (nav) =====
     "lp.skip": "الانتقال إلى المحتوى",
-    "lp.heroTitle": "حوكمة وامتثال تحفظ استثمارك|وتثبّت قرارات منشأتك",
+    "lp.heroTitle": "الحوكمة من منظورنا أن نعمل على إيجاد وتأهيل نظام متكامل من القواعد، والسياسات، والممارسات التي تُوجّه وتُرقّي وتحدّث بها منظمات الأعمال لضمان تحقيق {accent}، والشفافية، والمساءلة، وحماية حقوق أصحاب المصلحة والشأن.",
+    "lp.heroAccent": "حفظ الاستثمار واستقراره",
     "lp.heroSub": "مكتب استشاري يرافق مجالس الإدارات والمنشآت الخاصة من كتابة السياسات إلى تطبيقها. احجز جلسة مع مستشار معتمد واختر موعدك من المنصة.",
     "lp.heroCta": "احجز جلسة استشارية",
     "lp.heroNote": "اختر الباقة والمستشار والموعد في ثلاث خطوات.",
@@ -881,6 +882,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "nav.roles": "الأدوار والصلاحيات",
     "nav.consultants": "المستشارون",
     "nav.profile": "الملف الشخصي",
+    "nav.myAccount": "حسابي",
     "nav.my_availability": "مواعيدي",
     "nav.locations": "المواقع",
     "nav.payment_methods": "طرق الدفع",
@@ -2099,7 +2101,8 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // ===== plan keys (nav) =====
     "lp.skip": "Skip to content",
-    "lp.heroTitle": "Governance that protects your investment|and puts every decision on record",
+    "lp.heroTitle": "From our perspective, governance means building and qualifying an integrated system of rules, policies, and practices that guide, elevate, and modernize business organizations — ensuring {accent}, transparency, accountability, and the protection of stakeholders' rights.",
+    "lp.heroAccent": "the preservation and stability of investment",
     "lp.heroSub": "An advisory firm that works with boards and private companies, from writing policies to putting them into practice. Book a session with a certified consultant and pick your time on the platform.",
     "lp.heroCta": "Book a consulting session",
     "lp.heroNote": "Choose a package, a consultant, and a time in three steps.",
@@ -2179,6 +2182,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "nav.roles": "Roles & Permissions",
     "nav.consultants": "Consultants",
     "nav.profile": "Profile",
+    "nav.myAccount": "My account",
     "nav.my_availability": "My availability",
     "nav.locations": "Locations",
     "nav.payment_methods": "Payment methods",

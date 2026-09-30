@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, DeviceMobile, UserCircle } from "@phosphor-icons/react";
+import { ArrowLeft, DeviceMobile } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
@@ -27,6 +27,26 @@ const LINKS = [
 
 const EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
 
+function UserIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="7" r="3.5" />
+      <path d="M8 21c0-3 2-6 4-6s4 3 4 6" />
+      <g className="user-hand-group">
+        <path d="M16 14c2 2 4 6 4 9" />
+      </g>
+    </svg>
+  );
+}
+
 // Fluid island nav: a floating glass pill that expands into a full screen overlay.
 export function Header() {
   const { t } = useI18n();
@@ -38,6 +58,8 @@ export function Header() {
   const setUser = useClientAuth((s) => s.setUser);
   const clear = useClientAuth((s) => s.clear);
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Keep the stored client fresh — GET /client/auth/me (§6)
   const meQuery = useQuery({
@@ -54,16 +76,33 @@ export function Header() {
     onSettled: () => {
       clear();
       setOpen(false);
+      setMenuOpen(false);
       queryClient.clear();
       router.refresh();
     },
   });
 
   // close on navigation, lock page scroll while open, Escape closes
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    setOpen(false);
+    setMenuOpen(false);
+  }, [pathname]);
+  // close the account dropdown on outside click
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        setMenuOpen(false);
+      }
+    };
     document.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
@@ -114,15 +153,47 @@ export function Header() {
             <LanguageSwitcher panelClassName="max-sm:fixed! max-sm:inset-x-4! max-sm:top-20! max-sm:w-auto! max-sm:max-w-none!" />
             <ThemeToggle />
 
-            {!clientToken && (
-              <Link
-                href="/login"
-                aria-label={t("auth.login")}
-                className={`hidden size-10 items-center justify-center rounded-full text-text hover:bg-border ${FLUID} ${FOCUS} sm:inline-flex`}
+            {/* §9.2 — one dropdown; guest → login/register, client → account menu fed by /client/auth/me */}
+            <div className="client-user-menu" ref={menuRef}>
+              <button
+                type="button"
+                className="client-user-menu-btn"
+                aria-label={t("nav.myAccount")}
+                aria-haspopup="true"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((v) => !v)}
               >
-                <UserCircle size={24} aria-hidden="true" />
-              </Link>
-            )}
+                <UserIcon />
+              </button>
+              <div className={`client-user-dropdown${menuOpen ? " open" : ""}`}>
+                {clientToken ? (
+                  <>
+                    <div className="client-dropdown-header">
+                      <Avatar src={user?.avatar_url} name={user?.name ?? "?"} size="sm" />
+                      <span>{user?.name}</span>
+                    </div>
+                    <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
+                      {t("nav.dashboard")}
+                    </Link>
+                    <Link href="/profile" onClick={() => setMenuOpen(false)}>
+                      {t("nav.profile")}
+                    </Link>
+                    <button type="button" disabled={logout.isPending} onClick={() => logout.mutate()}>
+                      {t("common.logout")}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" onClick={() => setMenuOpen(false)}>
+                      {t("auth.login")}
+                    </Link>
+                    <Link href="/register" onClick={() => setMenuOpen(false)}>
+                      {t("auth.register")}
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
 
             <Link
               href="/app"
