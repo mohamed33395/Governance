@@ -181,6 +181,20 @@ html[data-theme="dark"] body {
   width: 24px;
   height: 24px;
 }
+.user-hand-group {
+  transform-origin: 16px 14px;
+  transform: rotate(0deg);
+  transition: transform 0.3s ease;
+}
+.client-user-menu-btn:hover .user-hand-group,
+.client-user-menu-btn:focus .user-hand-group {
+  transform: rotate(-135deg);
+  animation: waveHand 0.6s ease-in-out infinite;
+}
+@keyframes waveHand {
+  0%, 100% { transform: rotate(-135deg); }
+  50% { transform: rotate(-155deg); }
+}
 .client-user-dropdown {
   position: absolute;
   top: calc(100% + 8px);
