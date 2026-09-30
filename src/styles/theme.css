@@ -49,14 +49,14 @@ html[data-theme="dark"] {
   color-scheme: dark;
 
   /* swap light colors: green = background, beige = surfaces, white = text */
-  --cream: #0F2A1D;
+  --cream: #131209;
   --white: #F6F4EE;
   --ink: #FFFFFF;
-  --stone: #0F2A1D;
-  --line: #2A4A3A;
+  --stone: #131209;
+  --line: #313131;
   --line-dark: rgba(255,255,255,.12);
-  --green-deep: #0F2A1D;
-  --green-darker: #0B1E15;
+  --green-deep: #131209;
+  --green-darker: #000000;
   --green-mid: #4A7A60;
   --gold: #E7CE9C;
   --gold-light: #C19B4A;
@@ -104,9 +104,9 @@ html[data-theme="dark"] .shot-arrow,
 html[data-theme="dark"] input,
 html[data-theme="dark"] select,
 html[data-theme="dark"] textarea {
-  --green-deep: #0F2A1D !important;
-  --stone: #0F2A1D !important;
-  --ink: #0F2A1D !important;
+  --green-deep: #131209 !important;
+  --stone: #131209 !important;
+  --ink: #131209 !important;
 }
 
 /* page canvas */
@@ -179,7 +179,7 @@ html[data-theme="dark"] .btn-primary:hover {
 
 html[data-theme="dark"] .btn-gold {
   background: var(--gold) !important;
-  color: #0F2A1D !important;
+  color: #131209 !important;
   border-color: transparent !important;
 }
 html[data-theme="dark"] .btn-gold:hover {
@@ -188,7 +188,7 @@ html[data-theme="dark"] .btn-gold:hover {
 
 html[data-theme="dark"] .btn-outline:hover {
   background: var(--gold) !important;
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 
 html[data-theme="dark"] .btn-ghost {
@@ -232,7 +232,7 @@ html[data-theme="dark"] select,
 html[data-theme="dark"] textarea {
   background: var(--white) !important;
   border-color: var(--line) !important;
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 html[data-theme="dark"] input:focus,
 html[data-theme="dark"] select:focus,
@@ -241,11 +241,11 @@ html[data-theme="dark"] textarea:focus {
   background: #FFFFFF !important;
 }
 html[data-theme="dark"] .form-note {
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 html[data-theme="dark"] .form-msg {
   background: var(--gold) !important;
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 
 /* footer */
@@ -282,7 +282,7 @@ html[data-theme="dark"] .price-card:not(.featured) .price small,
 html[data-theme="dark"] .price-card:not(.featured) .desc,
 html[data-theme="dark"] .price-card:not(.featured) ul li,
 html[data-theme="dark"] .price-card:not(.featured) .btn-outline {
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 
 /* expert info card padding in dark mode */
@@ -304,10 +304,10 @@ html[data-theme="dark"] .order-summary .summary-row .value small {
   color: var(--stone) !important;
 }
 html[data-theme="dark"] .order-summary h2 {
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 html[data-theme="dark"] .order-summary .summary-row .value {
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 html[data-theme="dark"] .order-summary .summary-row.total {
   border-color: var(--line) !important;
@@ -323,21 +323,21 @@ html[data-theme="dark"] .payment-option .pay-card span {
 html[data-theme="dark"] .payment-option .pay-card .pay-icon {
   background: var(--white) !important;
   border-color: var(--line) !important;
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 html[data-theme="dark"] .payment-option input:checked + .pay-card,
 html[data-theme="dark"] .payment-option .pay-card:hover {
   background: var(--white) !important;
   border-color: var(--gold) !important;
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 html[data-theme="dark"] .payment-option input:checked + .pay-card span,
 html[data-theme="dark"] .payment-option .pay-card:hover span {
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 html[data-theme="dark"] .pay-hint {
   background: var(--gold) !important;
-  color: #0F2A1D !important;
+  color: #131209 !important;
 }
 
 /* translate widget */
@@ -376,7 +376,7 @@ html[data-theme="dark"] .translate-icon {
   color: #FFFFFF;
 }
 html[data-theme="dark"] .translate-panel {
-  background: #234A38;
+  background: #272727;
   border-color: var(--line);
 }
 html[data-theme="dark"] .translate-search {
@@ -387,7 +387,7 @@ html[data-theme="dark"] .translate-search {
 html[data-theme="dark"] .translate-list button:hover,
 html[data-theme="dark"] .translate-list button:focus {
   background: var(--gold-light);
-  color: #0F2A1D;
+  color: #131209;
 }
 
 
@@ -1209,7 +1209,7 @@ html[data-theme="dark"] .client-auth-msg {
   margin-bottom: 28px;
 }
 .hero-badge {
-  font-family: 'Amiri', serif;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
   font-size: clamp(1.8rem, 3.4vw, 2.8rem);
   font-weight: 700;
   color: var(--green-darker);
@@ -1218,7 +1218,7 @@ html[data-theme="dark"] .client-auth-msg {
 }
 .hero-definition {
   color: var(--green-deep);
-  font-family: 'Amiri', serif;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
   font-size: clamp(1.38rem, 2vw, 1.72rem);
   font-weight: 700;
   line-height: 1.9;
@@ -1312,7 +1312,7 @@ html[data-theme="dark"] .hero-certified-link {
   mix-blend-mode: multiply;
 }
 .hero-logo-tagline {
-  font-family: 'Amiri', serif;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
   font-size: clamp(1.7rem, 3.4vw, 2.6rem);
   font-weight: 700;
   color: var(--green-darker);
@@ -1331,7 +1331,7 @@ html[data-theme="dark"] .hero-certified-link {
 
 /* dark mode for new hero */
 html[data-theme="dark"] .hero-logo-tagline {
-  color: #0F2A1D;
+  color: #131209;
 }
 html[data-theme="dark"] .hero-definition {
   color: #D8E4DC;
@@ -1432,7 +1432,7 @@ html[data-theme="dark"] .hero-logo-big img {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Amiri', serif;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
   font-size: 1rem;
   font-weight: 700;
   flex-shrink: 0;
@@ -1481,12 +1481,12 @@ html[data-theme="dark"] .client-shell,
 html[data-theme="dark"] .client-login-view,
 html[data-theme="dark"] .client-modal-card {
   --green-deep: #F6F4EE;
-  --white: #1B3A2C;
+  --white: #1F1F1F;
   --ink: #F6F4EE;
   --stone: #9DB5A6;
-  --line: #2A4A3A;
+  --line: #313131;
   --line-dark: rgba(255,255,255,.12);
-  --green-darker: #0B1E15;
+  --green-darker: #000000;
   --green-mid: #4A7A60;
   --gold: #C19B4A;
   --gold-light: #E7CE9C;
@@ -1534,7 +1534,7 @@ html[data-theme="dark"] .client-shell textarea:focus,
 html[data-theme="dark"] .client-login-view input:focus,
 html[data-theme="dark"] .client-modal-card input:focus,
 html[data-theme="dark"] .client-modal-card textarea:focus {
-  background: #0B1E15 !important;
+  background: #000000 !important;
   border-color: var(--gold) !important;
 }
 
@@ -1546,7 +1546,7 @@ html[data-theme="dark"] .client-package-card .price {
 
 /* tables */
 html[data-theme="dark"] .client-table th {
-  background: #0F2A1D;
+  background: #131209;
   color: #F6F4EE;
 }
 html[data-theme="dark"] .client-table td {
@@ -1576,7 +1576,7 @@ html[data-theme="dark"] .client-badge.pending {
 
 /* welcome banner + featured package stay deep green */
 html[data-theme="dark"] .client-welcome {
-  background: #0F2A1D;
+  background: #131209;
 }
 html[data-theme="dark"] .client-package-card.featured {
   background: #1A2E24;

@@ -1,3 +1,7 @@
+/* Layer order: the legacy marketing CSS sits below Tailwind components/utilities so utility
+   classes on new components always win over old element resets (h1..h4, p, ul). */
+@layer theme, base, legacy, components, utilities;
+
 @import "tailwindcss";
 @import "../styles/theme.css";
 
@@ -37,15 +41,16 @@
 html[data-theme="dark"] {
   --primary: #4A7A60;            /* green-mid (dark)   */
   --primary-foreground: #FFFFFF;
-  --secondary: #0B1E15;
+  --secondary: #000000;
   --accent: #C19B4A;
-  --accent-foreground: #0F2A1D;
+  --accent-foreground: #131209;
   --accent-soft: #E7CE9C;
-  --background: #0F2A1D;
-  --surface: #1B3A2C;
-  --border: #2A4A3A;
+  /* Neutral dark surfaces (landing design system palette only) */
+  --background: #131209;
+  --surface: #1F1F1F;
+  --border: #313131;
   --text: #F6F4EE;
-  --muted: #9DB5A6;
+  --muted: #A3A3A3;
 
   --success: #7BC8A4;
   --success-soft: rgba(74, 122, 96, 0.25);
@@ -56,6 +61,9 @@ html[data-theme="dark"] {
   --info: #8FB4F8;
   --info-soft: rgba(37, 99, 235, 0.18);
 }
+
+/* Tailwind `dark:` follows the app's data-theme toggle, not the OS setting */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
   --color-primary: var(--primary);

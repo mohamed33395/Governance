@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, UserCircle } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
@@ -12,37 +13,30 @@ import { Avatar } from "@/components/ui";
 import { useClientAuth } from "@/stores/client-auth";
 import type { ClientMe } from "@/types/api";
 
-function UserIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="7" r="3.5" />
-      <path d="M8 21c0-3 2-6 4-6s4 3 4 6" />
-      <g className="user-hand-group">
-        <path d="M16 14c2 2 4 6 4 9" />
-      </g>
-    </svg>
-  );
-}
+const LINKS = [
+  { href: "/", key: "home" },
+  { href: "/services", key: "services" },
+  { href: "/packages", key: "packages" },
+  { href: "/consultants", key: "nav.consultants" },
+  { href: "/about", key: "about" },
+  { href: "/join", key: "join" },
+  { href: "/team", key: "team" },
+  { href: "/contact", key: "contact" },
+] as const;
 
+const EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
+
+// Fluid island nav: a floating glass pill that expands into a full screen overlay.
 export function Header() {
   const { t } = useI18n();
   const router = useRouter();
+  const pathname = usePathname() ?? "/";
   const queryClient = useQueryClient();
   const clientToken = useClientAuth((s) => s.token);
   const user = useClientAuth((s) => s.user);
   const setUser = useClientAuth((s) => s.setUser);
   const clear = useClientAuth((s) => s.clear);
-  const [navOpen, setNavOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const headerRef = useRef<HTMLElement>(null);
+  const [open, setOpen] = useState(false);
 
   // Keep the stored client fresh — GET /client/auth/me (§6)
   const meQuery = useQuery({
@@ -58,134 +52,164 @@ export function Header() {
     mutationFn: () => api.post("/client/auth/logout"),
     onSettled: () => {
       clear();
-      setMenuOpen(false);
+      setOpen(false);
       queryClient.clear();
       router.refresh();
     },
   });
 
+  // close on navigation, lock page scroll while open, Escape closes
+  useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
-    if (navOpen) {
-      document.body.classList.add("nav-open");
-    } else {
-      document.body.classList.remove("nav-open");
-    }
-    return () => document.body.classList.remove("nav-open");
-  }, [navOpen]);
+    document.body.style.overflow = open ? "hidden" : "";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setNavOpen(false);
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, []);
+  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  const stagger = (i: number) => ({ transitionDelay: open ? `${100 + i * 50}ms` : "0ms" });
+  const reveal = (shown: boolean) =>
+    shown ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0";
 
   return (
-    <header className="site-header" ref={headerRef}>
-      <div className="wrap nav-row">
-        <Link href="/" className="brand">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo_icon.png" alt={t("fullLogoAlt")} />
-          <span className="brand-text">
-            {t("brandName")}
-            <span>{t("brandTagline")}</span>
-          </span>
-        </Link>
-        <nav className={`main-nav${navOpen ? " open" : ""}`} id="mainNav">
-          <Link href="/" onClick={() => setNavOpen(false)}>
-            {t("home")}
-          </Link>
-          <Link href="/services" onClick={() => setNavOpen(false)}>
-            {t("services")}
-          </Link>
-          <Link href="/packages" onClick={() => setNavOpen(false)}>
-            {t("packages")}
-          </Link>
-          <Link href="/consultants" onClick={() => setNavOpen(false)}>
-            {t("nav.consultants")}
-          </Link>
-          <Link href="/about" onClick={() => setNavOpen(false)}>
-            {t("about")}
-          </Link>
-          <Link href="/join" onClick={() => setNavOpen(false)}>
-            {t("join")}
-          </Link>
-          <Link href="/team" onClick={() => setNavOpen(false)}>
-            {t("team")}
-          </Link>
-          <Link href="/contact" onClick={() => setNavOpen(false)}>
-            {t("contact")}
-          </Link>
+    <header className="pointer-events-none sticky top-0 z-50 h-24">
+      {/* screen filling glass overlay */}
+      <div
+        id="site-menu"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("menu")}
+        aria-hidden={!open}
+        className={`fixed inset-0 flex flex-col items-center justify-center gap-8 overflow-y-auto bg-white/80 px-6 py-24 backdrop-blur-3xl transition-all duration-700 ${EASE} dark:bg-black/80 ${
+          open ? "pointer-events-auto visible opacity-100" : "invisible opacity-0"
+        }`}
+      >
+        <nav aria-label={t("menu")} className="flex flex-col items-center gap-2">
+          {LINKS.map((link, i) => {
+            const active = isActive(link.href);
+            return (
+              <div key={link.href} className="overflow-hidden">
+                <Link
+                  href={link.href}
+                  tabIndex={open ? 0 : -1}
+                  aria-current={active ? "page" : undefined}
+                  style={stagger(i)}
+                  className={`flex items-center gap-3 rounded-xl px-4 py-2 text-3xl font-semibold transition-all duration-700 ${EASE} hover:text-text focus-visible:outline-2 focus-visible:outline-accent md:text-4xl ${reveal(open)} ${
+                    active ? "text-text" : "text-text/60"
+                  }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`size-2 rounded-full bg-accent transition-all duration-700 ${EASE} ${
+                      active ? "scale-100 opacity-100" : "scale-0 opacity-0"
+                    }`}
+                  />
+                  {t(link.key)}
+                </Link>
+              </div>
+            );
+          })}
         </nav>
-        <div className="header-actions">
-          <Link href="/app" className="app-download" aria-label={t("appDownloadAria")} title={t("appDownload")}>
-            <span className="app-download-text">{t("appDownload")}</span>
-          </Link>
-          <LanguageSwitcher />
-          <ThemeToggle />
-          {/* §9.2 — one dropdown; guest → login/register, client → account menu fed by /client/auth/me */}
-          <div className="client-user-menu">
-            <button
-              type="button"
-              className="client-user-menu-btn"
-              aria-label="حسابي"
-              aria-haspopup="true"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              <UserIcon />
-            </button>
-            <div className={`client-user-dropdown${menuOpen ? " open" : ""}`}>
-              {clientToken ? (
-                <>
-                  <div className="client-dropdown-header">
-                    <Avatar src={user?.avatar_url} name={user?.name ?? "?"} size="sm" />
-                    <span>{user?.name}</span>
-                  </div>
-                  <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
-                    {t("nav.dashboard")}
-                  </Link>
-                  <Link href="/profile" onClick={() => setMenuOpen(false)}>
-                    {t("nav.profile")}
-                  </Link>
-                  <button type="button" disabled={logout.isPending} onClick={() => logout.mutate()}>
-                    {t("common.logout")}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" onClick={() => setMenuOpen(false)}>
-                    {t("auth.login")}
-                  </Link>
-                  <Link href="/register" onClick={() => setMenuOpen(false)}>
-                    {t("auth.register")}
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-          <button
-            type="button"
-            className="menu-toggle"
-            id="menuToggle"
-            aria-label={t("menu")}
-            aria-expanded={navOpen}
-            onClick={() => setNavOpen((v) => !v)}
-          >
-            <span className="icon">
-              <svg viewBox="0 0 24 24">
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            </span>
-          </button>
+
+        <div
+          style={stagger(LINKS.length)}
+          className={`flex flex-wrap items-center justify-center gap-3 transition-all duration-700 ${EASE} ${reveal(open)}`}
+        >
+          {clientToken ? (
+            <>
+              <span className="flex items-center gap-2 text-base text-muted">
+                <Avatar src={user?.avatar_url} name={user?.name ?? "?"} size="sm" />
+                {user?.name}
+              </span>
+              <Link href="/dashboard" tabIndex={open ? 0 : -1} className="btn btn-outline">
+                {t("nav.dashboard")}
+              </Link>
+              <Link href="/profile" tabIndex={open ? 0 : -1} className="btn btn-outline">
+                {t("nav.profile")}
+              </Link>
+              <button
+                type="button"
+                tabIndex={open ? 0 : -1}
+                disabled={logout.isPending}
+                onClick={() => logout.mutate()}
+                className="btn btn-outline"
+              >
+                {t("common.logout")}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" tabIndex={open ? 0 : -1} className="btn btn-outline">
+                {t("auth.login")}
+              </Link>
+              <Link href="/register" tabIndex={open ? 0 : -1} className="btn btn-outline">
+                {t("auth.register")}
+              </Link>
+            </>
+          )}
         </div>
       </div>
-      {navOpen ? (
-        <div className="nav-overlay open" aria-hidden="true" onClick={() => setNavOpen(false)} />
-      ) : null}
+
+      {/* closed state: floating glass pill */}
+      <div
+        className={`pointer-events-auto relative mx-auto mt-6 flex w-max max-w-[calc(100vw-32px)] items-center gap-2 rounded-full border border-border bg-white/80 p-2 backdrop-blur-xl transition-all duration-700 ${EASE} dark:bg-black/80`}
+      >
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-full ps-2 pe-2 focus-visible:outline-2 focus-visible:outline-accent"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo_icon.png" alt={t("fullLogoAlt")} className="h-8 w-auto" />
+        </Link>
+
+        <LanguageSwitcher />
+        <ThemeToggle />
+
+        <Link
+          href="/packages"
+          className="hidden items-center gap-2 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.98] sm:inline-flex"
+        >
+          {t("bookConsultation")}
+          <ArrowLeft size={16} weight="bold" aria-hidden="true" className="ltr:rotate-180" />
+        </Link>
+
+        {!clientToken && (
+          <Link
+            href="/login"
+            aria-label={t("auth.login")}
+            className="hidden size-10 items-center justify-center rounded-full text-text transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-border focus-visible:outline-2 focus-visible:outline-accent sm:inline-flex"
+          >
+            <UserCircle size={24} aria-hidden="true" />
+          </Link>
+        )}
+
+        {/* hamburger → X morph */}
+        <button
+          type="button"
+          aria-label={t("menu")}
+          aria-expanded={open}
+          aria-controls="site-menu"
+          onClick={() => setOpen((v) => !v)}
+          className="relative size-10 shrink-0 rounded-full bg-text text-background transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.98]"
+        >
+          <span
+            aria-hidden="true"
+            className={`absolute start-1/2 top-1/2 -ms-[9px] -mt-px h-0.5 w-[18px] rounded-full bg-current transition-all duration-700 ${EASE} ${
+              open ? "translate-y-0 rotate-45" : "-translate-y-1 rotate-0"
+            }`}
+          />
+          <span
+            aria-hidden="true"
+            className={`absolute start-1/2 top-1/2 -ms-[9px] -mt-px h-0.5 w-[18px] rounded-full bg-current transition-all duration-700 ${EASE} ${
+              open ? "translate-y-0 -rotate-45" : "translate-y-1 rotate-0"
+            }`}
+          />
+        </button>
+      </div>
     </header>
   );
 }

@@ -1,11 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  CalendarCheck,
+  FileText,
+  Plus,
+  SealCheck,
+  ShieldCheck,
+  SquaresFour,
+  WarningCircle,
+} from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { EmptyState, ErrorState } from "@/components/ui";
+import { Reveal } from "@/components/public/Reveal";
+import { TaglineReveal } from "@/components/public/TaglineReveal";
 import type { Package } from "@/types/api";
 
 const MEDALS = ["medal-bronze", "medal-silver", "medal-gold"] as const;
@@ -20,18 +32,39 @@ function Check() {
   );
 }
 
-const SERVICE_TABS = [
-  { id: "t7", n: "01", featured: true },
-  { id: "t1", n: "02" },
-  { id: "t2", n: "03" },
-  { id: "t3", n: "04" },
-  { id: "t4", n: "05" },
-  { id: "t5", n: "06" },
-  { id: "t6", n: "07" },
+const FLUID = "transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]";
+const FOCUS = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
+function SectionHead({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className="mb-12 max-w-[680px]">
+      <span className="text-sm font-semibold text-primary dark:text-accent-soft">{eyebrow}</span>
+      <h2 className="mt-2 text-3xl font-bold text-text text-balance md:text-4xl">{title}</h2>
+    </div>
+  );
+}
+
+function Container({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`mx-auto max-w-[1180px] px-6 md:px-8 ${className}`}>{children}</div>;
+}
+
+const BENEFITS = [
+  { icon: SealCheck, title: "lp.b1Title", body: "lp.b1Body" },
+  { icon: SquaresFour, title: "lp.b2Title", body: "lp.b2Body" },
+  { icon: CalendarCheck, title: "lp.b3Title", body: "lp.b3Body" },
+  { icon: FileText, title: "lp.b4Title", body: "lp.b4Body" },
 ] as const;
 
+const STEPS = [
+  { n: "1", title: "lp.s1Title", body: "lp.s1Body" },
+  { n: "2", title: "lp.s2Title", body: "lp.s2Body" },
+  { n: "3", title: "lp.s3Title", body: "lp.s3Body" },
+] as const;
+
+const FAQ_COUNT = 8;
+
 export default function HomePage() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [activeTab, setActiveTab] = useState<string>("t7");
 
   // Packages come from the dashboard — GET /public/packages (PUB-01)
@@ -41,46 +74,180 @@ export default function HomePage() {
   });
   const packages = packagesQuery.data;
 
+  const faqs = Array.from({ length: FAQ_COUNT }, (_, i) => ({
+    q: t(`lp.faq${i + 1}Q`),
+    a: t(`lp.faq${i + 1}A`),
+  }));
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    inLanguage: lang,
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+  const heroLines = t("lp.heroTitle").split("|");
+
   return (
-    <>
-      {/* HERO */}
-      <section className="hero hero-new" id="top">
-        <div className="wrap">
-          <div className="hero-sketch-layout">
-            <div className="hero-left-column">
-              <div className="hero-left-panel">
-                <p className="hero-certified">
-                  <span className="hero-certified-icon" aria-hidden="true">
-                    ✓
+    <main>
+      {/* HERO — one offer, one audience, one primary action */}
+      <section id="top" className="relative pt-8 pb-24 md:pt-16">
+        <Container className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <Reveal>
+              <Link
+                href="/details#license-1"
+                className={`inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-sm text-text ${FLUID} hover:border-accent ${FOCUS}`}
+              >
+                <SealCheck size={20} weight="fill" className="text-accent" aria-hidden="true" />
+                {t("licenseText")}
+                <ArrowLeft size={14} weight="bold" aria-hidden="true" className="ltr:rotate-180" />
+              </Link>
+            </Reveal>
+            <Reveal delay={100}>
+              <h1 className="mt-6 max-w-[680px] bg-linear-to-r from-black to-[#666666] bg-clip-text text-4xl leading-tight font-bold text-balance text-transparent md:text-5xl dark:from-white dark:to-[#9B9B9B]">
+                {heroLines.map((line, i) => (
+                  <span key={i}>
+                    {i > 0 && <br className="hidden md:block" />}
+                    {i > 0 && <span className="md:hidden"> </span>}
+                    {line}
                   </span>
-                  <span>{t("licenseText")}</span>
-                  <Link href="/details#license-1" className="hero-certified-link">
-                    {t("licenseLink")}
-                  </Link>
-                </p>
-                <p className="hero-definition">
-                  <span className="hero-definition-accent">الحوكمة</span> من منظورنا أن نعمل على إيجاد وتأهيل نظام
-                  متكامل من القواعد، والسياسات، والممارسات التي تُوجّه وتُرقّي وتحدّث بها منظمات الأعمال لضمان تحقيق{" "}
-                  <span className="hero-definition-highlight">حفظ الاستثمار واستقراره</span>، والشفافية، والمساءلة،
-                  وحماية حقوق جميع أصحاب المصلحة والشأن.
-                </p>
+                ))}
+              </h1>
+            </Reveal>
+            <Reveal delay={200}>
+              <p className="mt-6 max-w-[680px] text-lg text-muted text-pretty md:text-xl">{t("lp.heroSub")}</p>
+            </Reveal>
+            <Reveal delay={300}>
+              <div className="mt-8 flex flex-wrap items-center gap-4">
+                <Link href="/packages" className="btn btn-primary">
+                  {t("lp.heroCta")}
+                  <ArrowLeft size={18} weight="bold" aria-hidden="true" className="ltr:rotate-180" />
+                </Link>
+                <span className="text-sm text-muted">{t("lp.heroNote")}</span>
+              </div>
+            </Reveal>
+            <Reveal delay={400}>
+              <div className="mt-12 grid max-w-[680px] grid-cols-3 gap-6 border-t border-border pt-6">
+                {(
+                  [
+                    ["expertStatExp", "expertStat1"],
+                    ["expertStatCons", "expertStat2"],
+                    ["expertStatEst", "expertStat3"],
+                  ] as const
+                ).map(([value, label]) => (
+                  <div key={value}>
+                    <strong className="block text-3xl font-bold text-text">{t(value)}</strong>
+                    <span className="text-sm text-muted">{t(label)}</span>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+
+          <Reveal delay={200} className="w-full max-w-[480px] lg:justify-self-end">
+            <div className="rounded-3xl border border-border bg-surface p-2">
+              {/* outer radius 24 − gap 8 = 16 */}
+              <div className="flex aspect-[5/4] flex-col items-center justify-center gap-4 rounded-2xl bg-white p-8">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/loge_leger-.png" alt={t("fullLogoAlt")} className="max-h-[200px] w-auto object-contain" />
+                <span className="text-lg font-semibold text-black">{t("lp.heroCaption")}</span>
               </div>
             </div>
-            <div className="hero-logo-big">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/loge_leger-.png" alt={t("fullLogoAlt")} />
-              <span className="hero-logo-tagline">عالم جديد من الحوكمة</span>
-            </div>
-          </div>
-          <div className="hero-actions-bottom">
-            <Link href="/packages" className="btn btn-primary">
-              {t("bookConsultation")}
-            </Link>
-            <Link href="/login" className="btn btn-outline">
-              {t("login")}
-            </Link>
-          </div>
-        </div>
+          </Reveal>
+        </Container>
+      </section>
+
+      {/* PROBLEM → SOLUTION */}
+      <section className="border-y border-border bg-surface py-24">
+        <Container className="grid gap-6 md:grid-cols-2">
+          <Reveal>
+            <article className="h-full rounded-2xl border border-border bg-background p-8">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-danger">
+                <WarningCircle size={20} weight="fill" aria-hidden="true" />
+                {t("lp.problemKicker")}
+              </span>
+              <h2 className="mt-4 text-2xl font-bold text-text text-balance">{t("lp.problemTitle")}</h2>
+              <p className="mt-4 text-base text-muted text-pretty">{t("lp.problemBody")}</p>
+            </article>
+          </Reveal>
+          <Reveal delay={100}>
+            <article className="h-full rounded-2xl border border-white/15 bg-secondary p-8 text-white">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-accent-soft">
+                <ShieldCheck size={20} weight="fill" aria-hidden="true" />
+                {t("lp.solutionKicker")}
+              </span>
+              <h2 className="mt-4 text-2xl font-bold text-balance">{t("lp.solutionTitle")}</h2>
+              <p className="mt-4 text-base text-white/70 text-pretty">{t("lp.solutionBody")}</p>
+            </article>
+          </Reveal>
+        </Container>
+      </section>
+
+      {/* TAGLINE REVEAL */}
+      <section className="flex min-h-[60vh] items-center py-24" aria-label={t("lp.tagline")}>
+        <Container>
+          <TaglineReveal
+            key={t("lp.tagline")}
+            text={t("lp.tagline")}
+            className="max-w-[680px] text-4xl leading-tight font-bold text-pretty md:text-5xl"
+          />
+        </Container>
+      </section>
+
+      {/* BENEFITS */}
+      <section id="why" className="border-y border-border bg-surface py-24">
+        <Container>
+          <Reveal>
+            <SectionHead eyebrow={t("lp.benefitsEyebrow")} title={t("lp.benefitsTitle")} />
+          </Reveal>
+          <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {BENEFITS.map(({ icon: Icon, title, body }, i) => (
+              <li key={title}>
+                <Reveal delay={i * 100} className="h-full">
+                  <article
+                    className={`h-full rounded-2xl border border-border bg-background p-6 ${FLUID} hover:-translate-y-1 hover:border-accent`}
+                  >
+                    <span className="inline-flex size-12 items-center justify-center rounded-xl border border-border bg-surface text-primary dark:text-accent-soft">
+                      <Icon size={24} weight="duotone" aria-hidden="true" />
+                    </span>
+                    <h3 className="mt-4 text-xl font-bold text-text text-balance">{t(title)}</h3>
+                    <p className="mt-2 text-sm text-muted text-pretty">{t(body)}</p>
+                  </article>
+                </Reveal>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section id="how" className="py-24">
+        <Container>
+          <Reveal>
+            <SectionHead eyebrow={t("lp.howEyebrow")} title={t("lp.howTitle")} />
+          </Reveal>
+          <ol className="grid gap-6 md:grid-cols-3">
+            {STEPS.map((step, i) => (
+              <li key={step.n}>
+                <Reveal delay={i * 100} className="h-full">
+                  <article className="h-full rounded-2xl border border-border bg-surface p-6">
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex size-10 items-center justify-center rounded-full bg-text text-base font-bold text-background"
+                    >
+                      {step.n}
+                    </span>
+                    <h3 className="mt-4 text-xl font-bold text-text text-balance">{t(step.title)}</h3>
+                    <p className="mt-2 text-sm text-muted text-pretty">{t(step.body)}</p>
+                  </article>
+                </Reveal>
+              </li>
+            ))}
+          </ol>
+        </Container>
       </section>
 
       {/* SERVICES */}
@@ -90,11 +257,14 @@ export default function HomePage() {
         style={{ background: "var(--white)", borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}
       >
         <div className="wrap">
+          <Reveal>
           <div className="section-head">
             <span className="eyebrow">{t("servicesEyebrow")}</span>
-            <h2>سبع خدمات استشارية متكاملة</h2>
+            <h2>{t("lp.servicesTitle")}</h2>
             <p>{t("servicesDesc")}</p>
           </div>
+          </Reveal>
+          <Reveal>
           <div className="services-panel">
             <div className="service-tabs" role="tablist">
               <button
@@ -158,7 +328,7 @@ export default function HomePage() {
                     </span>
                   </li>
                 </ul>
-                <Link href="/details#license-1" className="btn btn-outline btn-sm" style={{ marginTop: 14 }}>
+                <Link href="/details#license-1" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
                   عرض تفاصيل الاعتماد
                 </Link>
               </div>
@@ -181,7 +351,7 @@ export default function HomePage() {
                     <span className="b">٥</span> {t("s1i5")}
                   </li>
                 </ul>
-                <Link href="/details#service-1" className="btn btn-outline btn-sm" style={{ marginTop: 14 }}>
+                <Link href="/details#service-1" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
                   {t("details")}
                 </Link>
               </div>
@@ -198,7 +368,7 @@ export default function HomePage() {
                     <span className="b">٣</span> {t("s2i3")}
                   </li>
                 </ul>
-                <Link href="/details#service-2" className="btn btn-outline btn-sm" style={{ marginTop: 14 }}>
+                <Link href="/details#service-2" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
                   {t("details")}
                 </Link>
               </div>
@@ -221,7 +391,7 @@ export default function HomePage() {
                     <span className="b">٥</span> {t("s3i5")}
                   </li>
                 </ul>
-                <Link href="/details#service-3" className="btn btn-outline btn-sm" style={{ marginTop: 14 }}>
+                <Link href="/details#service-3" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
                   {t("details")}
                 </Link>
               </div>
@@ -264,7 +434,7 @@ export default function HomePage() {
                     </span>
                   </li>
                 </ul>
-                <Link href="/details#service-4" className="btn btn-outline btn-sm" style={{ marginTop: 14 }}>
+                <Link href="/details#service-4" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
                   {t("details")}
                 </Link>
               </div>
@@ -307,7 +477,7 @@ export default function HomePage() {
                     </span>
                   </li>
                 </ul>
-                <Link href="/details#service-5" className="btn btn-outline btn-sm" style={{ marginTop: 14 }}>
+                <Link href="/details#service-5" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
                   {t("details")}
                 </Link>
               </div>
@@ -330,12 +500,13 @@ export default function HomePage() {
                     <span className="b">٥</span> {t("s6i5")}
                   </li>
                 </ul>
-                <Link href="/details#service-6" className="btn btn-outline btn-sm" style={{ marginTop: 14 }}>
+                <Link href="/details#service-6" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
                   {t("details")}
                 </Link>
               </div>
             </div>
           </div>
+          </Reveal>
         </div>
       </section>
 
@@ -352,11 +523,14 @@ export default function HomePage() {
       {/* PACKAGES */}
       <section className="section" id="packages">
         <div className="wrap">
+          <Reveal>
           <div className="section-head">
             <span className="eyebrow">{t("packagesEyebrow")}</span>
             <h2>{t("packagesTitle")}</h2>
             <p>{t("packagesDesc")}</p>
           </div>
+          </Reveal>
+          <Reveal>
           {packagesQuery.isLoading ? (
             <div className="pricing-grid">
               {[0, 1, 2].map((i) => (
@@ -412,64 +586,14 @@ export default function HomePage() {
               ))}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* VISION / MISSION / VALUES */}
-      <section className="section" id="about">
-        <div className="wrap">
-          <div className="section-head">
-            <span className="eyebrow">{t("aboutEyebrow")}</span>
-            <h2>{t("aboutTitle")}</h2>
-          </div>
-          <div className="vm-grid">
-            <div className="vm-card">
-              <div className="divider" />
-              <span className="eyebrow" style={{ fontSize: ".85rem" }}>
-                {t("vision")}
-              </span>
-              <p style={{ marginTop: 14 }}>{t("visionText")}</p>
-            </div>
-            <div className="vm-card">
-              <div className="divider" />
-              <span className="eyebrow" style={{ fontSize: ".85rem" }}>
-                {t("mission")}
-              </span>
-              <p style={{ marginTop: 14 }}>{t("missionText")}</p>
-            </div>
-          </div>
-          <div className="values-row">
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("excellence")}</h4>
-            </div>
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("impact")}</h4>
-            </div>
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("initiative")}</h4>
-            </div>
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("leadership")}</h4>
-            </div>
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("distinction")}</h4>
-            </div>
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("ownership")}</h4>
-            </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* EXPERT */}
       <section className="section" id="expert">
         <div className="wrap">
+          <Reveal>
           <div className="expert-grid">
             <div className="expert-card">
               <div className="expert-photo">
@@ -501,123 +625,21 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* TEAM */}
-      <section className="section" id="team">
-        <div className="wrap">
-          <div className="section-head">
-            <span className="eyebrow">{t("teamEyebrow")}</span>
-            <h2>{t("teamTitle")}</h2>
-            <p>فريق عمل وهمي لأغراض العرض — يمكن استبدال البيانات بالفريق الفعلي لاحقاً.</p>
-          </div>
-          <div className="team-grid">
-            <div className="team-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className="avatar"
-                src="https://images.unsplash.com/photo-1758876204244-930299843f07?w=150&h=150&fit=crop&crop=faces&fm=jpg&q=80"
-                alt="عبدالله العتيبي"
-                loading="lazy"
-              />
-              <h4>عبدالله العتيبي</h4>
-              <div className="role">شريك استشاري</div>
-              <div className="field-tag">{t("fieldTagGovernance")}</div>
-            </div>
-            <div className="team-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className="avatar"
-                src="https://images.unsplash.com/photo-1758874574397-e56dfcfc116d?w=150&h=150&fit=crop&crop=faces&fm=jpg&q=80"
-                alt="فيصل الدوسري"
-                loading="lazy"
-              />
-              <h4>فيصل الدوسري</h4>
-              <div className="role">مستشار أول</div>
-              <div className="field-tag">{t("fieldTagManagement")}</div>
-            </div>
-            <div className="team-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className="avatar"
-                src="https://images.unsplash.com/photo-1758874573370-e5496b20794b?w=150&h=150&fit=crop&crop=faces&fm=jpg&q=80"
-                alt="سلطان الشهراني"
-                loading="lazy"
-              />
-              <h4>سلطان الشهراني</h4>
-              <div className="role">رئيس قسم الامتثال</div>
-              <div className="field-tag">{t("fieldTagCompliance")}</div>
-            </div>
-            <div className="team-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className="avatar"
-                src="https://images.unsplash.com/photo-1756412066334-faa0ba38261f?w=150&h=150&fit=crop&crop=faces&fm=jpg&q=80"
-                alt="نايف القحطاني"
-                loading="lazy"
-              />
-              <h4>نايف القحطاني</h4>
-              <div className="role">مدير المواهب</div>
-              <div className="field-tag">{t("fieldTagTalent")}</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CLIENTS */}
-      <section className="section" style={{ paddingTop: 0 }}>
-        <div className="wrap">
-          <div className="section-head" style={{ marginBottom: 24 }}>
-            <span className="eyebrow">{t("clientsEyebrow")}</span>
-            <h2>{t("clientsTitle")}</h2>
-          </div>
-          <p className="clients-note">{t("clientsNote")}</p>
-          <div className="clients-grid">
-            <div className="client-tile">
-              <div className="client-logo">ر</div>
-              <span>رواد الأعمال القابضة</span>
-            </div>
-            <div className="client-tile">
-              <div className="client-logo">م</div>
-              <span>المنارة للاستثمار</span>
-            </div>
-            <div className="client-tile">
-              <div className="client-logo">ب</div>
-              <span>بيت الخبرة التجارية</span>
-            </div>
-            <div className="client-tile">
-              <div className="client-logo">ت</div>
-              <span>التقنية المتقدمة</span>
-            </div>
-            <div className="client-tile">
-              <div className="client-logo">م</div>
-              <span>مشاريع الخليج</span>
-            </div>
-            <div className="client-tile">
-              <div className="client-logo">أ</div>
-              <span>مؤسسة الأعمال الرائدة</span>
-            </div>
-            <div className="client-tile">
-              <div className="client-logo">إ</div>
-              <span>إتقان للاستثمار</span>
-            </div>
-            <div className="client-tile">
-              <div className="client-logo">ق</div>
-              <span>قمة التطوير</span>
-            </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* TESTIMONIALS */}
       <section className="section" id="testimonials">
         <div className="wrap">
+          <Reveal>
           <div className="section-head">
             <span className="eyebrow">{t("testimonialsEyebrow")}</span>
             <h2>{t("testimonialsTitle")}</h2>
             <p>{t("testimonialsDesc")}</p>
           </div>
+          </Reveal>
+          <Reveal>
           <div className="testimonials-grid">
             {[1, 2, 3].map((i) => (
               <div className="testimonial-card" key={i}>
@@ -641,8 +663,117 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+          </Reveal>
         </div>
       </section>
-    </>
+      {/* VISION / MISSION / VALUES */}
+      <section className="section" id="about">
+        <div className="wrap">
+          <Reveal>
+          <div className="section-head">
+            <span className="eyebrow">{t("aboutEyebrow")}</span>
+            <h2>{t("aboutTitle")}</h2>
+          </div>
+          </Reveal>
+          <Reveal>
+          <div className="vm-grid">
+            <div className="vm-card">
+              <div className="divider" />
+              <span className="eyebrow" style={{ fontSize: ".85rem" }}>
+                {t("vision")}
+              </span>
+              <p style={{ marginTop: 14 }}>{t("visionText")}</p>
+            </div>
+            <div className="vm-card">
+              <div className="divider" />
+              <span className="eyebrow" style={{ fontSize: ".85rem" }}>
+                {t("mission")}
+              </span>
+              <p style={{ marginTop: 14 }}>{t("missionText")}</p>
+            </div>
+          </div>
+          </Reveal>
+          <Reveal>
+          <div className="values-row">
+            <div className="value-item">
+              <div className="mark" />
+              <h4>{t("excellence")}</h4>
+            </div>
+            <div className="value-item">
+              <div className="mark" />
+              <h4>{t("impact")}</h4>
+            </div>
+            <div className="value-item">
+              <div className="mark" />
+              <h4>{t("initiative")}</h4>
+            </div>
+            <div className="value-item">
+              <div className="mark" />
+              <h4>{t("leadership")}</h4>
+            </div>
+            <div className="value-item">
+              <div className="mark" />
+              <h4>{t("distinction")}</h4>
+            </div>
+            <div className="value-item">
+              <div className="mark" />
+              <h4>{t("ownership")}</h4>
+            </div>
+          </div>
+          </Reveal>
+        </div>
+      </section>
+
+
+      {/* FAQ */}
+      <section id="faq" className="border-t border-border bg-surface py-24">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+        <Container>
+          <Reveal>
+            <SectionHead eyebrow={t("lp.faqEyebrow")} title={t("lp.faqTitle")} />
+          </Reveal>
+          <div className="flex max-w-[880px] flex-col gap-3">
+            {faqs.map((f, i) => (
+              <Reveal key={i} delay={Math.min(i, 3) * 50}>
+                <details className="group rounded-2xl border border-border bg-background">
+                  <summary
+                    className={`flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl p-6 text-lg font-semibold text-text [&::-webkit-details-marker]:hidden ${FLUID} hover:bg-surface ${FOCUS}`}
+                  >
+                    {f.q}
+                    <Plus
+                      size={20}
+                      weight="bold"
+                      aria-hidden="true"
+                      className={`shrink-0 ${FLUID} group-open:rotate-45`}
+                    />
+                  </summary>
+                  <p className="px-6 pb-6 text-base text-muted text-pretty">{f.a}</p>
+                </details>
+              </Reveal>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* RISK REVERSAL + FINAL CTA (same action as the hero) */}
+      <section className="py-24">
+        <Container>
+          <Reveal>
+            <div className="flex flex-col items-center rounded-3xl border border-white/15 bg-secondary p-12 text-center text-white">
+              <h2 className="max-w-[680px] text-3xl font-bold text-balance md:text-4xl">{t("lp.finalTitle")}</h2>
+              <p className="mt-4 max-w-[680px] text-lg text-white/70 text-pretty">{t("lp.finalBody")}</p>
+              <Link href="/packages" className="btn btn-gold mt-8">
+                {t("lp.heroCta")}
+                <ArrowLeft size={18} weight="bold" aria-hidden="true" className="ltr:rotate-180" />
+              </Link>
+              <p className="mt-6 inline-flex max-w-[680px] items-start gap-2 text-sm text-white/60 text-pretty">
+                <ShieldCheck size={18} aria-hidden="true" className="mt-0.5 shrink-0" />
+                {t("lp.finalRisk")}
+              </p>
+            </div>
+          </Reveal>
+        </Container>
+      </section>
+    </main>
   );
 }
