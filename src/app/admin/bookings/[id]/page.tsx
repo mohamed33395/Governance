@@ -1,5 +1,6 @@
 'use client';
 
+import { useBreadcrumbLabel } from '@/components/admin/Breadcrumbs';
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -70,6 +71,7 @@ function DetailsInner() {
     },
   });
   const booking = query.data;
+  useBreadcrumbLabel(booking?.reference);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin', 'bookings', params.id] });
 

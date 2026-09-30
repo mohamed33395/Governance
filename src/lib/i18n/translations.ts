@@ -803,6 +803,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "common.maxMb": "بحد أقصى {max} ميجابايت",
 
     // ===== plan keys (nav) =====
+    "common.breadcrumb": "مسار التنقل",
     "navGroup.overview": "نظرة عامة",
     "navGroup.operations": "العمليات",
     "navGroup.people": "الأشخاص",
@@ -2040,6 +2041,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     "common.maxMb": "up to {max} MB",
 
     // ===== plan keys (nav) =====
+    "common.filters": "Filters",
+    "common.showFilters": "Show filters",
+    "common.hideFilters": "Hide filters",
+    "common.breadcrumb": "Breadcrumb",
     "navGroup.overview": "Overview",
     "navGroup.operations": "Operations",
     "navGroup.people": "People",

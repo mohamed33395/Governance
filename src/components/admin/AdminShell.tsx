@@ -12,6 +12,7 @@ import { useI18n } from '@/lib/i18n/i18n-context';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
 import { Avatar } from '@/components/ui';
+import { BreadcrumbProvider } from '@/components/admin/Breadcrumbs';
 import { FAMILY, NAV_GROUPS, ROUTES, routeForPath } from '@/components/admin/registry';
 
 export function AdminShell({ children }: { children: ReactNode }) {
@@ -147,7 +148,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div className="dash-body">
-          <div className="dash-content">{children}</div>
+          <div className="dash-content">
+            <BreadcrumbProvider>{children}</BreadcrumbProvider>
+          </div>
         </div>
       </div>
     </div>

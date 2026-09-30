@@ -725,3 +725,13 @@ html[data-app="admin"] .ranking-rank,
 html[data-app="admin"] .ranking-track{background:#eaeef3;}
 html[data-theme="dark"][data-app="admin"] .ranking-rank,
 html[data-theme="dark"][data-app="admin"] .ranking-track{background:rgba(255,255,255,.08);}
+
+/* ---- Breadcrumbs ---- */
+.breadcrumbs{margin-bottom:12px;}
+.breadcrumbs ol{list-style:none;margin:0;padding:0;display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:.82rem;}
+.breadcrumbs li{display:inline-flex;align-items:center;gap:6px;min-width:0;}
+.breadcrumb-link{display:inline-flex;align-items:center;gap:6px;color:var(--stone);text-decoration:none;border-radius:4px;padding:2px 4px;}
+.breadcrumb-link:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent);}
+.breadcrumb-link:focus-visible{outline:2px solid var(--primary);outline-offset:1px;}
+.breadcrumb-sep{color:var(--stone);opacity:.55;flex-shrink:0;}
+.breadcrumb-current{color:var(--ink);font-weight:600;padding:2px 4px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}

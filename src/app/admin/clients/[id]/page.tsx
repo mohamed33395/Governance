@@ -1,5 +1,6 @@
 'use client';
 
+import { useBreadcrumbLabel } from '@/components/admin/Breadcrumbs';
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -54,6 +55,7 @@ function DetailsInner() {
     queryFn: () => api.get(`/admin/clients/${params.id}`).then((r) => r.data.data as ClientDetails),
   });
   const client = query.data;
+  useBreadcrumbLabel(client?.name);
 
   if (query.isLoading) {
     return (

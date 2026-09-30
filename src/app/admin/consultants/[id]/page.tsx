@@ -1,5 +1,6 @@
 'use client';
 
+import { useBreadcrumbLabel } from '@/components/admin/Breadcrumbs';
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -76,6 +77,7 @@ function DetailsInner() {
   });
 
   const consultant = consultantQuery.data;
+  useBreadcrumbLabel(consultant?.name);
   const stats = statsQuery.data;
 
   if (consultantQuery.isLoading) {
