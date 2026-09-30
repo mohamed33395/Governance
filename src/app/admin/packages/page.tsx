@@ -11,6 +11,7 @@ import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { packageSchema, type PackageValues } from '@/schemas/packages';
 import { RequirePermission } from '@/components/admin/RequirePermission';
+import { FilterPanel } from '@/components/admin/FilterPanel';
 import {
   ActionsMenu,
   Badge,
@@ -103,7 +104,7 @@ function PackagesInner() {
         }
       />
 
-      <div className="flex gap-3 flex-wrap mb-6">
+      <FilterPanel>
         <SearchInput
           value={search}
           onChange={(v) => {
@@ -125,7 +126,7 @@ function PackagesInner() {
           }}
           style={{ maxWidth: 150 }}
         />
-      </div>
+      </FilterPanel>
 
       {query.isLoading ? (
         <div className="page-loader">

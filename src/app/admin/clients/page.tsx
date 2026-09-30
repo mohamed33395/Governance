@@ -8,6 +8,7 @@ import { isApiError } from '@/lib/errors';
 import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { RequirePermission } from '@/components/admin/RequirePermission';
+import { FilterPanel } from '@/components/admin/FilterPanel';
 import {
   ActionsMenu,
   Avatar,
@@ -24,7 +25,8 @@ import {
   TableSkeleton,
   useToast,
 } from '@/components/ui';
-import type { Client, Consultant, Paginated } from '@/types/api';
+import { ChartCard, BarChart } from '@/components/admin/charts';
+import type { AdminClientsStats, Client, Consultant, Paginated } from '@/types/api';
 
 // §13.10 — clients (ADM-CL-01..08)
 export default function AdminClientsPage() {
@@ -75,6 +77,13 @@ function ClientsInner() {
     staleTime: 60_000,
   });
 
+  const statsQuery = useQuery({
+    queryKey: ['admin', 'clients', 'stats'],
+    queryFn: () => api.get('/admin/clients/stats').then((r) => r.data.data as AdminClientsStats),
+    enabled: can('view-clients'),
+    staleTime: 60_000,
+  });
+
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin', 'clients'] });
 
   const statusMutation = useMutation({
@@ -111,7 +120,46 @@ function ClientsInner() {
     <>
       <PageHeader title={t('nav.clients')} />
 
-      <div className="flex gap-3 flex-wrap mb-6">
+      {can('view-clients') && statsQuery.data && (
+        <>
+          <div className="stat-grid mb-6">
+            <div className="stat-card">
+              <div className="label">{t('nav.clients')}</div>
+              <div className="num">{statsQuery.data.total}</div>
+              <div className="trend flat">{t('admin.statsActive')}: {statsQuery.data.active}</div>
+            </div>
+            <div className="stat-card">
+              <div className="label">{t('users.inactive')}</div>
+              <div className="num">{statsQuery.data.inactive}</div>
+            </div>
+            <div className="stat-card">
+              <div className="label">{t('admin.statsNewThisMonth')}</div>
+              <div className="num">{statsQuery.data.new_this_month}</div>
+            </div>
+          </div>
+
+          <div className="chart-row mb-6">
+            <ChartCard title={t('admin.clientsGrowth')}>
+              <BarChart
+                data={statsQuery.data.new_by_month.map((m) => ({ label: m.month, value: m.count, color: 'var(--primary)' }))}
+                sort="label-asc"
+              />
+            </ChartCard>
+            <ChartCard title={t('admin.topClients')}>
+              <BarChart
+                data={statsQuery.data.top_clients.slice(0, 5).map((c) => ({
+                  label: c.company_name,
+                  value: c.bookings_count,
+                  color: 'var(--gold)',
+                }))}
+                sort="value-desc"
+              />
+            </ChartCard>
+          </div>
+        </>
+      )}
+
+      <FilterPanel>
         <SearchInput
           value={search}
           onChange={(v) => {
@@ -158,7 +206,7 @@ function ClientsInner() {
           }}
           style={{ maxWidth: 170 }}
         />
-      </div>
+      </FilterPanel>
 
       {query.isLoading ? (
         <TableSkeleton rows={5} cols={6} />

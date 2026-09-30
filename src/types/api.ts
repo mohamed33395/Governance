@@ -185,12 +185,51 @@ export interface PermissionGroup { group: string; label: string; permissions: Pe
 
 // ---------- dashboards ----------
 export interface AdminStats {
-  bookings: { total: number; pending: number; completed: number; cancelled: number; today: number };
+  bookings: {
+    total: number; pending: number; completed: number; cancelled: number; today: number;
+    by_month: { month: string; count: number }[];
+  };
   reports: { total: number; pending: number };
   clients: { total: number; new_this_month: number };
   consultants?: { total: number; active: number };        // admins only
-  revenue?: { this_month: number; this_month_formatted: string; total: number; total_formatted: string };
+  revenue?: {
+    this_month: number; this_month_formatted: string; total: number; total_formatted: string;
+    by_month: { month: string; amount: number; amount_formatted: string }[];
+  };
   upcoming_bookings: Booking[];
+}
+
+export interface AdminBookingsStats {
+  total: number; today: number;
+  by_status: { status: string; label: string; count: number }[];
+  by_consultant: { consultant_id: ID; consultant_name: string; count: number }[];
+  by_package: { package_id: ID; package_name: string; count: number }[];
+  by_month: { month: string; count: number }[];
+}
+
+export interface AdminPaymentsStats {
+  total_amount: number; total_amount_formatted: string;
+  by_status: { status: string; count: number; amount: number; amount_formatted: string }[];
+  by_gateway: { gateway: string; count: number }[];
+  by_month: { month: string; count: number; amount: number; amount_formatted: string }[];
+}
+
+export interface AdminClientsStats {
+  total: number; active: number; inactive: number; new_this_month: number;
+  new_by_month: { month: string; count: number }[];
+  top_clients: { client_id: ID; client_name: string; company_name: string; bookings_count: number; revenue: number; revenue_formatted: string }[];
+}
+
+export interface AdminConsultantsStats {
+  total: number; active: number;
+  by_specialization: { specialization: string; count: number }[];
+  top_consultants: { consultant_id: ID; consultant_name: string; bookings_count: number; completed_count: number; pending_reports_count: number; revenue: number; revenue_formatted: string }[];
+}
+
+export interface AdminReportsStats {
+  total: number; pending: number; uploaded: number;
+  by_month: { month: string; count: number }[];
+  by_consultant: { consultant_id: ID; consultant_name: string; count: number }[];
 }
 
 export interface ClientDashboard {

@@ -8,6 +8,7 @@ import { downloadFile } from '@/lib/files';
 import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { RequirePermission } from '@/components/admin/RequirePermission';
+import { FilterPanel } from '@/components/admin/FilterPanel';
 import {
   ActionsMenu,
   Badge,
@@ -24,7 +25,8 @@ import {
   TableSkeleton,
   useToast,
 } from '@/components/ui';
-import type { Client, Consultant, Paginated, Report } from '@/types/api';
+import { ChartCard, BarChart, DonutChart, DonutLegend } from '@/components/admin/charts';
+import type { AdminReportsStats, Client, Consultant, Paginated, Report } from '@/types/api';
 
 // §13.9 — reports (RPT-01..06)
 export default function AdminReportsPage() {
@@ -83,6 +85,13 @@ function ReportsInner() {
     staleTime: 60_000,
   });
 
+  const statsQuery = useQuery({
+    queryKey: ['admin', 'reports', 'stats'],
+    queryFn: () => api.get('/admin/reports/stats').then((r) => r.data.data as AdminReportsStats),
+    enabled: can('view-reports'),
+    staleTime: 60_000,
+  });
+
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin', 'reports'] });
 
   const resend = useMutation({
@@ -108,7 +117,45 @@ function ReportsInner() {
     <>
       <PageHeader title={t('nav.reports')} />
 
-      <div className="flex gap-3 flex-wrap mb-6">
+      {can('view-reports') && statsQuery.data && (
+        <>
+          <div className="stat-grid mb-6">
+            <div className="stat-card">
+              <div className="label">{t('nav.reports')}</div>
+              <div className="num">{statsQuery.data.total}</div>
+            </div>
+            <div className="stat-card">
+              <div className="label">{t('reportStatus.pending')}</div>
+              <div className="num">{statsQuery.data.pending}</div>
+            </div>
+            <div className="stat-card">
+              <div className="label">{t('reportStatus.uploaded')}</div>
+              <div className="num">{statsQuery.data.uploaded}</div>
+            </div>
+          </div>
+
+          <div className="chart-row mb-6">
+            <ChartCard title={t('admin.reportsByMonth')}>
+              <BarChart
+                data={statsQuery.data.by_month.map((m) => ({ label: m.month, value: m.count, color: 'var(--primary)' }))}
+                sort="label-asc"
+              />
+            </ChartCard>
+            <ChartCard title={t('admin.reportsByConsultant')}>
+              <BarChart
+                data={statsQuery.data.by_consultant.map((c) => ({
+                  label: c.consultant_name,
+                  value: c.count,
+                  color: 'var(--info)',
+                }))}
+                sort="value-desc"
+              />
+            </ChartCard>
+          </div>
+        </>
+      )}
+
+      <FilterPanel>
         <SearchInput
           value={search}
           onChange={(v) => {
@@ -161,7 +208,7 @@ function ReportsInner() {
           aria-label={t('reports.dateTo')}
           style={{ maxWidth: 155 }}
         />
-      </div>
+      </FilterPanel>
 
       {query.isLoading ? (
         <TableSkeleton rows={5} cols={6} />

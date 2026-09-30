@@ -26,6 +26,7 @@ import {
   useToast,
 } from '@/components/ui';
 import { RequirePermission } from '@/components/admin/RequirePermission';
+import { FilterPanel } from '@/components/admin/FilterPanel';
 import type { Paginated, PermissionGroup, Role, User } from '@/types/api';
 
 // §13.2 — roles & permissions (ACL-01..07)
@@ -86,14 +87,16 @@ function RolesInner() {
         }
       />
 
-      <SearchInput
-        value={search}
-        onChange={(v) => {
-          setSearch(v);
-          setPage(1);
-        }}
-        className="mb-6 max-w-sm"
-      />
+      <FilterPanel>
+        <SearchInput
+          value={search}
+          onChange={(v) => {
+            setSearch(v);
+            setPage(1);
+          }}
+          className="flex-1 min-w-[200px] max-w-sm"
+        />
+      </FilterPanel>
 
       {query.isLoading ? (
         <TableSkeleton rows={3} />

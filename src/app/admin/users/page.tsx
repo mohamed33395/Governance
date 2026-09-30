@@ -33,6 +33,7 @@ import {
   useToast,
 } from '@/components/ui';
 import { RequirePermission } from '@/components/admin/RequirePermission';
+import { FilterPanel } from '@/components/admin/FilterPanel';
 import { AVATAR_ACCEPT, AVATAR_MAX_MB } from '@/lib/files';
 import type { Paginated, Role, User } from '@/types/api';
 
@@ -131,7 +132,7 @@ function UsersInner() {
         }
       />
 
-      <div className="flex gap-3 flex-wrap mb-6">
+      <FilterPanel>
         <SearchInput
           value={search}
           onChange={(v) => {
@@ -176,7 +177,7 @@ function UsersInner() {
           }}
           style={{ maxWidth: 150 }}
         />
-      </div>
+      </FilterPanel>
 
       {query.isLoading ? (
         <TableSkeleton rows={5} />

@@ -22,7 +22,9 @@ import {
   Table,
   TableSkeleton,
 } from '@/components/ui';
-import type { Booking, Consultant, Package, Paginated } from '@/types/api';
+import { BarChart, ChartCard, DonutChart, DonutLegend } from '@/components/admin/charts';
+import { FilterPanel } from '@/components/admin/FilterPanel';
+import type { AdminBookingsStats, Booking, Consultant, Package, Paginated } from '@/types/api';
 
 // §13.7 — bookings (BKG-01)
 export default function AdminBookingsPage() {
@@ -37,7 +39,7 @@ function BookingsInner() {
   const { t } = useI18n();
   const router = useRouter();
   const meta = usePublicMeta();
-  const { type } = usePermissions();
+  const { can, type } = usePermissions();
 
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
@@ -92,6 +94,13 @@ function BookingsInner() {
 
   const resetPage = () => setPage(1);
 
+  const statsQuery = useQuery({
+    queryKey: ['admin', 'bookings', 'stats'],
+    queryFn: () => api.get('/admin/bookings/stats').then((r) => r.data.data as AdminBookingsStats),
+    enabled: can('view-bookings'),
+    staleTime: 60_000,
+  });
+
   return (
     <>
       <PageHeader
@@ -105,8 +114,79 @@ function BookingsInner() {
         }
       />
 
-      {/* filter bar */}
-      <div className="flex gap-3 flex-wrap mb-6">
+      {can('view-bookings') && statsQuery.data && (
+        <>
+          <div className="stat-grid mb-6">
+            <div className="stat-card">
+              <div className="label">{t('admin.statsBookings')}</div>
+              <div className="num">{statsQuery.data.total}</div>
+              <div className="trend flat">{t('admin.statsToday')}: {statsQuery.data.today}</div>
+            </div>
+            {statsQuery.data.by_status.map((s) => (
+              <div key={s.status} className="stat-card">
+                <div className="label">{s.label}</div>
+                <div className="num">{s.count}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="chart-row mb-6">
+            <ChartCard title={t('admin.bookingsByStatus')}>
+              {(() => {
+                const data = statsQuery.data.by_status.map((s) => ({
+                  label: s.label,
+                  value: s.count,
+                  color:
+                    s.status === 'pending'
+                      ? 'var(--warning)'
+                      : s.status === 'completed'
+                        ? 'var(--success)'
+                        : s.status === 'cancelled'
+                          ? 'var(--danger)'
+                          : 'var(--info)',
+                }));
+                return (
+                  <div className="flex items-center gap-8 flex-wrap">
+                    <DonutChart data={data} />
+                    <DonutLegend data={data} />
+                  </div>
+                );
+              })()}
+            </ChartCard>
+            <ChartCard title={t('admin.bookingsByMonth')}>
+              <BarChart
+                data={statsQuery.data.by_month.map((m) => ({ label: m.month, value: m.count, color: 'var(--primary)' }))}
+                sort="label-asc"
+              />
+            </ChartCard>
+          </div>
+
+          <div className="chart-row mb-6">
+            <ChartCard title={t('admin.bookingsByConsultant')}>
+              <BarChart
+                data={statsQuery.data.by_consultant.map((c) => ({
+                  label: c.consultant_name,
+                  value: c.count,
+                  color: 'var(--info)',
+                }))}
+                sort="value-desc"
+              />
+            </ChartCard>
+            <ChartCard title={t('admin.bookingsByPackage')}>
+              <BarChart
+                data={statsQuery.data.by_package.map((p) => ({
+                  label: p.package_name,
+                  value: p.count,
+                  color: 'var(--gold)',
+                }))}
+                sort="value-desc"
+              />
+            </ChartCard>
+          </div>
+        </>
+      )}
+
+      <FilterPanel>
         <SearchInput
           value={search}
           onChange={(v) => {
@@ -188,7 +268,7 @@ function BookingsInner() {
           aria-label={t('reports.dateTo')}
           style={{ maxWidth: 155 }}
         />
-      </div>
+      </FilterPanel>
 
       {query.isLoading ? (
         <TableSkeleton rows={6} cols={7} />

@@ -32,7 +32,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { user, clear } = useAdminAuth();
   const { can, type } = usePermissions();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const logout = useMutation({
@@ -54,8 +55,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const activeItem = [...items].reverse().find((i) => isActive(i.href));
 
   return (
-    <div className="dash-shell" id="dashShell">
-      <aside className={`dash-sidebar${sidebarOpen ? ' open' : ''}`} id="dashSidebar">
+    <div className={`dash-shell${desktopCollapsed ? ' sidebar-collapsed' : ''}`} id="dashShell">
+      <aside className={`dash-sidebar${mobileOpen ? ' open' : ''}`} id="dashSidebar">
         <div className="dash-brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo_icon.png" alt="" />
@@ -67,7 +68,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               key={item.href}
               href={item.href}
               className={`dash-nav-link${isActive(item.href) ? ' active' : ''}`}
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => setMobileOpen(false)}
             >
               {t(item.key)}
             </Link>
@@ -75,8 +76,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </nav>
       </aside>
       <div
-        className={`dash-sidebar-overlay${sidebarOpen ? ' open' : ''}`}
-        onClick={() => setSidebarOpen(false)}
+        className={`dash-sidebar-overlay${mobileOpen ? ' open' : ''}`}
+        onClick={() => setMobileOpen(false)}
         aria-hidden="true"
       />
       <div className="dash-main">
@@ -86,7 +87,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
               type="button"
               className="menu-toggle"
               aria-label={t('menu')}
-              onClick={() => setSidebarOpen((v) => !v)}
+              onClick={() => {
+                setMobileOpen((v) => !v);
+                setDesktopCollapsed((v) => !v);
+              }}
             >
               <span className="icon">
                 <svg viewBox="0 0 24 24">

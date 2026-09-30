@@ -6,7 +6,10 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePublicMeta } from '@/lib/meta';
+import { usePermissions } from '@/lib/permissions';
 import { RequirePermission } from '@/components/admin/RequirePermission';
+import { FilterPanel } from '@/components/admin/FilterPanel';
+import { ChartCard, DonutChart, DonutLegend, BarChart } from '@/components/admin/charts';
 import {
   Button,
   Drawer,
@@ -22,7 +25,7 @@ import {
   Table,
   TableSkeleton,
 } from '@/components/ui';
-import type { Booking, Paginated, Payment } from '@/types/api';
+import type { AdminPaymentsStats, Booking, Paginated, Payment } from '@/types/api';
 
 // §13.12 — payments (PAY-01/02). gateway_response is never returned.
 export default function AdminPaymentsPage() {
@@ -36,6 +39,7 @@ export default function AdminPaymentsPage() {
 function PaymentsInner() {
   const { t } = useI18n();
   const meta = usePublicMeta();
+  const { can } = usePermissions();
 
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
@@ -63,11 +67,58 @@ function PaymentsInner() {
 
   const resetPage = () => setPage(1);
 
+  const statsQuery = useQuery({
+    queryKey: ['admin', 'payments', 'stats'],
+    queryFn: () => api.get('/admin/payments/stats').then((r) => r.data.data as AdminPaymentsStats),
+    enabled: can('view-payments'),
+    staleTime: 60_000,
+  });
+
   return (
     <>
       <PageHeader title={t('nav.payments')} />
 
-      <div className="flex gap-3 flex-wrap mb-6">
+      {can('view-payments') && statsQuery.data && (
+        <>
+          <div className="stat-grid mb-6">
+            <div className="stat-card">
+              <div className="label">{t('admin.totalAmount')}</div>
+              <div className="num" style={{ fontSize: '1.5rem' }}>{statsQuery.data.total_amount_formatted}</div>
+            </div>
+            {statsQuery.data.by_status.map((s) => (
+              <div key={s.status} className="stat-card">
+                <div className="label">{t(`paymentStatus.${s.status}`)}</div>
+                <div className="num">{s.count}</div>
+                <div className="trend flat">{s.amount_formatted}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="chart-row mb-6">
+            <ChartCard title={t('admin.paymentsByStatus')}>
+              {(() => {
+                const data = statsQuery.data.by_status
+                  .filter((s) => s.count > 0)
+                  .map((s) => ({ label: t(`paymentStatus.${s.status}`), value: s.count, color: 'var(--primary)' }));
+                return (
+                  <div className="flex items-center gap-8 flex-wrap">
+                    <DonutChart data={data} />
+                    <DonutLegend data={data} />
+                  </div>
+                );
+              })()}
+            </ChartCard>
+            <ChartCard title={t('admin.paymentsByGateway')}>
+              <BarChart
+                data={statsQuery.data.by_gateway.map((g) => ({ label: g.gateway, value: g.count, color: 'var(--gold)' }))}
+                sort="value-desc"
+              />
+            </ChartCard>
+          </div>
+        </>
+      )}
+
+      <FilterPanel>
         <SearchInput
           value={search}
           onChange={(v) => {
@@ -107,7 +158,7 @@ function PaymentsInner() {
           aria-label={t('reports.dateTo')}
           style={{ maxWidth: 155 }}
         />
-      </div>
+      </FilterPanel>
 
       {query.isLoading ? (
         <TableSkeleton rows={5} cols={6} />

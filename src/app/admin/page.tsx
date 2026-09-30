@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePermissions } from '@/lib/permissions';
 import { EmptyState, ErrorState, StatusBadge } from '@/components/ui';
+import { ChartCard, DonutChart, DonutLegend, BarChart } from '@/components/admin/charts';
 import type { AdminStats } from '@/types/api';
 
 // §13.1 — admin dashboard home (DSH-01). Consultants get no `consultants`/`revenue` keys.
@@ -122,6 +123,70 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* charts row */}
+      <div className="chart-row">
+        <ChartCard title={t('admin.bookingsByStatus')}>
+          {(() => {
+            const data = [
+              { label: t('bookingStatus.pending'), value: stats.bookings.pending, color: 'var(--warning)' },
+              { label: t('bookingStatus.completed'), value: stats.bookings.completed, color: 'var(--success)' },
+              { label: t('bookingStatus.cancelled'), value: stats.bookings.cancelled, color: 'var(--danger)' },
+            ];
+            return (
+              <div className="flex items-center gap-8 flex-wrap">
+                <DonutChart data={data} />
+                <DonutLegend data={data} />
+              </div>
+            );
+          })()}
+        </ChartCard>
+        <ChartCard title={t('admin.revenueOverview')}>
+          {stats.revenue ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-success-soft rounded-xl p-4 text-center">
+                <div className="text-muted text-sm">{t('admin.statsRevenueMonth')}</div>
+                <div className="font-serif text-xl mt-1" style={{ color: 'var(--success)' }}>
+                  {stats.revenue.this_month_formatted}
+                </div>
+              </div>
+              <div className="bg-primary/10 rounded-xl p-4 text-center">
+                <div className="text-muted text-sm">{t('admin.statsRevenueTotal')}</div>
+                <div className="font-serif text-xl mt-1" style={{ color: 'var(--primary)' }}>
+                  {stats.revenue.total_formatted}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-muted text-sm py-8 text-center">{t('admin.chartEmpty')}</div>
+          )}
+        </ChartCard>
+      </div>
+
+      {/* monthly trends */}
+      <div className="chart-row">
+        <ChartCard title={t('admin.bookingsByMonth')}>
+          <BarChart
+            data={stats.bookings.by_month.map((m) => ({ label: m.month, value: m.count, color: 'var(--primary)' }))}
+            sort="label-asc"
+          />
+        </ChartCard>
+        <ChartCard title={t('admin.revenueByMonth')}>
+          {stats.revenue ? (
+            <BarChart
+              data={stats.revenue.by_month.map((m) => ({
+                label: m.month,
+                value: Math.round(m.amount / 100),
+                color: 'var(--gold)',
+              }))}
+              sort="label-asc"
+              valueFormatter={(v) => `${v.toLocaleString()} SAR`}
+            />
+          ) : (
+            <div className="text-muted text-sm py-8 text-center">{t('admin.chartEmpty')}</div>
+          )}
+        </ChartCard>
       </div>
 
       {/* upcoming bookings mini-table */}

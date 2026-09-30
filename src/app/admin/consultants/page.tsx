@@ -21,6 +21,7 @@ import {
   type EditorDay,
 } from '@/components/admin/AvailabilityEditor';
 import { RequirePermission } from '@/components/admin/RequirePermission';
+import { FilterPanel } from '@/components/admin/FilterPanel';
 import {
   Avatar,
   ActionsMenu,
@@ -42,7 +43,8 @@ import {
   useToast,
 } from '@/components/ui';
 import { AVATAR_ACCEPT, AVATAR_MAX_MB } from '@/lib/files';
-import type { Consultant, Paginated } from '@/types/api';
+import { ChartCard, BarChart } from '@/components/admin/charts';
+import type { AdminConsultantsStats, Consultant, Paginated } from '@/types/api';
 
 // §13.4 — consultants (CON-01..07)
 export default function ConsultantsPage() {
@@ -84,6 +86,13 @@ function ConsultantsInner() {
         .then((r) => r.data as Paginated<Consultant>),
   });
   const data = query.data;
+
+  const statsQuery = useQuery({
+    queryKey: ['admin', 'consultants', 'stats'],
+    queryFn: () => api.get('/admin/consultants/stats').then((r) => r.data.data as AdminConsultantsStats),
+    enabled: can('view-consultants'),
+    staleTime: 60_000,
+  });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin', 'consultants'] });
 
@@ -133,7 +142,55 @@ function ConsultantsInner() {
         }
       />
 
-      <div className="flex gap-3 flex-wrap mb-6">
+      {can('view-consultants') && statsQuery.data && (
+        <>
+          <div className="stat-grid mb-6">
+            <div className="stat-card">
+              <div className="label">{t('nav.consultants')}</div>
+              <div className="num">{statsQuery.data.total}</div>
+              <div className="trend flat">{t('admin.statsActive')}: {statsQuery.data.active}</div>
+            </div>
+            <div className="stat-card">
+              <div className="label">{t('admin.statsPendingReports')}</div>
+              <div className="num">
+                {statsQuery.data.top_consultants.reduce((sum, c) => sum + c.pending_reports_count, 0)}
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="label">{t('consultants.specializationField')}</div>
+              <div className="num">{statsQuery.data.by_specialization.length}</div>
+            </div>
+          </div>
+
+          <div className="chart-row mb-6">
+            <ChartCard title={t('admin.consultantsBySpecialization')}>
+              <BarChart
+                data={statsQuery.data.by_specialization.map((s) => ({
+                  label: s.specialization,
+                  value: s.count,
+                  color: 'var(--info)',
+                }))}
+                sort="value-desc"
+              />
+            </ChartCard>
+            <ChartCard title={t('admin.topConsultants')}>
+              <BarChart
+                data={statsQuery.data.top_consultants
+                  .filter((c) => c.bookings_count > 0)
+                  .slice(0, 5)
+                  .map((c) => ({
+                    label: c.consultant_name,
+                    value: c.bookings_count,
+                    color: 'var(--gold)',
+                  }))}
+                sort="value-desc"
+              />
+            </ChartCard>
+          </div>
+        </>
+      )}
+
+      <FilterPanel>
         <SearchInput
           value={search}
           onChange={(v) => {
@@ -164,7 +221,7 @@ function ConsultantsInner() {
           }}
           style={{ maxWidth: 150 }}
         />
-      </div>
+      </FilterPanel>
 
       {query.isLoading ? (
         <TableSkeleton rows={4} />

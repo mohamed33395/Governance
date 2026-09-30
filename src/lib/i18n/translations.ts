@@ -772,6 +772,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     "common.delete": "حذف",
     "common.edit": "تعديل",
     "common.search": "بحث",
+    "common.filters": "عوامل التصفية",
+    "common.showFilters": "إظهار التصفية",
+    "common.hideFilters": "إخفاء التصفية",
     "common.loading": "جارٍ التحميل…",
     "common.empty": "لا توجد بيانات",
     "common.retry": "إعادة المحاولة",
@@ -990,6 +993,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "paymentStatus.not_required": "غير مطلوب",
     "paymentStatus.failed": "فشل",
     "paymentStatus.refunded": "مسترد",
+    "paymentStatus.initiated": "بُدئ",
     "subscriptionStatus.active": "نشط",
     "subscriptionStatus.expired": "منتهي",
     "subscriptionStatus.cancelled": "ملغي",
@@ -1145,6 +1149,22 @@ export const translations: Record<Lang, Record<string, string>> = {
     "paymentsAdmin.gateway": "بوابة الدفع",
     "paymentsAdmin.failureReason": "سبب الفشل",
 
+    // ===== admin charts =====
+    "admin.bookingsByMonth": "الحجوزات شهرياً",
+    "admin.revenueByMonth": "الإيرادات شهرياً",
+    "admin.bookingsByConsultant": "الحجوزات حسب المستشار",
+    "admin.bookingsByPackage": "الحجوزات حسب الباقة",
+    "admin.paymentsByStatus": "المدفوعات حسب الحالة",
+    "admin.paymentsByGateway": "المدفوعات حسب البوابة",
+    "admin.paymentsByMonth": "المدفوعات شهرياً",
+    "admin.clientsGrowth": "نمو العملاء",
+    "admin.topClients": "أكثر العملاء نشاطاً",
+    "admin.consultantsBySpecialization": "المستشارون حسب التخصص",
+    "admin.topConsultants": "أكثر المستشارين نشاطاً",
+    "admin.reportsByMonth": "التقارير شهرياً",
+    "admin.reportsByConsultant": "التقارير حسب المستشار",
+    "admin.totalAmount": "إجمالي المبلغ",
+
     // ===== status labels (booking/report statuses) =====
     "bookingStatus.pending_payment": "بانتظار الدفع",
     "bookingStatus.pending": "قيد الانتظار",
@@ -1201,6 +1221,9 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // ===== admin dashboard =====
     "admin.forbidden": "لا تملك صلاحية الوصول لهذه الصفحة",
+    "admin.bookingsByStatus": "توزيع الحجوزات حسب الحالة",
+    "admin.revenueOverview": "نظرة عامة على الإيرادات",
+    "admin.chartEmpty": "لا توجد بيانات كافية",
     "admin.statsBookings": "إجمالي الحجوزات",
     "admin.statsToday": "اليوم",
     "admin.statsPending": "قيد الانتظار",
@@ -2197,6 +2220,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "paymentStatus.not_required": "Not required",
     "paymentStatus.failed": "Failed",
     "paymentStatus.refunded": "Refunded",
+    "paymentStatus.initiated": "Initiated",
     "subscriptionStatus.active": "Active",
     "subscriptionStatus.expired": "Expired",
     "subscriptionStatus.cancelled": "Cancelled",
@@ -2352,6 +2376,22 @@ export const translations: Record<Lang, Record<string, string>> = {
     "paymentsAdmin.gateway": "Gateway",
     "paymentsAdmin.failureReason": "Failure reason",
 
+    // ===== admin charts =====
+    "admin.bookingsByMonth": "Bookings by month",
+    "admin.revenueByMonth": "Revenue by month",
+    "admin.bookingsByConsultant": "Bookings by consultant",
+    "admin.bookingsByPackage": "Bookings by package",
+    "admin.paymentsByStatus": "Payments by status",
+    "admin.paymentsByGateway": "Payments by gateway",
+    "admin.paymentsByMonth": "Payments by month",
+    "admin.clientsGrowth": "Client growth",
+    "admin.topClients": "Top clients",
+    "admin.consultantsBySpecialization": "Consultants by specialization",
+    "admin.topConsultants": "Top consultants",
+    "admin.reportsByMonth": "Reports by month",
+    "admin.reportsByConsultant": "Reports by consultant",
+    "admin.totalAmount": "Total amount",
+
     // ===== status labels (booking/report statuses) =====
     "bookingStatus.pending_payment": "Pending payment",
     "bookingStatus.pending": "Pending",
@@ -2408,6 +2448,9 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // ===== admin dashboard =====
     "admin.forbidden": "You don't have permission to view this page",
+    "admin.bookingsByStatus": "Bookings by status",
+    "admin.revenueOverview": "Revenue overview",
+    "admin.chartEmpty": "Not enough data",
     "admin.statsBookings": "Total bookings",
     "admin.statsToday": "Today",
     "admin.statsPending": "Pending",
