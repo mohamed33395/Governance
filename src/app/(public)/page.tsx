@@ -137,7 +137,7 @@ export default function HomePage() {
                 <ShieldCheck size={20} weight="fill" aria-hidden="true" />
                 {t("lp.solutionKicker")}
               </span>
-              <h2 className="mt-4 text-2xl font-bold text-balance">{t("lp.solutionTitle")}</h2>
+              <h2 className="mt-4 text-2xl font-bold text-white text-balance">{t("lp.solutionTitle")}</h2>
               <p className="mt-4 text-base text-white/70 text-pretty">{t("lp.solutionBody")}</p>
             </article>
           </Reveal>
@@ -313,7 +313,7 @@ export default function HomePage() {
         <Container>
           <Reveal>
             <div className="flex flex-col items-center rounded-3xl border border-white/15 bg-secondary p-12 text-center text-white">
-              <h2 className="max-w-[680px] text-3xl font-bold text-balance md:text-4xl">{t("lp.finalTitle")}</h2>
+              <h2 className="max-w-[680px] text-3xl font-bold text-white text-balance md:text-4xl">{t("lp.finalTitle")}</h2>
               <p className="mt-4 max-w-[680px] text-lg text-white/70 text-pretty">{t("lp.finalBody")}</p>
               <Link href="/packages" className="btn btn-gold mt-8">
                 {t("lp.heroCta")}
