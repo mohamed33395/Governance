@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
@@ -24,6 +24,27 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close the user menu on outside click / Escape / route change. (An onBlur handler closed the
+  // menu on mousedown, before the item's click fired, so "Profile" never navigated.)
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenuOpen(false);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('touchstart', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('touchstart', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => setMenuOpen(false), [pathname]);
 
   const logout = useMutation({
     mutationFn: () => api.post('/admin/auth/logout'),
@@ -109,7 +130,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <div className="topbar-right header-actions">
             <LanguageSwitcher />
             <ThemeToggle />
-            <div className="admin-user-menu">
+            <div className="admin-user-menu" ref={userMenuRef}>
               <div
                 className="admin-chip"
                 role="button"
@@ -117,8 +138,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 aria-haspopup="true"
                 aria-expanded={menuOpen}
                 onClick={() => setMenuOpen((v) => !v)}
-                onBlur={(e) => {
-                  if (!e.currentTarget.contains(e.relatedTarget)) setMenuOpen(false);
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setMenuOpen((v) => !v);
+                  }
                 }}
               >
                 <Avatar src={user?.avatar_thumb_url ?? user?.avatar_url} name={user?.name ?? '?'} size="sm" />
@@ -132,12 +156,20 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   <strong>{user?.name}</strong>
                   <span dir="ltr">{user?.email}</span>
                 </div>
-                <button type="button" onClick={() => router.push('/admin/profile')}>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push('/admin/profile');
+                  }}
+                >
                   {t('nav.profile')}
                 </button>
                 <button
                   type="button"
                   className="danger"
+                  role="menuitem"
                   disabled={logout.isPending}
                   onClick={() => logout.mutate()}
                 >
