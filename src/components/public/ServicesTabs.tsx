@@ -59,7 +59,7 @@ export function ServicesTabs() {
                 {g.featured && <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-accent" />}
                 {tx(g.label ?? g.title)}
               </span>
-              <span aria-hidden="true" className={`text-xs ${selected ? "text-muted" : "text-white/40"}`}>
+              <span aria-hidden="true" className={`text-xs ${selected ? "text-muted" : "text-white/60"}`}>
                 {String(i + 1).padStart(2, "0")}
               </span>
             </button>

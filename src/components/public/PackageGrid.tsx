@@ -61,7 +61,7 @@ export function PackageGrid({ withDetails = false }: { withDetails?: boolean }) 
                     {t("featuredTag")}
                   </span>
                 )}
-                <h3 className="flex items-center gap-2 text-lg font-bold">
+                <h3 className={`flex items-center gap-2 text-lg font-bold ${featured ? "text-white" : "text-text"}`}>
                   <span aria-hidden="true" className={`size-3 shrink-0 rounded-full ${MEDALS[i % MEDALS.length]}`} />
                   {pkg.name}
                 </h3>
