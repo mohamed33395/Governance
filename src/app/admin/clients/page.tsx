@@ -25,7 +25,9 @@ import {
   TableSkeleton,
   useToast,
 } from '@/components/ui';
-import { ChartCard, BarChart } from '@/components/admin/charts';
+import { ChartCard, BarChart, RankingList } from '@/components/admin/charts';
+import { KpiCard } from '@/components/admin/KpiCard';
+import { FAMILY } from '@/components/admin/registry';
 import type { AdminClientsStats, Client, Consultant, Paginated } from '@/types/api';
 
 // §13.10 — clients (ADM-CL-01..08)
@@ -122,37 +124,38 @@ function ClientsInner() {
 
       {can('view-clients') && statsQuery.data && (
         <>
-          <div className="stat-grid mb-6">
-            <div className="stat-card">
-              <div className="label">{t('nav.clients')}</div>
-              <div className="num">{statsQuery.data.total}</div>
-              <div className="trend flat">{t('admin.statsActive')}: {statsQuery.data.active}</div>
-            </div>
-            <div className="stat-card">
-              <div className="label">{t('users.inactive')}</div>
-              <div className="num">{statsQuery.data.inactive}</div>
-            </div>
-            <div className="stat-card">
-              <div className="label">{t('admin.statsNewThisMonth')}</div>
-              <div className="num">{statsQuery.data.new_this_month}</div>
-            </div>
+          <div className="stat-grid">
+            <KpiCard
+              family="pink"
+              label={t('nav.clients')}
+              hint={t('admin.hintClients')}
+              value={statsQuery.data.total}
+              context={`${t('admin.statsActive')}: ${statsQuery.data.active}`}
+            />
+            <KpiCard family="blue" label={t('users.inactive')} value={statsQuery.data.inactive} />
+            <KpiCard
+              family="green"
+              label={t('admin.statsNewThisMonth')}
+              value={statsQuery.data.new_this_month}
+            />
           </div>
 
-          <div className="chart-row mb-6">
-            <ChartCard title={t('admin.clientsGrowth')}>
+          <div className="chart-row">
+            <ChartCard title={t('admin.clientsGrowth')} accent="pink">
               <BarChart
-                data={statsQuery.data.new_by_month.map((m) => ({ label: m.month, value: m.count, color: 'var(--primary)' }))}
+                data={statsQuery.data.new_by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.pink.light }))}
                 sort="label-asc"
+                label={t('admin.clientsGrowth')}
               />
             </ChartCard>
-            <ChartCard title={t('admin.topClients')}>
-              <BarChart
+            <ChartCard title={t('admin.topClients')} accent="green">
+              <RankingList
                 data={statsQuery.data.top_clients.slice(0, 5).map((c) => ({
                   label: c.company_name,
                   value: c.bookings_count,
-                  color: 'var(--gold)',
+                  color: FAMILY.green.light,
                 }))}
-                sort="value-desc"
+                label={t('admin.topClients')}
               />
             </ChartCard>
           </div>

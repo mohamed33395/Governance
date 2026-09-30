@@ -1,7 +1,11 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { FAMILY, routeForPath } from '@/components/admin/registry';
 
+// One shared page-identity header: accent rail + route icon tile + title/subtitle,
+// actions on the opposite side. Routes outside the admin registry keep a plain title.
 export function PageHeader({
   title,
   subtitle,
@@ -13,13 +17,32 @@ export function PageHeader({
   actions?: ReactNode;
   className?: string;
 }) {
+  const pathname = usePathname();
+  const route = routeForPath(pathname ?? '');
+  const Icon = route?.icon;
+  const accent = route ? FAMILY[route.family] : null;
+
   return (
-    <div className={`flex items-start justify-between gap-4 flex-wrap mb-6 ${className}`}>
-      <div>
-        <h1 className="text-2xl sm:text-[1.7rem]">{title}</h1>
-        {subtitle && <p className="text-muted text-[0.92rem] mt-1.5">{subtitle}</p>}
+    <div className={`page-identity ${className}`}>
+      <div className="page-identity-main">
+        {accent && Icon ? (
+          <>
+            <span className="page-id-rail" style={{ background: accent.strong }} aria-hidden="true" />
+            <span
+              className="page-id-tile"
+              style={{ ['--id-strong' as string]: accent.strong, ['--id-light' as string]: accent.light }}
+              aria-hidden="true"
+            >
+              <Icon size={18} strokeWidth={2.25} />
+            </span>
+          </>
+        ) : null}
+        <div className="min-w-0">
+          <h1 className="page-id-title">{title}</h1>
+          {subtitle && <p className="page-id-sub">{subtitle}</p>}
+        </div>
       </div>
-      {actions && <div className="flex items-center gap-2.5 flex-wrap">{actions}</div>}
+      {actions && <div className="page-identity-actions">{actions}</div>}
     </div>
   );
 }

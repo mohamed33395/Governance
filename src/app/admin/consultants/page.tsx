@@ -43,7 +43,9 @@ import {
   useToast,
 } from '@/components/ui';
 import { AVATAR_ACCEPT, AVATAR_MAX_MB } from '@/lib/files';
-import { ChartCard, BarChart } from '@/components/admin/charts';
+import { ChartCard, RankingList } from '@/components/admin/charts';
+import { KpiCard } from '@/components/admin/KpiCard';
+import { FAMILY } from '@/components/admin/registry';
 import type { AdminConsultantsStats, Consultant, Paginated } from '@/types/api';
 
 // §13.4 — consultants (CON-01..07)
@@ -144,46 +146,48 @@ function ConsultantsInner() {
 
       {can('view-consultants') && statsQuery.data && (
         <>
-          <div className="stat-grid mb-6">
-            <div className="stat-card">
-              <div className="label">{t('nav.consultants')}</div>
-              <div className="num">{statsQuery.data.total}</div>
-              <div className="trend flat">{t('admin.statsActive')}: {statsQuery.data.active}</div>
-            </div>
-            <div className="stat-card">
-              <div className="label">{t('admin.statsPendingReports')}</div>
-              <div className="num">
-                {statsQuery.data.top_consultants.reduce((sum, c) => sum + c.pending_reports_count, 0)}
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="label">{t('consultants.specializationField')}</div>
-              <div className="num">{statsQuery.data.by_specialization.length}</div>
-            </div>
+          <div className="stat-grid">
+            <KpiCard
+              family="cyan"
+              label={t('nav.consultants')}
+              hint={t('admin.hintConsultants')}
+              value={statsQuery.data.total}
+              context={`${t('admin.statsActive')}: ${statsQuery.data.active}`}
+            />
+            <KpiCard
+              family="blue"
+              label={t('admin.statsPendingReports')}
+              value={statsQuery.data.top_consultants.reduce((sum, c) => sum + c.pending_reports_count, 0)}
+            />
+            <KpiCard
+              family="violet"
+              label={t('consultants.specializationField')}
+              value={statsQuery.data.by_specialization.length}
+            />
           </div>
 
-          <div className="chart-row mb-6">
-            <ChartCard title={t('admin.consultantsBySpecialization')}>
-              <BarChart
+          <div className="chart-row">
+            <ChartCard title={t('admin.consultantsBySpecialization')} accent="violet">
+              <RankingList
                 data={statsQuery.data.by_specialization.map((s) => ({
                   label: s.specialization,
                   value: s.count,
-                  color: 'var(--info)',
+                  color: FAMILY.violet.light,
                 }))}
-                sort="value-desc"
+                label={t('admin.consultantsBySpecialization')}
               />
             </ChartCard>
-            <ChartCard title={t('admin.topConsultants')}>
-              <BarChart
+            <ChartCard title={t('admin.topConsultants')} accent="cyan">
+              <RankingList
                 data={statsQuery.data.top_consultants
                   .filter((c) => c.bookings_count > 0)
-                  .slice(0, 5)
                   .map((c) => ({
                     label: c.consultant_name,
                     value: c.bookings_count,
-                    color: 'var(--gold)',
+                    color: FAMILY.cyan.light,
                   }))}
-                sort="value-desc"
+                limit={5}
+                label={t('admin.topConsultants')}
               />
             </ChartCard>
           </div>

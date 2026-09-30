@@ -25,7 +25,9 @@ import {
   TableSkeleton,
   useToast,
 } from '@/components/ui';
-import { ChartCard, BarChart, DonutChart, DonutLegend } from '@/components/admin/charts';
+import { ChartCard, BarChart, RankingList } from '@/components/admin/charts';
+import { KpiCard } from '@/components/admin/KpiCard';
+import { FAMILY } from '@/components/admin/registry';
 import type { AdminReportsStats, Client, Consultant, Paginated, Report } from '@/types/api';
 
 // §13.9 — reports (RPT-01..06)
@@ -119,36 +121,34 @@ function ReportsInner() {
 
       {can('view-reports') && statsQuery.data && (
         <>
-          <div className="stat-grid mb-6">
-            <div className="stat-card">
-              <div className="label">{t('nav.reports')}</div>
-              <div className="num">{statsQuery.data.total}</div>
-            </div>
-            <div className="stat-card">
-              <div className="label">{t('reportStatus.pending')}</div>
-              <div className="num">{statsQuery.data.pending}</div>
-            </div>
-            <div className="stat-card">
-              <div className="label">{t('reportStatus.uploaded')}</div>
-              <div className="num">{statsQuery.data.uploaded}</div>
-            </div>
+          <div className="stat-grid">
+            <KpiCard
+              family="violet"
+              label={t('nav.reports')}
+              hint={t('admin.hintReports')}
+              value={statsQuery.data.total}
+            />
+            <KpiCard family="orange" label={t('reportStatus.pending')} value={statsQuery.data.pending} />
+            <KpiCard family="green" label={t('reportStatus.uploaded')} value={statsQuery.data.uploaded} />
           </div>
 
-          <div className="chart-row mb-6">
-            <ChartCard title={t('admin.reportsByMonth')}>
+          <div className="chart-row">
+            <ChartCard title={t('admin.reportsByMonth')} accent="violet">
               <BarChart
-                data={statsQuery.data.by_month.map((m) => ({ label: m.month, value: m.count, color: 'var(--primary)' }))}
+                data={statsQuery.data.by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.violet.light }))}
                 sort="label-asc"
+                label={t('admin.reportsByMonth')}
               />
             </ChartCard>
-            <ChartCard title={t('admin.reportsByConsultant')}>
-              <BarChart
+            <ChartCard title={t('admin.reportsByConsultant')} accent="cyan">
+              <RankingList
                 data={statsQuery.data.by_consultant.map((c) => ({
                   label: c.consultant_name,
                   value: c.count,
-                  color: 'var(--info)',
+                  color: FAMILY.cyan.light,
                 }))}
-                sort="value-desc"
+                limit={8}
+                label={t('admin.reportsByConsultant')}
               />
             </ChartCard>
           </div>

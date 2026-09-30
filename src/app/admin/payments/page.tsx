@@ -9,7 +9,9 @@ import { usePublicMeta } from '@/lib/meta';
 import { usePermissions } from '@/lib/permissions';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import { FilterPanel } from '@/components/admin/FilterPanel';
-import { ChartCard, DonutChart, DonutLegend, BarChart } from '@/components/admin/charts';
+import { ChartCard, DonutChart, DonutLegend, RankingList } from '@/components/admin/charts';
+import { KpiCard } from '@/components/admin/KpiCard';
+import { CATEGORY_COLOR, FAMILY, type FamilyKey } from '@/components/admin/registry';
 import {
   Button,
   Drawer,
@@ -26,6 +28,8 @@ import {
   TableSkeleton,
 } from '@/components/ui';
 import type { AdminPaymentsStats, Booking, Paginated, Payment } from '@/types/api';
+
+const STATUS_FAMILY: Record<string, FamilyKey> = { initiated: 'orange', paid: 'green', failed: 'pink', refunded: 'violet' };
 
 // §13.12 — payments (PAY-01/02). gateway_response is never returned.
 export default function AdminPaymentsPage() {
@@ -80,38 +84,46 @@ function PaymentsInner() {
 
       {can('view-payments') && statsQuery.data && (
         <>
-          <div className="stat-grid mb-6">
-            <div className="stat-card">
-              <div className="label">{t('admin.totalAmount')}</div>
-              <div className="num" style={{ fontSize: '1.5rem' }}>{statsQuery.data.total_amount_formatted}</div>
-            </div>
+          <div className="stat-grid">
+            <KpiCard
+              family="cyan"
+              label={t('admin.totalAmount')}
+              value={statsQuery.data.total_amount_formatted}
+              valueSize="sm"
+            />
             {statsQuery.data.by_status.map((s) => (
-              <div key={s.status} className="stat-card">
-                <div className="label">{t(`paymentStatus.${s.status}`)}</div>
-                <div className="num">{s.count}</div>
-                <div className="trend flat">{s.amount_formatted}</div>
-              </div>
+              <KpiCard
+                key={s.status}
+                family={STATUS_FAMILY[s.status] ?? 'blue'}
+                label={t(`paymentStatus.${s.status}`)}
+                value={s.count}
+                context={s.amount_formatted}
+              />
             ))}
           </div>
 
-          <div className="chart-row mb-6">
-            <ChartCard title={t('admin.paymentsByStatus')}>
+          <div className="chart-row">
+            <ChartCard title={t('admin.paymentsByStatus')} accent="green">
               {(() => {
                 const data = statsQuery.data.by_status
                   .filter((s) => s.count > 0)
-                  .map((s) => ({ label: t(`paymentStatus.${s.status}`), value: s.count, color: 'var(--primary)' }));
+                  .map((s) => ({
+                    label: t(`paymentStatus.${s.status}`),
+                    value: s.count,
+                    color: CATEGORY_COLOR[s.status] ?? FAMILY.cyan.light,
+                  }));
                 return (
                   <div className="flex items-center gap-8 flex-wrap">
-                    <DonutChart data={data} />
+                    <DonutChart data={data} label={t('admin.paymentsByStatus')} />
                     <DonutLegend data={data} />
                   </div>
                 );
               })()}
             </ChartCard>
-            <ChartCard title={t('admin.paymentsByGateway')}>
-              <BarChart
-                data={statsQuery.data.by_gateway.map((g) => ({ label: g.gateway, value: g.count, color: 'var(--gold)' }))}
-                sort="value-desc"
+            <ChartCard title={t('admin.paymentsByGateway')} accent="violet">
+              <RankingList
+                data={statsQuery.data.by_gateway.map((g) => ({ label: g.gateway, value: g.count, color: FAMILY.violet.light }))}
+                label={t('admin.paymentsByGateway')}
               />
             </ChartCard>
           </div>

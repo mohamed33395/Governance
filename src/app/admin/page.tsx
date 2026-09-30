@@ -5,8 +5,10 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePermissions } from '@/lib/permissions';
-import { EmptyState, ErrorState, StatusBadge } from '@/components/ui';
+import { EmptyState, ErrorState, PageHeader, StatusBadge } from '@/components/ui';
 import { ChartCard, DonutChart, DonutLegend, BarChart } from '@/components/admin/charts';
+import { KpiCard } from '@/components/admin/KpiCard';
+import { CATEGORY_COLOR, FAMILY } from '@/components/admin/registry';
 import type { AdminStats } from '@/types/api';
 
 // §13.1 — admin dashboard home (DSH-01). Consultants get no `consultants`/`revenue` keys.
@@ -35,127 +37,79 @@ export default function AdminDashboardPage() {
     return <ErrorState onRetry={() => statsQuery.refetch()} />;
   }
 
+  const statusData = [
+    { label: t('bookingStatus.pending'), value: stats.bookings.pending, color: CATEGORY_COLOR.pending },
+    { label: t('bookingStatus.completed'), value: stats.bookings.completed, color: CATEGORY_COLOR.completed },
+    { label: t('bookingStatus.cancelled'), value: stats.bookings.cancelled, color: CATEGORY_COLOR.cancelled },
+  ];
+
   return (
     <>
+      <PageHeader title={t('nav.dashboard')} />
+
       <div className="stat-grid">
-        <div className="stat-card">
-          <div className="top">
-            <span className="ic">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M16 2v4M8 2v4M3 10h18" />
-              </svg>
-            </span>
-          </div>
-          <div className="label">{t('admin.statsBookings')}</div>
-          <div className="num">{stats.bookings.total}</div>
-          <div className="trend flat">
-            {t('admin.statsToday')}: {stats.bookings.today} · {t('admin.statsPending')}: {stats.bookings.pending}
-          </div>
-        </div>
-
-        <div className="stat-card" role="link" style={{ cursor: 'pointer' }} onClick={() => router.push('/admin/reports')}>
-          <div className="top">
-            <span className="ic">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <path d="M14 2v6h6M16 13H8M16 17H8" />
-              </svg>
-            </span>
-          </div>
-          <div className="label">{t('admin.statsReports')}</div>
-          <div className="num">{stats.reports.total}</div>
-          <div className="trend flat">
-            {t('admin.statsPendingReports')}: {stats.reports.pending}
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="top">
-            <span className="ic">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </span>
-          </div>
-          <div className="label">{t('nav.clients')}</div>
-          <div className="num">{stats.clients.total}</div>
-          <div className="trend up">
-            +{stats.clients.new_this_month} {t('admin.statsNewThisMonth')}
-          </div>
-        </div>
-
+        <KpiCard
+          family="cyan"
+          label={t('admin.statsBookings')}
+          hint={t('admin.hintBookings')}
+          value={stats.bookings.total}
+          context={`${t('admin.statsToday')}: ${stats.bookings.today} · ${t('admin.statsPending')}: ${stats.bookings.pending}`}
+        />
+        <KpiCard
+          family="blue"
+          label={t('admin.statsReports')}
+          hint={t('admin.hintReports')}
+          value={stats.reports.total}
+          context={`${t('admin.statsPendingReports')}: ${stats.reports.pending}`}
+          onClick={() => router.push('/admin/reports')}
+        />
+        <KpiCard
+          family="green"
+          label={t('nav.clients')}
+          hint={t('admin.hintClients')}
+          value={stats.clients.total}
+          delta={{ value: stats.clients.new_this_month }}
+          context={t('admin.statsNewThisMonth')}
+        />
         {/* admins only — the key is absent for consultants */}
         {stats.consultants && (
-          <div className="stat-card">
-            <div className="top">
-              <span className="ic">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <circle cx="12" cy="8" r="4" />
-                  <path d="M4 21v-1a7 7 0 0 1 14 0v1" />
-                </svg>
-              </span>
-            </div>
-            <div className="label">{t('nav.consultants')}</div>
-            <div className="num">{stats.consultants.total}</div>
-            <div className="trend flat">
-              {t('admin.statsActive')}: {stats.consultants.active}
-            </div>
-          </div>
+          <KpiCard
+            family="violet"
+            label={t('nav.consultants')}
+            hint={t('admin.hintConsultants')}
+            value={stats.consultants.total}
+            context={`${t('admin.statsActive')}: ${stats.consultants.active}`}
+          />
         )}
-
         {stats.revenue && (
-          <div className="stat-card">
-            <div className="top">
-              <span className="ic">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <line x1="12" y1="1" x2="12" y2="23" />
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-              </span>
-            </div>
-            <div className="label">{t('admin.statsRevenueMonth')}</div>
-            <div className="num" style={{ fontSize: '1.5rem' }}>{stats.revenue.this_month_formatted}</div>
-            <div className="trend flat">
-              {t('admin.statsRevenueTotal')}: {stats.revenue.total_formatted}
-            </div>
-          </div>
+          <KpiCard
+            family="pink"
+            label={t('admin.statsRevenueMonth')}
+            hint={t('admin.hintRevenue')}
+            value={stats.revenue.this_month_formatted}
+            valueSize="sm"
+            context={`${t('admin.statsRevenueTotal')}: ${stats.revenue.total_formatted}`}
+          />
         )}
       </div>
 
-      {/* charts row */}
       <div className="chart-row">
-        <ChartCard title={t('admin.bookingsByStatus')}>
-          {(() => {
-            const data = [
-              { label: t('bookingStatus.pending'), value: stats.bookings.pending, color: 'var(--warning)' },
-              { label: t('bookingStatus.completed'), value: stats.bookings.completed, color: 'var(--success)' },
-              { label: t('bookingStatus.cancelled'), value: stats.bookings.cancelled, color: 'var(--danger)' },
-            ];
-            return (
-              <div className="flex items-center gap-8 flex-wrap">
-                <DonutChart data={data} />
-                <DonutLegend data={data} />
-              </div>
-            );
-          })()}
+        <ChartCard title={t('admin.bookingsByStatus')} accent="cyan">
+          <div className="flex items-center gap-8 flex-wrap">
+            <DonutChart data={statusData} label={t('admin.bookingsByStatus')} />
+            <DonutLegend data={statusData} />
+          </div>
         </ChartCard>
-        <ChartCard title={t('admin.revenueOverview')}>
+        <ChartCard title={t('admin.revenueOverview')} accent="pink">
           {stats.revenue ? (
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-success-soft rounded-xl p-4 text-center">
+              <div className="rounded-lg border border-border p-4">
                 <div className="text-muted text-sm">{t('admin.statsRevenueMonth')}</div>
-                <div className="font-serif text-xl mt-1" style={{ color: 'var(--success)' }}>
-                  {stats.revenue.this_month_formatted}
-                </div>
+                <div className="text-xl font-bold mt-1 tabular-nums">{stats.revenue.this_month_formatted}</div>
               </div>
-              <div className="bg-primary/10 rounded-xl p-4 text-center">
+              <div className="rounded-lg border border-border p-4">
                 <div className="text-muted text-sm">{t('admin.statsRevenueTotal')}</div>
-                <div className="font-serif text-xl mt-1" style={{ color: 'var(--primary)' }}>
-                  {stats.revenue.total_formatted}
-                </div>
+                <div className="text-xl font-bold mt-1 tabular-nums">{stats.revenue.total_formatted}</div>
               </div>
             </div>
           ) : (
@@ -164,24 +118,25 @@ export default function AdminDashboardPage() {
         </ChartCard>
       </div>
 
-      {/* monthly trends */}
       <div className="chart-row">
-        <ChartCard title={t('admin.bookingsByMonth')}>
+        <ChartCard title={t('admin.bookingsByMonth')} accent="cyan">
           <BarChart
-            data={stats.bookings.by_month.map((m) => ({ label: m.month, value: m.count, color: 'var(--primary)' }))}
+            data={stats.bookings.by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.cyan.light }))}
             sort="label-asc"
+            label={t('admin.bookingsByMonth')}
           />
         </ChartCard>
-        <ChartCard title={t('admin.revenueByMonth')}>
+        <ChartCard title={t('admin.revenueByMonth')} accent="pink">
           {stats.revenue ? (
             <BarChart
               data={stats.revenue.by_month.map((m) => ({
                 label: m.month,
                 value: Math.round(m.amount / 100),
-                color: 'var(--gold)',
+                color: FAMILY.pink.light,
               }))}
               sort="label-asc"
               valueFormatter={(v) => `${v.toLocaleString()} SAR`}
+              label={t('admin.revenueByMonth')}
             />
           ) : (
             <div className="text-muted text-sm py-8 text-center">{t('admin.chartEmpty')}</div>
@@ -190,8 +145,8 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* upcoming bookings mini-table */}
-      <div className="panel-card">
-        <h3>{t('admin.upcomingBookings')}</h3>
+      <section className="panel-card">
+        <h3 className="chart-card-title">{t('admin.upcomingBookings')}</h3>
         {stats.upcoming_bookings.length === 0 ? (
           <EmptyState title={t('common.empty')} />
         ) : (
@@ -224,7 +179,7 @@ export default function AdminDashboardPage() {
             </table>
           </div>
         )}
-      </div>
+      </section>
     </>
   );
 }

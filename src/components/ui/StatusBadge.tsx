@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, type BadgeColor } from './Badge';
+import type { BadgeColor } from './Badge';
 
 // §15 — status → color maps. The label always comes translated from the API.
 const MAPS: Record<string, Record<string, BadgeColor>> = {
@@ -13,6 +13,7 @@ const MAPS: Record<string, Record<string, BadgeColor>> = {
   subscription: { active: 'green', expired: 'gray', cancelled: 'red' },
 };
 
+// Yafa-UI status anatomy: a 6px semantic dot plus plain neutral text — no capsule.
 export function StatusBadge({
   kind,
   value,
@@ -26,8 +27,9 @@ export function StatusBadge({
 }) {
   const color = MAPS[kind]?.[value] ?? 'gray';
   return (
-    <Badge color={color} className={className}>
+    <span className={`status-dot-label ${className}`} data-color={color}>
+      <span className="status-dot" aria-hidden="true" />
       {label}
-    </Badge>
+    </span>
   );
 }

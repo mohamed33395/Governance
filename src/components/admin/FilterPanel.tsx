@@ -31,8 +31,7 @@ export function FilterPanel({ title, children, defaultOpen = true, className = '
 
   return (
     <div
-      className={`filter-panel bg-surface border border-border rounded-2xl mb-6 ${className}`}
-      style={{ boxShadow: 'var(--shadow)' }}
+      className={`filter-panel bg-surface border border-border rounded-lg mb-6 ${className}`}
     >
       <button
         type="button"

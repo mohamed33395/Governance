@@ -22,9 +22,13 @@ import {
   Table,
   TableSkeleton,
 } from '@/components/ui';
-import { BarChart, ChartCard, DonutChart, DonutLegend } from '@/components/admin/charts';
+import { BarChart, ChartCard, DonutChart, DonutLegend, RankingList } from '@/components/admin/charts';
+import { KpiCard } from '@/components/admin/KpiCard';
+import { CATEGORY_COLOR, FAMILY, type FamilyKey } from '@/components/admin/registry';
 import { FilterPanel } from '@/components/admin/FilterPanel';
 import type { AdminBookingsStats, Booking, Consultant, Package, Paginated } from '@/types/api';
+
+const STATUS_FAMILY: Record<string, FamilyKey> = { pending_payment: 'orange', pending: 'blue', completed: 'green', cancelled: 'pink' };
 
 // §13.7 — bookings (BKG-01)
 export default function AdminBookingsPage() {
@@ -116,70 +120,70 @@ function BookingsInner() {
 
       {can('view-bookings') && statsQuery.data && (
         <>
-          <div className="stat-grid mb-6">
-            <div className="stat-card">
-              <div className="label">{t('admin.statsBookings')}</div>
-              <div className="num">{statsQuery.data.total}</div>
-              <div className="trend flat">{t('admin.statsToday')}: {statsQuery.data.today}</div>
-            </div>
+          <div className="stat-grid">
+            <KpiCard
+              family="cyan"
+              label={t('admin.statsBookings')}
+              hint={t('admin.hintBookings')}
+              value={statsQuery.data.total}
+              context={`${t('admin.statsToday')}: ${statsQuery.data.today}`}
+            />
             {statsQuery.data.by_status.map((s) => (
-              <div key={s.status} className="stat-card">
-                <div className="label">{s.label}</div>
-                <div className="num">{s.count}</div>
-              </div>
+              <KpiCard
+                key={s.status}
+                family={STATUS_FAMILY[s.status] ?? 'blue'}
+                label={s.label}
+                value={s.count}
+              />
             ))}
           </div>
 
-          <div className="chart-row mb-6">
-            <ChartCard title={t('admin.bookingsByStatus')}>
+          <div className="chart-row">
+            <ChartCard title={t('admin.bookingsByStatus')} accent="cyan">
               {(() => {
                 const data = statsQuery.data.by_status.map((s) => ({
                   label: s.label,
                   value: s.count,
-                  color:
-                    s.status === 'pending'
-                      ? 'var(--warning)'
-                      : s.status === 'completed'
-                        ? 'var(--success)'
-                        : s.status === 'cancelled'
-                          ? 'var(--danger)'
-                          : 'var(--info)',
+                  color: CATEGORY_COLOR[s.status] ?? FAMILY.cyan.light,
                 }));
                 return (
                   <div className="flex items-center gap-8 flex-wrap">
-                    <DonutChart data={data} />
+                    <DonutChart data={data} label={t('admin.bookingsByStatus')} />
                     <DonutLegend data={data} />
                   </div>
                 );
               })()}
             </ChartCard>
-            <ChartCard title={t('admin.bookingsByMonth')}>
+            <ChartCard title={t('admin.bookingsByMonth')} accent="blue">
               <BarChart
-                data={statsQuery.data.by_month.map((m) => ({ label: m.month, value: m.count, color: 'var(--primary)' }))}
+                data={statsQuery.data.by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.blue.light }))}
                 sort="label-asc"
+                label={t('admin.bookingsByMonth')}
               />
             </ChartCard>
           </div>
 
-          <div className="chart-row mb-6">
-            <ChartCard title={t('admin.bookingsByConsultant')}>
-              <BarChart
+          <div className="chart-row">
+            <ChartCard title={t('admin.bookingsByConsultant')} accent="violet">
+              <RankingList
                 data={statsQuery.data.by_consultant.map((c) => ({
                   label: c.consultant_name,
                   value: c.count,
-                  color: 'var(--info)',
+                  color: FAMILY.violet.light,
                 }))}
-                sort="value-desc"
+                limit={8}
+                label={t('admin.bookingsByConsultant')}
               />
             </ChartCard>
-            <ChartCard title={t('admin.bookingsByPackage')}>
-              <BarChart
+            <ChartCard title={t('admin.bookingsByPackage')} accent="orange">
+              <RankingList
                 data={statsQuery.data.by_package.map((p) => ({
                   label: p.package_name,
                   value: p.count,
-                  color: 'var(--gold)',
+                  color: FAMILY.orange.light,
                 }))}
-                sort="value-desc"
+                limit={8}
+                label={t('admin.bookingsByPackage')}
               />
             </ChartCard>
           </div>

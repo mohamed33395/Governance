@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "yafa-ui-dashboard": {
+      "source": "rejourneyco/yafa-ui-dashboard",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "5cf18dd5b4d937af3d87df3289aab46f744e6a21ffbb8614446bbeed8d775655"
+    }
+  }
+}

@@ -1,23 +1,58 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { FAMILY } from '@/components/admin/registry';
 
-interface DonutSlice {
+export interface ChartDatum {
   label: string;
   value: number;
-  color: string;
+  color?: string;
 }
+
+type Sort = 'none' | 'value-desc' | 'value-asc' | 'label-asc';
+
+function sortData<T extends ChartDatum>(data: T[], sort: Sort): T[] {
+  return [...data].sort((a, b) => {
+    if (sort === 'value-desc') return b.value - a.value;
+    if (sort === 'value-asc') return a.value - b.value;
+    if (sort === 'label-asc') return a.label.localeCompare(b.label);
+    return 0;
+  });
+}
+
+// Accessible alternative to the drawing: the same values as a visually-hidden table.
+function ValuesTable({ data, format }: { data: ChartDatum[]; format: (v: number) => string }) {
+  return (
+    <table className="sr-only">
+      <tbody>
+        {data.map((d, i) => (
+          <tr key={i}>
+            <th scope="row">{d.label}</th>
+            <td>{format(d.value)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+const summarize = (data: ChartDatum[], format: (v: number) => string) =>
+  data.map((d) => `${d.label}: ${format(d.value)}`).join('، ');
+
+/* ----------------------------------------------------------------- Donut */
 
 export function DonutChart({
   data,
-  size = 170,
-  thickness = 22,
+  size = 168,
+  thickness = 20,
   showTotal = true,
+  label,
 }: {
-  data: DonutSlice[];
+  data: ChartDatum[];
   size?: number;
   thickness?: number;
   showTotal?: boolean;
+  label?: string;
 }) {
   const total = data.reduce((sum, s) => sum + s.value, 0);
   if (total <= 0) {
@@ -29,72 +64,73 @@ export function DonutChart({
   }
 
   const radius = (size - thickness) / 2;
-  const circumference = 2 * Math.PI * radius;
+  const c = 2 * Math.PI * radius;
+  const visible = data.filter((s) => s.value > 0);
   let offset = 0;
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="none"
-        stroke="var(--border)"
-        strokeWidth={thickness}
-        opacity={0.5}
-      />
-      {data.map((slice, i) => {
-        const fraction = slice.value / total;
-        const dash = fraction * circumference;
-        const gap = circumference - dash;
-        const circle = (
-          <circle
-            key={i}
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke={slice.color}
-            strokeWidth={thickness}
-            strokeDasharray={`${dash} ${gap}`}
-            strokeDashoffset={-offset}
-            strokeLinecap="round"
-          />
-        );
-        offset += dash;
-        return circle;
-      })}
+    <div style={{ width: size, height: size }} className="relative shrink-0">
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        role="img"
+        aria-label={`${label ?? ''} ${summarize(data, String)}`.trim()}
+        className="-rotate-90"
+      >
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--chart-grid)" strokeWidth={thickness} />
+        {visible.map((slice, i) => {
+          const dash = (slice.value / total) * c;
+          // hairline gap between arcs keeps neighbouring colours distinguishable
+          const gap = visible.length > 1 ? 2 : 0;
+          const el = (
+            <circle
+              key={i}
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke={slice.color ?? FAMILY.cyan.light}
+              strokeWidth={thickness}
+              strokeDasharray={`${Math.max(dash - gap, 0)} ${c - Math.max(dash - gap, 0)}`}
+              strokeDashoffset={-offset}
+            />
+          );
+          offset += dash;
+          return el;
+        })}
+      </svg>
       {showTotal && (
-        <text
-          x="50%"
-          y="50%"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          className="font-serif fill-primary"
-          style={{ fontSize: '1.35rem' }}
-          transform={`rotate(90 ${size / 2} ${size / 2})`}
+        <span
+          className="absolute inset-0 flex items-center justify-center font-serif"
+          style={{ fontSize: '1.6rem', color: 'var(--text)' }}
+          aria-hidden="true"
         >
           {total}
-        </text>
+        </span>
       )}
-    </svg>
+      <ValuesTable data={data} format={String} />
+    </div>
   );
 }
 
-export function DonutLegend({ data }: { data: DonutSlice[] }) {
+export function DonutLegend({ data }: { data: ChartDatum[] }) {
   const total = data.reduce((sum, s) => sum + s.value, 0);
   return (
-    <ul className="flex flex-col gap-2 text-sm">
+    <ul className="flex flex-col gap-2.5 text-[0.88rem] min-w-[170px]">
       {data.map((slice, i) => {
         const pct = total > 0 ? Math.round((slice.value / total) * 100) : 0;
         return (
-          <li key={i} className="flex items-center justify-between gap-4">
-            <span className="flex items-center gap-2">
-              <span className="inline-block rounded-full" style={{ width: 10, height: 10, background: slice.color }} />
+          <li key={i} className="flex items-center justify-between gap-5">
+            <span className="flex items-center gap-2.5">
+              <span
+                className="inline-block rounded-full shrink-0"
+                style={{ width: 8, height: 8, background: slice.color ?? FAMILY.cyan.light }}
+              />
               <span className="text-text">{slice.label}</span>
             </span>
-            <span className="text-muted">
-              {slice.value} <span className="text-xs">({pct}%)</span>
+            <span className="text-text font-semibold tabular-nums">
+              {slice.value} <span className="text-muted text-xs font-normal">({pct}%)</span>
             </span>
           </li>
         );
@@ -103,129 +139,149 @@ export function DonutLegend({ data }: { data: DonutSlice[] }) {
   );
 }
 
-interface BarDatum {
-  label: string;
-  value: number;
-  color?: string;
-}
+/* ------------------------------------------------------------------- Bars */
 
+// Vertical columns — for chronological series (months).
 export function BarChart({
   data,
-  height = 220,
+  height = 240,
   sort = 'none',
   valueFormatter = (v) => String(v),
+  label,
 }: {
-  data: BarDatum[];
+  data: ChartDatum[];
   height?: number;
-  sort?: 'none' | 'value-desc' | 'value-asc' | 'label-asc';
+  sort?: Sort;
   valueFormatter?: (value: number) => string;
+  label?: string;
 }) {
-  const sorted = [...data].sort((a, b) => {
-    if (sort === 'value-desc') return b.value - a.value;
-    if (sort === 'value-asc') return a.value - b.value;
-    if (sort === 'label-asc') return a.label.localeCompare(b.label);
-    return 0;
-  });
+  const sorted = sortData(data, sort);
+  if (sorted.length === 0) return <div className="text-muted text-sm text-center py-10">—</div>;
 
-  if (sorted.length === 0) {
-    return <div className="text-muted text-sm text-center py-10">—</div>;
-  }
-
-  const margin = { top: 24, right: 16, bottom: 56, left: 52 };
+  const margin = { top: 28, right: 12, bottom: 34, left: 8 };
   const width = 640;
   const innerW = width - margin.left - margin.right;
   const innerH = height - margin.top - margin.bottom;
   const max = Math.max(...sorted.map((d) => d.value), 1);
   const y = (v: number) => margin.top + innerH - (v / max) * innerH;
   const slotW = innerW / sorted.length;
-  const barW = Math.min(slotW * 0.55, 52);
-
-  const truncate = (text: string, len = 12) =>
-    text.length > len ? text.slice(0, len) + '…' : text;
+  const barW = Math.min(slotW * 0.5, 56);
 
   return (
-    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
-      <defs>
-        <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" style={{ stopColor: 'var(--primary)' }} />
-          <stop offset="100%" style={{ stopColor: 'var(--green-mid)' }} />
-        </linearGradient>
-      </defs>
-
-      {/* grid lines */}
-      {[0, 0.25, 0.5, 0.75, 1].map((t) => {
-        const val = max * t;
-        const yPos = y(val);
-        return (
-          <g key={t}>
-            <line
-              x1={margin.left}
-              x2={width - margin.right}
-              y1={yPos}
-              y2={yPos}
-              stroke="var(--border)"
-              strokeDasharray="4 4"
-              opacity={0.7}
-            />
-            <text
-              x={margin.left - 10}
-              y={yPos + 4}
-              textAnchor="end"
-              className="fill-muted"
-              style={{ fontSize: 11 }}
-            >
-              {valueFormatter(Math.round(val))}
-            </text>
-          </g>
-        );
-      })}
-
-      {/* bars */}
-      {sorted.map((d, i) => {
-        const x = margin.left + i * slotW + (slotW - barW) / 2;
-        const barH = y(0) - y(d.value);
-        return (
-          <g key={i}>
-            <rect
-              x={x}
-              y={y(d.value)}
-              width={barW}
-              height={barH}
-              rx={6}
-              ry={6}
-              fill={d.color ?? 'url(#barGradient)'}
-              style={{ filter: 'drop-shadow(0 4px 6px rgba(15,42,29,.12))' }}
-            />
-            <text
-              x={x + barW / 2}
-              y={y(d.value) - 10}
-              textAnchor="middle"
-              className="fill-text font-semibold"
-              style={{ fontSize: 12 }}
-            >
-              {valueFormatter(d.value)}
-            </text>
-            <text
-              x={x + barW / 2}
-              y={height - 14}
-              textAnchor="middle"
-              className="fill-muted"
-              style={{ fontSize: 11 }}
-            >
-              {truncate(d.label)}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
+    <div>
+      <svg
+        width="100%"
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label={`${label ?? ''} ${summarize(sorted, valueFormatter)}`.trim()}
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {[0, 0.5, 1].map((t) => (
+          <line
+            key={t}
+            x1={margin.left}
+            x2={width - margin.right}
+            y1={y(max * t)}
+            y2={y(max * t)}
+            stroke="var(--chart-grid)"
+            strokeWidth={1}
+          />
+        ))}
+        {sorted.map((d, i) => {
+          const x = margin.left + i * slotW + (slotW - barW) / 2;
+          const barH = Math.max(y(0) - y(d.value), d.value > 0 ? 2 : 0);
+          const fill = d.color ?? FAMILY.cyan.light;
+          return (
+            <g key={i}>
+              <rect x={x} y={y(0) - barH} width={barW} height={barH} rx={4} ry={4} fill={fill} />
+              <text
+                x={x + barW / 2}
+                y={y(0) - barH - 8}
+                textAnchor="middle"
+                style={{ fontSize: 12, fontWeight: 700, fill: 'var(--text)' }}
+              >
+                {valueFormatter(d.value)}
+              </text>
+              <text
+                x={x + barW / 2}
+                y={height - 10}
+                textAnchor="middle"
+                style={{ fontSize: 12, fill: 'var(--muted)' }}
+              >
+                {d.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <ValuesTable data={sorted} format={valueFormatter} />
+    </div>
   );
 }
 
-export function ChartCard({ title, children }: { title: string; children: ReactNode }) {
+// Horizontal ranking — for named categories (consultants, packages…). Long Arabic
+// names stay fully readable and the order reads like a leaderboard.
+export function RankingList({
+  data,
+  sort = 'value-desc',
+  limit,
+  valueFormatter = (v) => String(v),
+  label,
+}: {
+  data: ChartDatum[];
+  sort?: Sort;
+  limit?: number;
+  valueFormatter?: (value: number) => string;
+  label?: string;
+}) {
+  const sorted = sortData(data, sort).slice(0, limit);
+  if (sorted.length === 0) return <div className="text-muted text-sm text-center py-10">—</div>;
+  const max = Math.max(...sorted.map((d) => d.value), 1);
+
   return (
-    <div className="panel-card">
-      <h3>{title}</h3>
-      {children}
-    </div>
+    <ol className="ranking-list" aria-label={label}>
+      {sorted.map((d, i) => (
+        <li key={i} className="ranking-row">
+          <span className="ranking-rank" aria-hidden="true">
+            {i + 1}
+          </span>
+          <span className="ranking-body">
+            <span className="ranking-line">
+              <span className="ranking-label" title={d.label}>
+                {d.label}
+              </span>
+              <span className="ranking-value">{valueFormatter(d.value)}</span>
+            </span>
+            <span className="ranking-track">
+              <span
+                className="ranking-fill"
+                style={{ width: `${Math.max((d.value / max) * 100, d.value > 0 ? 3 : 0)}%`, background: d.color ?? FAMILY.cyan.light }}
+              />
+            </span>
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/* ------------------------------------------------------------------- Card */
+
+// Every chart card answers one question: a short title, quiet divider, then the chart.
+export function ChartCard({
+  title,
+  accent = 'cyan',
+  children,
+}: {
+  title: string;
+  accent?: keyof typeof FAMILY;
+  children: ReactNode;
+}) {
+  return (
+    <section className="panel-card chart-card" style={{ ['--card-accent' as string]: FAMILY[accent].light }}>
+      <h3 className="chart-card-title">{title}</h3>
+      <div className="chart-card-body">{children}</div>
+    </section>
   );
 }

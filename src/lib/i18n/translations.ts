@@ -803,6 +803,16 @@ export const translations: Record<Lang, Record<string, string>> = {
     "common.maxMb": "بحد أقصى {max} ميجابايت",
 
     // ===== plan keys (nav) =====
+    "navGroup.overview": "نظرة عامة",
+    "navGroup.operations": "العمليات",
+    "navGroup.people": "الأشخاص",
+    "navGroup.catalog": "الباقات",
+    "navGroup.access": "الصلاحيات",
+    "admin.hintBookings": "إجمالي الحجوزات المسجلة بكل حالاتها، ويشمل المكتملة والملغاة.",
+    "admin.hintReports": "عدد التقارير المرفوعة للعملاء. الحجوزات المكتملة التي لم يُرفع لها تقرير تظهر ضمن «بانتظار التقرير».",
+    "admin.hintClients": "إجمالي العملاء المسجلين، مع عدد من انضموا خلال الشهر الحالي.",
+    "admin.hintConsultants": "عدد المستشارين في المنصة، والنشطون هم من يستقبلون الحجوزات حالياً.",
+    "admin.hintRevenue": "مجموع المدفوعات الناجحة خلال الشهر الحالي، دون احتساب المسترد.",
     "nav.dashboard": "الرئيسية",
     "nav.bookings": "الحجوزات",
     "nav.reports": "التقارير",
@@ -2030,6 +2040,16 @@ export const translations: Record<Lang, Record<string, string>> = {
     "common.maxMb": "up to {max} MB",
 
     // ===== plan keys (nav) =====
+    "navGroup.overview": "Overview",
+    "navGroup.operations": "Operations",
+    "navGroup.people": "People",
+    "navGroup.catalog": "Catalog",
+    "navGroup.access": "Access",
+    "admin.hintBookings": "All recorded bookings across every status, including completed and cancelled.",
+    "admin.hintReports": "Reports uploaded to clients. Completed bookings still missing a report appear under “Awaiting report”.",
+    "admin.hintClients": "Total registered clients, plus how many joined during the current month.",
+    "admin.hintConsultants": "Consultants on the platform. Active consultants are the ones currently accepting bookings.",
+    "admin.hintRevenue": "Sum of successful payments this month, excluding refunded amounts.",
     "nav.dashboard": "Dashboard",
     "nav.bookings": "Bookings",
     "nav.reports": "Reports",

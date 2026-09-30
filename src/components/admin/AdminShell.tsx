@@ -4,6 +4,7 @@ import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
+import { Menu } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAdminAuth } from '@/stores/admin-auth';
 import { usePermissions } from '@/lib/permissions';
@@ -11,20 +12,7 @@ import { useI18n } from '@/lib/i18n/i18n-context';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
 import { Avatar } from '@/components/ui';
-
-// §9.2 — admin sidebar items, each hidden without its permission
-const NAV_ITEMS = [
-  { key: 'nav.dashboard', href: '/admin', perm: 'view-dashboard' },
-  { key: 'nav.bookings', href: '/admin/bookings', perm: 'view-bookings' },
-  { key: 'nav.reports', href: '/admin/reports', perm: 'view-reports' },
-  { key: 'nav.clients', href: '/admin/clients', perm: 'view-clients' },
-  { key: 'nav.consultants', href: '/admin/consultants', perm: 'view-consultants' },
-  { key: 'nav.my_availability', href: '/admin/my-availability', perm: 'view-availability', consultantOnly: true },
-  { key: 'nav.packages', href: '/admin/packages', perm: 'view-packages' },
-  { key: 'nav.payments', href: '/admin/payments', perm: 'view-payments' },
-  { key: 'nav.users', href: '/admin/users', perm: 'view-users' },
-  { key: 'nav.roles', href: '/admin/roles', perm: 'view-roles' },
-] as const;
+import { FAMILY, NAV_GROUPS, ROUTES, routeForPath } from '@/components/admin/registry';
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const { t } = useI18n();
@@ -44,15 +32,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
     },
   });
 
-  const items = NAV_ITEMS.filter((item) => {
-    if ('consultantOnly' in item && item.consultantOnly && type !== 'consultant') return false;
-    return can(item.perm);
+  // §9.2 — each sidebar item is hidden without its permission
+  const allowed = ROUTES.filter((r) => {
+    if (r.consultantOnly && type !== 'consultant') return false;
+    return can(r.perm);
   });
 
-  const isActive = (href: string) =>
-    href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
-
-  const activeItem = [...items].reverse().find((i) => isActive(i.href));
+  const activeHref = routeForPath(pathname ?? '')?.href;
 
   return (
     <div className={`dash-shell${desktopCollapsed ? ' sidebar-collapsed' : ''}`} id="dashShell">
@@ -62,17 +48,38 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <img src="/logo_icon.png" alt="" />
           <span>{t('auth.adminArea')}</span>
         </div>
-        <nav className="dash-nav">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`dash-nav-link${isActive(item.href) ? ' active' : ''}`}
-              onClick={() => setMobileOpen(false)}
-            >
-              {t(item.key)}
-            </Link>
-          ))}
+        <nav className="dash-nav" aria-label={t('auth.adminArea')}>
+          {NAV_GROUPS.map((group) => {
+            const items = group.hrefs
+              .map((href) => allowed.find((r) => r.href === href))
+              .filter((r): r is NonNullable<typeof r> => !!r);
+            if (items.length === 0) return null;
+            return (
+              <div key={group.key} className="dash-nav-group">
+                <div className="group-label">
+                  <span className="group-dot" style={{ background: FAMILY[group.family].light }} aria-hidden="true" />
+                  {t(group.key)}
+                </div>
+                {items.map((item) => {
+                  const Icon = item.icon;
+                  const active = item.href === activeHref;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={active ? 'page' : undefined}
+                      className={`dash-nav-link${active ? ' active' : ''}`}
+                      style={{ ['--route-light' as string]: FAMILY[item.family].light }}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Icon size={18} strokeWidth={2.25} aria-hidden="true" className="dash-nav-icon" />
+                      <span>{t(item.key)}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            );
+          })}
         </nav>
       </aside>
       <div
@@ -82,25 +89,21 @@ export function AdminShell({ children }: { children: ReactNode }) {
       />
       <div className="dash-main">
         <div className="dash-topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div className="flex items-center gap-3">
             <button
               type="button"
               className="menu-toggle"
               aria-label={t('menu')}
+              aria-expanded={mobileOpen || !desktopCollapsed}
+              aria-controls="dashSidebar"
               onClick={() => {
                 setMobileOpen((v) => !v);
                 setDesktopCollapsed((v) => !v);
               }}
             >
-              <span className="icon">
-                <svg viewBox="0 0 24 24">
-                  <line x1="3" y1="6" x2="21" y2="6" />
-                  <line x1="3" y1="12" x2="21" y2="12" />
-                  <line x1="3" y1="18" x2="21" y2="18" />
-                </svg>
-              </span>
+              <Menu size={20} strokeWidth={2.25} aria-hidden="true" />
             </button>
-            <h2 id="dashTitle">{activeItem ? t(activeItem.key) : t('nav.dashboard')}</h2>
+            <span className="dash-topbar-title">{t('auth.adminArea')}</span>
           </div>
           <div className="topbar-right header-actions">
             <LanguageSwitcher />
@@ -143,7 +146,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </div>
           </div>
         </div>
-        <div className="dash-body">{children}</div>
+        <div className="dash-body">
+          <div className="dash-content">{children}</div>
+        </div>
       </div>
     </div>
   );
