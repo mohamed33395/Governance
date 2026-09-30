@@ -76,7 +76,7 @@ export function Header() {
   const reveal = (shown: boolean) =>
     shown ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0";
 
-  const LINK = `rounded-lg px-3 py-2 text-sm font-semibold ${FLUID} ${FOCUS}`;
+  const LINK = `rounded-lg px-2 py-2 text-sm font-semibold whitespace-nowrap ${FLUID} ${FOCUS}`;
 
   return (
     <>
