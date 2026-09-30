@@ -191,7 +191,7 @@ function ClientsInner() {
                 key: 'subscription',
                 header: t('clientsAdmin.subscription'),
                 render: (c) =>
-                  c.active_subscription ? (
+                  c.active_subscription?.package ? (
                     <Badge color="green">{c.active_subscription.package.name}</Badge>
                   ) : (
                     <span className="text-muted">—</span>

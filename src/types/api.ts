@@ -85,7 +85,7 @@ export type SubscriptionStatus = 'active' | 'expired' | 'cancelled';
 
 export interface Subscription {
   id: ID;
-  package: Pick<Package, 'id' | 'slug' | 'name' | 'name_ar' | 'name_en'>;
+  package?: Pick<Package, 'id' | 'slug' | 'name' | 'name_ar' | 'name_en'> | null;
   status: SubscriptionStatus; status_label?: string;
   starts_at: string; ends_at: string;
   consultations_limit: number | null; consultations_used: number;

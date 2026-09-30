@@ -73,7 +73,7 @@ export default function MyPackagesPage() {
               return (
                 <div key={sub.id} className="bg-surface border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow)' }}>
                   <div className="flex items-start justify-between gap-3 mb-4">
-                    <h3 className="text-lg">{sub.package.name}</h3>
+                    <h3 className="text-lg">{sub.package?.name ?? '—'}</h3>
                     <StatusBadge kind="subscription" value={sub.status} label={sub.status_label ?? t(`subscriptionStatus.${sub.status}`)} />
                   </div>
 

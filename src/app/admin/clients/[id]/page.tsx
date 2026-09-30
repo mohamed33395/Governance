@@ -82,7 +82,7 @@ function DetailsInner() {
               {client.email} · {client.phone}
             </p>
           </div>
-          {client.active_subscription && (
+          {client.active_subscription?.package && (
             <Badge color="green">{client.active_subscription.package.name}</Badge>
           )}
         </div>
@@ -333,7 +333,7 @@ function ClientSubscriptionsTab({ clientId }: { clientId: number }) {
     <>
       <Table
         columns={[
-          { key: 'package', header: t('bookings.package'), render: (s) => <strong>{s.package.name}</strong> },
+          { key: 'package', header: t('bookings.package'), render: (s) => <strong>{s.package?.name ?? '—'}</strong> },
           {
             key: 'status',
             header: t('common.status'),

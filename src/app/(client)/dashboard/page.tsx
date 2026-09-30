@@ -106,7 +106,7 @@ export default function DashboardPage() {
         <div className="client-packages">
           {data.active_subscriptions.map((sub) => (
             <div key={sub.id} className="client-package-card">
-              <h4>{sub.package.name}</h4>
+              <h4>{sub.package?.name ?? '—'}</h4>
               <div className="mt-2 mb-3">
                 <StatusBadge kind="subscription" value={sub.status} label={sub.status_label ?? sub.status} />
               </div>
