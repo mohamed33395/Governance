@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
+import { useI18n } from "@/lib/i18n/i18n-context";
+import { Container, PageHero } from "@/components/public/Section";
+import { Reveal } from "@/components/public/Reveal";
+import { PersonCard } from "@/components/public/PersonCard";
 
 const TEAM = [
   {
@@ -30,30 +34,45 @@ const TEAM = [
 ];
 
 export default function TeamPage() {
+  const { t } = useI18n();
+
   useEffect(() => {
-    document.title = "فريق العمل — مكتب المتخصصون في الحوكمة والامتثال للاستشارات الإدارية";
-  }, []);
+    document.title = `${t("team")} — ${t("brandName")}`;
+  }, [t]);
 
   return (
-    <section className="section" id="team">
-      <div className="wrap">
-        <div className="section-head">
-          <span className="eyebrow">فريق العمل</span>
-          <h2>الاستراتيجيون خلف المكتب</h2>
-          <p>فريق عمل وهمي لأغراض العرض — يمكن استبدال البيانات بالفريق الفعلي لاحقاً.</p>
-        </div>
-        <div className="team-grid">
-          {TEAM.map((m) => (
-            <div className="team-card" key={m.name}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="avatar" src={m.img} alt={m.name} loading="lazy" />
-              <h4>{m.name}</h4>
-              <div className="role">{m.role}</div>
-              <div className="field-tag">{m.field}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+    <main>
+      <PageHero
+        eyebrow={t("team")}
+        title="الاستراتيجيون خلف المكتب"
+        lead="فريق عمل وهمي لأغراض العرض — يمكن استبدال البيانات بالفريق الفعلي لاحقاً."
+      />
+      <section className="py-24">
+        <Container>
+          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {TEAM.map((m, i) => (
+              <li key={m.name}>
+                <Reveal delay={i * 100} className="h-full">
+                  <PersonCard
+                    avatar={
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={m.img}
+                        alt={m.name}
+                        loading="lazy"
+                        className="size-24 rounded-full border border-border object-cover"
+                      />
+                    }
+                    name={m.name}
+                    role={m.role}
+                    field={m.field}
+                  />
+                </Reveal>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </section>
+    </main>
   );
 }

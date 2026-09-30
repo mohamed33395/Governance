@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import "@/styles/contact.css";
+import { Clock, DeviceMobile, Envelope, WhatsappLogo } from "@phosphor-icons/react";
+import { Container, PageHero } from "@/components/public/Section";
+import { Reveal } from "@/components/public/Reveal";
+import { FormMessage, SelectField, TextAreaField, TextField } from "@/components/public/FormField";
+import { CARD, FLUID, FOCUS } from "@/components/public/tokens";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -44,157 +48,110 @@ export default function ContactPage() {
     form.reset();
   }
 
+  const LINK = `rounded-lg font-semibold text-text ${FLUID} hover:text-primary dark:hover:text-accent-soft ${FOCUS}`;
+
   return (
     <main>
-      <section className="page-hero">
-        <div className="wrap">
-          <span className="eyebrow">تواصل معنا</span>
-          <h1 style={{ marginTop: 12 }}>نسعد بتواصلكم معنا</h1>
-          <p className="lead">
-            يمكنكم التواصل مع فريقنا عبر البريد الإلكتروني أو الجوال، أو إرسال رسالة مباشرة من خلال النموذج أدناه.
-          </p>
-          <div className="contact-chips">
-            <a className="contact-chip" href="mailto:GCMC@GCMC.SA">
-              <span className="icon">
-                <svg viewBox="0 0 24 24">
-                  <rect x="3" y="5" width="18" height="14" rx="1" />
-                  <polyline points="3,6 12,13 21,6" />
-                </svg>
-              </span>
-              GCMC@GCMC.SA
-            </a>
-            <a className="contact-chip" href="tel:+966550181166">
-              <span className="icon">
-                <svg viewBox="0 0 24 24">
-                  <rect x="7" y="2" width="10" height="20" rx="2" />
-                  <line x1="11" y1="18" x2="13" y2="18" />
-                </svg>
-              </span>
-              <span dir="ltr">+966 55 018 1166</span>
-            </a>
-            <a className="contact-chip" href="tel:+966554181166">
-              <span className="icon">
-                <svg viewBox="0 0 24 24">
-                  <rect x="7" y="2" width="10" height="20" rx="2" />
-                  <line x1="11" y1="18" x2="13" y2="18" />
-                </svg>
-              </span>
-              <span dir="ltr">+966 55 418 1166</span>
-            </a>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="تواصل معنا"
+        title="نسعد بتواصلكم معنا"
+        lead="يمكنكم التواصل مع فريقنا عبر البريد الإلكتروني أو الجوال، أو إرسال رسالة مباشرة من خلال النموذج أدناه."
+      />
 
-      <section className="section">
-        <div className="wrap">
-          <div className="contact-grid">
-            <div className="contact-info">
-              <div className="divider" />
-              <h2>بيانات التواصل</h2>
-              <ul>
-                <li>
-                  <span className="icon">
-                    <svg viewBox="0 0 24 24">
-                      <rect x="3" y="5" width="18" height="14" rx="1" />
-                      <polyline points="3,6 12,13 21,6" />
-                    </svg>
-                  </span>
-                  <span>
-                    البريد الإلكتروني:
-                    <br />
-                    <a href="mailto:GCMC@GCMC.SA">GCMC@GCMC.SA</a>
-                  </span>
-                </li>
-                <li>
-                  <span className="icon">
-                    <svg viewBox="0 0 24 24">
-                      <rect x="7" y="2" width="10" height="20" rx="2" />
-                      <line x1="11" y1="18" x2="13" y2="18" />
-                    </svg>
-                  </span>
-                  <span>
-                    الجوال:
-                    <br />
-                    <a href="tel:+966550181166" dir="ltr">+966 55 018 1166</a>
-                  </span>
-                </li>
-                <li>
-                  <span className="icon">
-                    <svg viewBox="0 0 24 24">
-                      <rect x="7" y="2" width="10" height="20" rx="2" />
-                      <line x1="11" y1="18" x2="13" y2="18" />
-                    </svg>
-                  </span>
-                  <span>
-                    الواتساب:
-                    <br />
-                    <a href="tel:+966554181166" dir="ltr">+966 55 418 1166</a>
-                  </span>
-                </li>
-                <li>
-                  <span className="icon">
-                    <svg viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12,6 12,12 16,14" />
-                    </svg>
-                  </span>
-                  <span>
-                    وقت الرد:
-                    <br />
-                    خلال يوم عمل واحد
-                  </span>
-                </li>
-              </ul>
-            </div>
+      <section className="py-24">
+        <Container className="grid items-start gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+          <Reveal>
+            <h2 className="text-2xl font-bold text-text">بيانات التواصل</h2>
+            <ul className="mt-8 flex flex-col gap-6">
+              <li className="flex items-start gap-4">
+                <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-primary dark:text-accent-soft">
+                  <Envelope size={24} weight="duotone" aria-hidden="true" />
+                </span>
+                <span className="text-sm text-muted">
+                  البريد الإلكتروني
+                  <br />
+                  <a href="mailto:GCMC@GCMC.SA" className={LINK} dir="ltr">
+                    GCMC@GCMC.SA
+                  </a>
+                </span>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-primary dark:text-accent-soft">
+                  <DeviceMobile size={24} weight="duotone" aria-hidden="true" />
+                </span>
+                <span className="text-sm text-muted">
+                  الجوال
+                  <br />
+                  <a href="tel:+966550181166" dir="ltr" className={LINK}>
+                    +966 55 018 1166
+                  </a>
+                </span>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-primary dark:text-accent-soft">
+                  <WhatsappLogo size={24} weight="duotone" aria-hidden="true" />
+                </span>
+                <span className="text-sm text-muted">
+                  الواتساب
+                  <br />
+                  <a href="tel:+966554181166" dir="ltr" className={LINK}>
+                    +966 55 418 1166
+                  </a>
+                </span>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-primary dark:text-accent-soft">
+                  <Clock size={24} weight="duotone" aria-hidden="true" />
+                </span>
+                <span className="text-sm text-muted">
+                  وقت الرد
+                  <br />
+                  <span className="font-semibold text-text">خلال يوم عمل واحد</span>
+                </span>
+              </li>
+            </ul>
+          </Reveal>
 
-            <form className="contact-form" id="contactForm" onSubmit={handleSubmit}>
-              <div className="field-grid">
-                <div className="field">
-                  <label>الاسم</label>
-                  <input type="text" name="name" required />
-                </div>
-                <div className="field">
-                  <label>رقم الجوال (مرتبط بالتسجيل)</label>
-                  <input type="tel" name="phone" required />
-                </div>
-                <div className="field full">
-                  <label>البريد الإلكتروني</label>
-                  <input type="email" name="email" required />
-                </div>
-                <div className="field">
-                  <label>برنامج التواصل المفضل</label>
-                  <select name="msgApp" defaultValue="">
-                    <option value="" disabled>
-                      اختر البرنامج
-                    </option>
-                    <option value="واتساب">واتساب</option>
-                    <option value="تليجرام">تليجرام</option>
-                    <option value="سيجنال">سيجنال</option>
-                  </select>
-                </div>
-                <div className="field">
-                  <label>اسم الحساب أو الرابط</label>
-                  <input type="text" name="msgAccount" placeholder="مثال: @username أو رقم الحساب" />
-                </div>
-                <div className="field full">
-                  <label>الموضوع</label>
-                  <input type="text" name="subject" required />
-                </div>
-                <div className="field full">
-                  <label>الرسالة</label>
-                  <textarea name="message" placeholder="اكتب رسالتك هنا..." required />
-                </div>
+          <Reveal delay={100}>
+            <form onSubmit={handleSubmit} className={`p-6 md:p-8 ${CARD}`}>
+              <div className="grid gap-6 sm:grid-cols-2">
+                <TextField label="الاسم" name="name" type="text" autoComplete="name" required />
+                <TextField
+                  label="رقم الجوال (مرتبط بالتسجيل)"
+                  name="phone"
+                  type="tel"
+                  dir="ltr"
+                  autoComplete="tel"
+                  required
+                />
+                <TextField label="البريد الإلكتروني" name="email" type="email" dir="ltr" autoComplete="email" required full />
+                <SelectField label="برنامج التواصل المفضل" name="msgApp" defaultValue="">
+                  <option value="" disabled>
+                    اختر البرنامج
+                  </option>
+                  <option value="واتساب">واتساب</option>
+                  <option value="تليجرام">تليجرام</option>
+                  <option value="سيجنال">سيجنال</option>
+                </SelectField>
+                <TextField
+                  label="اسم الحساب أو الرابط"
+                  name="msgAccount"
+                  type="text"
+                  placeholder="مثال: @username أو رقم الحساب"
+                />
+                <TextField label="الموضوع" name="subject" type="text" required full />
+                <TextAreaField label="الرسالة" name="message" placeholder="اكتب رسالتك هنا..." required full />
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }}>
+              <button type="submit" className="btn btn-primary mt-8 w-full">
                 إرسال الرسالة
               </button>
-              <p className="form-note">بإرسال هذا النموذج فإنك توافق على التواصل معك عبر البريد أو الجوال.</p>
-              <div className={`form-msg${submitted ? " show" : ""}`} id="formMsg">
-                تم استلام رسالتك بنجاح، سيتواصل معك فريقنا قريباً.
-              </div>
+              <p className="mt-4 text-sm text-muted text-pretty">
+                بإرسال هذا النموذج فإنك توافق على التواصل معك عبر البريد أو الجوال.
+              </p>
+              <FormMessage show={submitted}>تم استلام رسالتك بنجاح، سيتواصل معك فريقنا قريباً.</FormMessage>
             </form>
-          </div>
-        </div>
+          </Reveal>
+        </Container>
       </section>
     </main>
   );

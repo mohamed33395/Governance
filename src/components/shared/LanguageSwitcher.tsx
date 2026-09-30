@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ panelClassName = "" }: { panelClassName?: string }) {
   const { lang, setLang, t } = useI18n();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ export function LanguageSwitcher() {
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
         </svg>
       </button>
-      <div className={`translate-panel${open ? " open" : ""}`}>
+      <div className={`translate-panel${open ? " open" : ""} ${panelClassName}`}>
         <div className="translate-list">
           <button
             type="button"

@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-/** Shared easing for every landing transition (heavy, spring like settle). */
-export const FLUID = "transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]";
+import { FLUID } from "./tokens";
+
+export { FLUID };
 
 function prefersReducedMotion() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;

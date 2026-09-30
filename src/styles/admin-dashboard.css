@@ -150,7 +150,7 @@ img.avatar{object-fit:cover;display:block;}
   position:sticky;top:0;z-index:5;
 }
 .dash-topbar-title{font-family:'Amiri',serif;font-weight:700;font-size:1.05rem;color:var(--green-deep);}
-.topbar-right{display:flex;align-items:center;gap:20px;}
+.topbar-right{display:flex;align-items:center;gap:16px;margin-inline-start:24px;}
 .table-search{
   display:flex;align-items:center;gap:10px;background:var(--cream);
   border:1px solid var(--line);padding:9px 14px;border-radius:3px;width:240px;color:var(--stone);

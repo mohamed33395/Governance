@@ -1,6 +1,8 @@
 'use client';
 
 const SIZES = { sm: 32, md: 44, lg: 64, xl: 88 } as const;
+// on-scale type sizes (px) per avatar size
+const FONT = { sm: 12, md: 14, lg: 20, xl: 24 } as const;
 
 export function Avatar({
   src,
@@ -37,12 +39,12 @@ export function Avatar({
   return (
     <span
       aria-label={name}
-      className={`rounded-full inline-flex items-center justify-center font-serif font-bold shrink-0 ${className}`}
+      className={`rounded-full inline-flex items-center justify-center font-bold shrink-0 ${className}`}
       style={{
         width: px,
         height: px,
-        fontSize: px * 0.34,
-        background: 'linear-gradient(150deg, var(--primary), var(--secondary))',
+        fontSize: FONT[size],
+        background: 'var(--secondary)',
         color: 'var(--accent-soft)',
         border: '2px solid var(--accent)',
       }}

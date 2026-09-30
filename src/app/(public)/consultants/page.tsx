@@ -7,6 +7,9 @@ import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePublicMeta } from '@/lib/meta';
 import { Avatar, EmptyState, ErrorState, Pagination, SearchInput } from '@/components/ui';
+import { Container, PageHero } from '@/components/public/Section';
+import { PersonCard } from '@/components/public/PersonCard';
+import { FIELD, FOCUS } from '@/components/public/tokens';
 import type { Paginated, PublicConsultant } from '@/types/api';
 
 // §10.2 — public consultant list (PUB-03). No email/phone is returned.
@@ -32,60 +35,63 @@ export default function ConsultantsPage() {
   const result = consultantsQuery.data;
 
   return (
-    <section className="section">
-      <div className="wrap">
-        <div className="section-head">
-          <span className="eyebrow">{t('consultants.eyebrow')}</span>
-          <h2>{t('consultants.title')}</h2>
-          <p>{t('consultants.subtitle')}</p>
-        </div>
-
-        <div className="flex gap-3 flex-wrap mb-10">
-          <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} className="flex-1 min-w-56" />
-          <input
-            value={specialization}
-            onChange={(e) => { setSpecialization(e.target.value); setPage(1); }}
-            placeholder={t('consultants.specializationFilter')}
-            className="ui-input"
-            style={{ maxWidth: 260 }}
-          />
-        </div>
-
-        {consultantsQuery.isLoading ? (
-          <div className="team-grid">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="team-card animate-pulse" style={{ minHeight: 220 }} />
-            ))}
+    <main>
+      <PageHero eyebrow={t('consultants.eyebrow')} title={t('consultants.title')} lead={t('consultants.subtitle')} />
+      <section className="py-24">
+        <Container>
+          <div className="mb-12 flex flex-wrap gap-3">
+            <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} className="min-w-64 flex-1" />
+            <input
+              value={specialization}
+              onChange={(e) => { setSpecialization(e.target.value); setPage(1); }}
+              placeholder={t('consultants.specializationFilter')}
+              aria-label={t('consultants.specializationFilter')}
+              className={`${FIELD} max-w-[260px]`}
+            />
           </div>
-        ) : consultantsQuery.isError ? (
-          <ErrorState onRetry={() => consultantsQuery.refetch()} />
-        ) : !result || result.data.length === 0 ? (
-          <EmptyState title={t('common.empty')} />
-        ) : (
-          <>
-            <div className="team-grid">
-              {result.data.map((c) => (
-                <Link key={c.id} href={`/consultants/${c.id}`} className="team-card" style={{ textDecoration: 'none' }}>
-                  <Avatar src={c.avatar_thumb_url ?? c.avatar_url} name={c.name} size="lg" className="avatar" />
-                  <h4>{c.name}</h4>
-                  {c.title && <div className="role">{c.title}</div>}
-                  {c.specialization && <div className="field-tag">{c.specialization}</div>}
-                  {c.working_days.length > 0 && (
-                    <div className="flex gap-1 justify-center flex-wrap mt-3">
-                      {c.working_days.map((d) => (
-                        <span key={d} className="ui-badge" data-color="green" style={{ fontSize: '.68rem', padding: '3px 9px' }}>
-                          {dayName(d)}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </Link>
+
+          {consultantsQuery.isLoading ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4" aria-busy="true">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="min-h-[240px] animate-pulse rounded-2xl border border-border bg-surface" />
               ))}
             </div>
-            <Pagination meta={result.meta} onPage={setPage} />
-          </>
-        )}
-      </div>
-    </section>
+          ) : consultantsQuery.isError ? (
+            <ErrorState onRetry={() => consultantsQuery.refetch()} />
+          ) : !result || result.data.length === 0 ? (
+            <EmptyState title={t('common.empty')} />
+          ) : (
+            <>
+              <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {result.data.map((c) => (
+                  <li key={c.id}>
+                    <Link href={`/consultants/${c.id}`} className={`block h-full rounded-2xl ${FOCUS}`}>
+                      <PersonCard
+                        avatar={<Avatar src={c.avatar_thumb_url ?? c.avatar_url} name={c.name} size="lg" />}
+                        name={c.name}
+                        role={c.title}
+                        field={c.specialization}
+                        footer={
+                          c.working_days.length > 0 ? (
+                            <span className="mt-4 flex flex-wrap justify-center gap-1">
+                              {c.working_days.map((d) => (
+                                <span key={d} className="ui-badge" data-color="green">
+                                  {dayName(d)}
+                                </span>
+                              ))}
+                            </span>
+                          ) : null
+                        }
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Pagination meta={result.meta} onPage={setPage} />
+            </>
+          )}
+        </Container>
+      </section>
+    </main>
   );
 }

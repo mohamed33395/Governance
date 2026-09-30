@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   CalendarCheck,
@@ -13,40 +11,16 @@ import {
   SquaresFour,
   WarningCircle,
 } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/i18n-context";
-import { EmptyState, ErrorState } from "@/components/ui";
 import { Reveal } from "@/components/public/Reveal";
 import { TaglineReveal } from "@/components/public/TaglineReveal";
-import type { Package } from "@/types/api";
-
-const MEDALS = ["medal-bronze", "medal-silver", "medal-gold"] as const;
-
-function Check() {
-  return (
-    <span className="check">
-      <svg viewBox="0 0 24 24">
-        <polyline points="4,12.5 9.5,18 20,6.5" />
-      </svg>
-    </span>
-  );
-}
-
-const FLUID = "transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]";
-const FOCUS = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
-
-function SectionHead({ eyebrow, title }: { eyebrow: string; title: string }) {
-  return (
-    <div className="mb-12 max-w-[680px]">
-      <span className="text-sm font-semibold text-primary dark:text-accent-soft">{eyebrow}</span>
-      <h2 className="mt-2 text-3xl font-bold text-text text-balance md:text-4xl">{title}</h2>
-    </div>
-  );
-}
-
-function Container({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`mx-auto max-w-[1180px] px-6 md:px-8 ${className}`}>{children}</div>;
-}
+import { Container, SectionHead } from "@/components/public/Section";
+import { ServicesTabs } from "@/components/public/ServicesTabs";
+import { PackageGrid } from "@/components/public/PackageGrid";
+import { ExpertCard } from "@/components/public/ExpertCard";
+import { Testimonials } from "@/components/public/Testimonials";
+import { VisionValues } from "@/components/public/VisionValues";
+import { FLUID, FOCUS } from "@/components/public/tokens";
 
 const BENEFITS = [
   { icon: SealCheck, title: "lp.b1Title", body: "lp.b1Body" },
@@ -65,14 +39,6 @@ const FAQ_COUNT = 8;
 
 export default function HomePage() {
   const { t, lang } = useI18n();
-  const [activeTab, setActiveTab] = useState<string>("t7");
-
-  // Packages come from the dashboard — GET /public/packages (PUB-01)
-  const packagesQuery = useQuery({
-    queryKey: ["public", "packages"],
-    queryFn: () => api.get("/public/packages").then((r) => r.data.data as Package[]),
-  });
-  const packages = packagesQuery.data;
 
   const faqs = Array.from({ length: FAQ_COUNT }, (_, i) => ({
     q: t(`lp.faq${i + 1}Q`),
@@ -251,479 +217,74 @@ export default function HomePage() {
       </section>
 
       {/* SERVICES */}
-      <section
-        className="section"
-        id="services"
-        style={{ background: "var(--white)", borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}
-      >
-        <div className="wrap">
+      <section id="services" className="border-y border-border bg-surface py-24">
+        <Container>
           <Reveal>
-          <div className="section-head">
-            <span className="eyebrow">{t("servicesEyebrow")}</span>
-            <h2>{t("lp.servicesTitle")}</h2>
-            <p>{t("servicesDesc")}</p>
-          </div>
+            <SectionHead eyebrow={t("servicesEyebrow")} title={t("lp.servicesTitle")} lead={t("servicesDesc")} />
           </Reveal>
           <Reveal>
-          <div className="services-panel">
-            <div className="service-tabs" role="tablist">
-              <button
-                className={`service-tab-featured${activeTab === "t7" ? " active" : ""}`}
-                onClick={() => setActiveTab("t7")}
-              >
-                <span>الخدمات الاستشارية لمنصة خبرة</span>
-                <span className="n">01</span>
-              </button>
-              <button className={activeTab === "t1" ? "active" : undefined} onClick={() => setActiveTab("t1")}>
-                <span>{t("service1")}</span>
-                <span className="n">02</span>
-              </button>
-              <button className={activeTab === "t2" ? "active" : undefined} onClick={() => setActiveTab("t2")}>
-                <span>{t("service2")}</span>
-                <span className="n">03</span>
-              </button>
-              <button className={activeTab === "t3" ? "active" : undefined} onClick={() => setActiveTab("t3")}>
-                <span>{t("service3")}</span>
-                <span className="n">04</span>
-              </button>
-              <button className={activeTab === "t4" ? "active" : undefined} onClick={() => setActiveTab("t4")}>
-                <span>{t("service4")}</span>
-                <span className="n">05</span>
-              </button>
-              <button className={activeTab === "t5" ? "active" : undefined} onClick={() => setActiveTab("t5")}>
-                <span>{t("service5")}</span>
-                <span className="n">06</span>
-              </button>
-              <button className={activeTab === "t6" ? "active" : undefined} onClick={() => setActiveTab("t6")}>
-                <span>{t("service6")}</span>
-                <span className="n">07</span>
-              </button>
-            </div>
-            <div className="service-content">
-              <div className={`tab-panel expert-platform-panel${activeTab === "t7" ? " active" : ""}`} id="t7">
-                <span className="service-panel-kicker">خدمات منصة خبرة</span>
-                <h3>الخدمات الاستشارية لمنصة خبرة</h3>
-                <ul className="service-list service-list-detailed">
-                  <li>
-                    <span className="b">١</span>
-                    <span>
-                      <strong>إعداد تقارير الخبرة القضائية</strong>
-                      تقديم دراسات فنية دقيقة حول القضايا والنزاعات الإدارية المحالة من الدوائر القضائية، وصياغة حلول
-                      مهنية محايدة.
-                    </span>
-                  </li>
-                  <li>
-                    <span className="b">٢</span>
-                    <span>
-                      <strong>تقديم الآراء في النزاعات التعاقدية</strong>
-                      فحص وتحليل النزاعات المتعلقة بالعقود الإدارية والهياكل التنظيمية وإجراءات التشغيل داخل المنشآت،
-                      ومقارنتها باللوائح والأنظمة المعمول بها.
-                    </span>
-                  </li>
-                  <li>
-                    <span className="b">٣</span>
-                    <span>
-                      <strong>تقديم العروض الفنية</strong>
-                      تقديم حلول واستشارات فنية من خبراء المنصة بناءً على معايير الطلب المرفوع من الدائرة القضائية.
-                    </span>
-                  </li>
-                </ul>
-                <Link href="/details#license-1" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
-                  عرض تفاصيل الاعتماد
-                </Link>
-              </div>
-              <div className={`tab-panel${activeTab === "t1" ? " active" : ""}`} id="t1">
-                <h3>{t("service1")}</h3>
-                <ul className="service-list">
-                  <li>
-                    <span className="b">١</span> {t("s1i1")}
-                  </li>
-                  <li>
-                    <span className="b">٢</span> {t("s1i2")}
-                  </li>
-                  <li>
-                    <span className="b">٣</span> {t("s1i3")}
-                  </li>
-                  <li>
-                    <span className="b">٤</span> {t("s1i4")}
-                  </li>
-                  <li>
-                    <span className="b">٥</span> {t("s1i5")}
-                  </li>
-                </ul>
-                <Link href="/details#service-1" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
-                  {t("details")}
-                </Link>
-              </div>
-              <div className={`tab-panel${activeTab === "t2" ? " active" : ""}`} id="t2">
-                <h3>{t("service2")}</h3>
-                <ul className="service-list">
-                  <li>
-                    <span className="b">١</span> {t("s2i1")}
-                  </li>
-                  <li>
-                    <span className="b">٢</span> {t("s2i2")}
-                  </li>
-                  <li>
-                    <span className="b">٣</span> {t("s2i3")}
-                  </li>
-                </ul>
-                <Link href="/details#service-2" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
-                  {t("details")}
-                </Link>
-              </div>
-              <div className={`tab-panel${activeTab === "t3" ? " active" : ""}`} id="t3">
-                <h3>{t("service3")}</h3>
-                <ul className="service-list">
-                  <li>
-                    <span className="b">١</span> {t("s3i1")}
-                  </li>
-                  <li>
-                    <span className="b">٢</span> {t("s3i2")}
-                  </li>
-                  <li>
-                    <span className="b">٣</span> {t("s3i3")}
-                  </li>
-                  <li>
-                    <span className="b">٤</span> {t("s3i4")}
-                  </li>
-                  <li>
-                    <span className="b">٥</span> {t("s3i5")}
-                  </li>
-                </ul>
-                <Link href="/details#service-3" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
-                  {t("details")}
-                </Link>
-              </div>
-              <div className={`tab-panel${activeTab === "t4" ? " active" : ""}`} id="t4">
-                <h3>{t("service4")}</h3>
-                <ul className="service-list service-list-detailed">
-                  <li>
-                    <span className="b">١</span>
-                    <span>
-                      <strong>قطاع التكنولوجيا والتقنية</strong>
-                      استقطاب خبرات متخصصة في البرمجيات والأمن السيبراني والذكاء الاصطناعي.
-                    </span>
-                  </li>
-                  <li>
-                    <span className="b">٢</span>
-                    <span>
-                      <strong>التسويق الرقمي وتحليل البيانات</strong>
-                      توفير متخصصين في التسويق الإلكتروني وتحليل سلوك المستهلك وإدارة الحملات الرقمية.
-                    </span>
-                  </li>
-                  <li>
-                    <span className="b">٣</span>
-                    <span>
-                      <strong>الهندسة بمختلف فروعها</strong>
-                      استقطاب كفاءات هندسية متخصصة تلائم احتياجات القطاعات التقنية والصناعية.
-                    </span>
-                  </li>
-                  <li>
-                    <span className="b">٤</span>
-                    <span>
-                      <strong>الإدارة والقيادة التنفيذية</strong>
-                      توفير قيادات ومديري مشاريع وكفاءات إدارية عليا لدعم استراتيجيات المؤسسات.
-                    </span>
-                  </li>
-                  <li>
-                    <span className="b">٥</span>
-                    <span>
-                      <strong>المبيعات وتطوير الأعمال</strong>
-                      استقطاب محترفي المبيعات وتطوير الأعمال القادرين على بناء الفرص وتنمية الإيرادات.
-                    </span>
-                  </li>
-                </ul>
-                <Link href="/details#service-4" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
-                  {t("details")}
-                </Link>
-              </div>
-              <div className={`tab-panel${activeTab === "t5" ? " active" : ""}`} id="t5">
-                <h3>{t("service5")}</h3>
-                <ul className="service-list service-list-detailed">
-                  <li>
-                    <span className="b">١</span>
-                    <span>
-                      <strong>تحديد نهج تحليل الأعمال</strong>
-                      اختيار المنهجية المناسبة لبيئة المنشأة وآلية تنفيذ المهام وتخطيط الأنشطة المطلوبة.
-                    </span>
-                  </li>
-                  <li>
-                    <span className="b">٢</span>
-                    <span>
-                      <strong>إشراك أصحاب المصلحة</strong>
-                      تحديد أصحاب المصلحة وأدوارهم ومسؤولياتهم، وبناء آليات تواصل فعّالة معهم.
-                    </span>
-                  </li>
-                  <li>
-                    <span className="b">٣</span>
-                    <span>
-                      <strong>تخطيط حوكمة تحليل الأعمال</strong>
-                      وضع القواعد المنظمة لاتخاذ القرارات وتغيير المتطلبات واعتمادها.
-                    </span>
-                  </li>
-                  <li>
-                    <span className="b">٤</span>
-                    <span>
-                      <strong>تخطيط إدارة معلومات تحليل الأعمال</strong>
-                      تحديد كيفية تخزين وتنظيم وحفظ المعلومات والوثائق المرتبطة بالمتطلبات.
-                    </span>
-                  </li>
-                  <li>
-                    <span className="b">٥</span>
-                    <span>
-                      <strong>تحديد أداء تحليل الأعمال</strong>
-                      وضع معايير واضحة لقياس جودة وفاعلية أعمال تحليل الأعمال وتقييم نتائجها.
-                    </span>
-                  </li>
-                </ul>
-                <Link href="/details#service-5" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
-                  {t("details")}
-                </Link>
-              </div>
-              <div className={`tab-panel${activeTab === "t6" ? " active" : ""}`} id="t6">
-                <h3>شبكات الأعمال والشؤون الاقتصادية والتجارية</h3>
-                <ul className="service-list">
-                  <li>
-                    <span className="b">١</span> {t("s6i1")}
-                  </li>
-                  <li>
-                    <span className="b">٢</span> {t("s6i2")}
-                  </li>
-                  <li>
-                    <span className="b">٣</span> {t("s6i3")}
-                  </li>
-                  <li>
-                    <span className="b">٤</span> {t("s6i4")}
-                  </li>
-                  <li>
-                    <span className="b">٥</span> {t("s6i5")}
-                  </li>
-                </ul>
-                <Link href="/details#service-6" className="btn btn-outline btn-sm" style={{ marginTop: 16 }}>
-                  {t("details")}
-                </Link>
-              </div>
-            </div>
-          </div>
+            <ServicesTabs />
           </Reveal>
-        </div>
+        </Container>
       </section>
 
-      {/* Saudi Riyal symbol (official SAMA glyph) */}
-      <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
-        <defs>
-          <symbol id="riyal-symbol" viewBox="0 0 1124.14 1256.39">
-            <path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z" />
-            <path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z" />
-          </symbol>
-        </defs>
-      </svg>
-
       {/* PACKAGES */}
-      <section className="section" id="packages">
-        <div className="wrap">
+      <section id="packages" className="py-24">
+        <Container>
           <Reveal>
-          <div className="section-head">
-            <span className="eyebrow">{t("packagesEyebrow")}</span>
-            <h2>{t("packagesTitle")}</h2>
-            <p>{t("packagesDesc")}</p>
-          </div>
+            <SectionHead eyebrow={t("packagesEyebrow")} title={t("packagesTitle")} lead={t("packagesDesc")} />
           </Reveal>
           <Reveal>
-          {packagesQuery.isLoading ? (
-            <div className="pricing-grid">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="price-card animate-pulse" style={{ minHeight: 420 }} />
-              ))}
-            </div>
-          ) : packagesQuery.isError ? (
-            <ErrorState onRetry={() => packagesQuery.refetch()} />
-          ) : !packages || packages.length === 0 ? (
-            <EmptyState title={t("common.empty")} />
-          ) : (
-            <div className="pricing-grid">
-              {packages.map((pkg, i) => (
-                <div key={pkg.id} className={`price-card${pkg.is_featured ? " featured" : ""}`}>
-                  {pkg.is_featured && <span className="featured-tag">{t("featuredTag")}</span>}
-                  <div className="tier">
-                    <span className={`medal ${MEDALS[i % MEDALS.length]}`} /> {pkg.name}
-                  </div>
-                  <div className="price">
-                    {pkg.price_formatted.replace(/\s*SAR\s*$/u, "")}{" "}
-                    <svg className="riyal-icon" aria-hidden="true">
-                      <use href="#riyal-symbol" />
-                    </svg>{" "}
-                    <small>
-                      / {pkg.billing_period_days} {t("packages.days")}
-                    </small>
-                  </div>
-                  {pkg.description && <p className="desc">{pkg.description}</p>}
-                  <ul>
-                    <li>
-                      <Check />{" "}
-                      {pkg.is_unlimited || pkg.consultations_limit === null
-                        ? t("packages.unlimitedConsultations")
-                        : t("packages.consultationsMonthly").replace("{n}", String(pkg.consultations_limit))}
-                    </li>
-                    {pkg.features_localized.map((feature, fi) => (
-                      <li key={fi}>
-                        <Check /> {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href={`/details#package-${i + 1}`}
-                    className={`btn ${pkg.is_featured ? "btn-ghost" : "btn-outline"} btn-sm`}
-                    style={{ marginBottom: 12 }}
-                  >
-                    {t("packageDetails")}
-                  </Link>
-                  <Link href={`/book/${pkg.slug}`} className={`btn ${pkg.is_featured ? "btn-gold" : "btn-outline"}`}>
-                    {t("choosePackage")}
-                  </Link>
-                </div>
-              ))}
-            </div>
-          )}
+            <PackageGrid withDetails />
           </Reveal>
-        </div>
+        </Container>
       </section>
 
       {/* EXPERT */}
-      <section className="section" id="expert">
-        <div className="wrap">
+      <section id="expert" className="border-y border-border bg-surface py-24">
+        <Container>
           <Reveal>
-          <div className="expert-grid">
-            <div className="expert-card">
-              <div className="expert-photo">
-                <div className="expert-frame">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/WhatsApp Image 2026-09-07 at 4.14.04 PM.png" alt={t("expertName")} />
-                </div>
-              </div>
-              <div className="expert-info">
-                <span className="eyebrow">{t("expertEyebrow")}</span>
-                <h2>{t("expertName")}</h2>
-                <span className="expert-name-en">Consultant. Abdul Kareem Al-Ghamdi</span>
-                <span className="expert-role">{t("expertRole")}</span>
-                <p>{t("expertBio")}</p>
-                <div className="expert-stats">
-                  <div>
-                    <strong>{t("expertStatExp")}</strong>
-                    <span>{t("expertStat1")}</span>
-                  </div>
-                  <div>
-                    <strong>{t("expertStatCons")}</strong>
-                    <span>{t("expertStat2")}</span>
-                  </div>
-                  <div>
-                    <strong>{t("expertStatEst")}</strong>
-                    <span>{t("expertStat3")}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            <ExpertCard
+              eyebrow={t("expertEyebrow")}
+              name={t("expertName")}
+              sub="Consultant. Abdul Kareem Al-Ghamdi"
+              role={t("expertRole")}
+              bio={t("expertBio")}
+              photo="/WhatsApp Image 2026-09-07 at 4.14.04 PM.png"
+              photoAlt={t("expertName")}
+              stats={[
+                { value: t("expertStatExp"), label: t("expertStat1") },
+                { value: t("expertStatCons"), label: t("expertStat2") },
+                { value: t("expertStatEst"), label: t("expertStat3") },
+              ]}
+            />
           </Reveal>
-        </div>
+        </Container>
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="section" id="testimonials">
-        <div className="wrap">
+      <section id="testimonials" className="py-24">
+        <Container>
           <Reveal>
-          <div className="section-head">
-            <span className="eyebrow">{t("testimonialsEyebrow")}</span>
-            <h2>{t("testimonialsTitle")}</h2>
-            <p>{t("testimonialsDesc")}</p>
-          </div>
+            <SectionHead
+              eyebrow={t("testimonialsEyebrow")}
+              title={t("testimonialsTitle")}
+              lead={t("testimonialsDesc")}
+            />
           </Reveal>
-          <Reveal>
-          <div className="testimonials-grid">
-            {[1, 2, 3].map((i) => (
-              <div className="testimonial-card" key={i}>
-                <div className="testimonial-rating" aria-label="5 من 5">
-                  {Array.from({ length: 5 }).map((_, starIdx) => (
-                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" key={starIdx}>
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="testimonial-text">{t(`testimonial${i}Text`)}</p>
-                <div className="testimonial-author">
-                  <div className="testimonial-avatar">
-                    {i === 1 ? "م.ر" : i === 2 ? "ن.ع" : "ف.ح"}
-                  </div>
-                  <div className="testimonial-meta">
-                    <strong>{t(`testimonial${i}Name`)}</strong>
-                    <span>{t(`testimonial${i}Role`)}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          </Reveal>
-        </div>
-      </section>
-      {/* VISION / MISSION / VALUES */}
-      <section className="section" id="about">
-        <div className="wrap">
-          <Reveal>
-          <div className="section-head">
-            <span className="eyebrow">{t("aboutEyebrow")}</span>
-            <h2>{t("aboutTitle")}</h2>
-          </div>
-          </Reveal>
-          <Reveal>
-          <div className="vm-grid">
-            <div className="vm-card">
-              <div className="divider" />
-              <span className="eyebrow" style={{ fontSize: ".85rem" }}>
-                {t("vision")}
-              </span>
-              <p style={{ marginTop: 14 }}>{t("visionText")}</p>
-            </div>
-            <div className="vm-card">
-              <div className="divider" />
-              <span className="eyebrow" style={{ fontSize: ".85rem" }}>
-                {t("mission")}
-              </span>
-              <p style={{ marginTop: 14 }}>{t("missionText")}</p>
-            </div>
-          </div>
-          </Reveal>
-          <Reveal>
-          <div className="values-row">
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("excellence")}</h4>
-            </div>
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("impact")}</h4>
-            </div>
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("initiative")}</h4>
-            </div>
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("leadership")}</h4>
-            </div>
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("distinction")}</h4>
-            </div>
-            <div className="value-item">
-              <div className="mark" />
-              <h4>{t("ownership")}</h4>
-            </div>
-          </div>
-          </Reveal>
-        </div>
+          <Testimonials />
+        </Container>
       </section>
 
+      {/* VISION / MISSION / VALUES */}
+      <section id="about" className="border-y border-border bg-surface py-24">
+        <Container>
+          <Reveal>
+            <SectionHead eyebrow={t("aboutEyebrow")} title={t("aboutTitle")} />
+          </Reveal>
+          <VisionValues />
+        </Container>
+      </section>
 
       {/* FAQ */}
       <section id="faq" className="border-t border-border bg-surface py-24">

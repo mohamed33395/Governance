@@ -127,7 +127,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </button>
             <span className="dash-topbar-title">{t('auth.adminArea')}</span>
           </div>
-          <div className="topbar-right header-actions">
+          <div className="topbar-right">
             <LanguageSwitcher />
             <ThemeToggle />
             <div className="admin-user-menu" ref={userMenuRef}>

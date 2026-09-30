@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import "@/styles/app-page.css";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { Container, SectionHead } from "@/components/public/Section";
+import { Reveal } from "@/components/public/Reveal";
+import { CARD, FLUID, FOCUS, H1_GRADIENT } from "@/components/public/tokens";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import {
   AppointmentsScreen,
@@ -130,21 +134,25 @@ export default function AppPage() {
   const maxShot = Math.max(0, SCREENSHOTS.length - visible);
   const shot = Math.min(activeShot, maxShot);
 
+  const ICON_BOX =
+    "inline-flex shrink-0 items-center justify-center rounded-full bg-secondary text-accent-soft [&_svg]:fill-none [&_svg]:stroke-current [&_svg]:stroke-2 [&_svg]:[stroke-linecap:round] [&_svg]:[stroke-linejoin:round]";
+  const ARROW = `inline-flex size-12 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-text ${FLUID} ${FOCUS} hover:not-disabled:border-accent disabled:opacity-40`;
+
   return (
-    <main className="app-page">
-      <section className="app-hero" id="top">
-        <div className="wrap">
+    <main>
+      <section id="top" className="border-b border-border bg-surface py-24">
+        <Container className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <span className="eyebrow">{t("appEyebrow")}</span>
-            <h1>{t("appHeroTitle")}</h1>
-            <p>{t("appHeroLead")}</p>
-            <div className="store-badges">
-              <a href="#" className="store-badge" aria-label={t("downloadAppStore")}>
-                {APPLE_ICON}
+            <span className="text-sm font-semibold text-primary dark:text-accent-soft">{t("appEyebrow")}</span>
+            <h1 className={`mt-2 ${H1_GRADIENT}`}>{t("appHeroTitle")}</h1>
+            <p className="mt-6 max-w-[680px] text-lg text-muted text-pretty">{t("appHeroLead")}</p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <a href="#" className="btn btn-primary" aria-label={t("downloadAppStore")}>
+                <span className="size-6 [&_svg]:size-full [&_svg]:fill-current">{APPLE_ICON}</span>
                 iPhone
               </a>
-              <a href="#" className="store-badge" aria-label={t("downloadPlayStore")}>
-                {ANDROID_ICON}
+              <a href="#" className="btn btn-outline" aria-label={t("downloadPlayStore")}>
+                <span className="size-6 [&_svg]:size-full [&_svg]:fill-current">{ANDROID_ICON}</span>
                 Android
               </a>
             </div>
@@ -157,117 +165,113 @@ export default function AppPage() {
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
-      <section className="section" id="features">
-        <div className="wrap">
-          <div className="section-head">
-            <span className="eyebrow">{t("featuresEyebrow")}</span>
-            <h2>{t("featuresTitle")}</h2>
-            <p>{t("featuresDesc")}</p>
-          </div>
-          <div className="features-grid">
-            {FEATURES.map((f) => (
-              <div className="feature-card" key={f.titleKey}>
-                <div className="feature-icon">{f.icon}</div>
-                <h3>{t(f.titleKey)}</h3>
-                <p>{t(f.descKey)}</p>
-              </div>
+      <section id="features" className="py-24">
+        <Container>
+          <Reveal>
+            <SectionHead eyebrow={t("featuresEyebrow")} title={t("featuresTitle")} lead={t("featuresDesc")} />
+          </Reveal>
+          <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((f, i) => (
+              <li key={f.titleKey}>
+                <Reveal delay={(i % 3) * 100} className="h-full">
+                  <article className={`h-full p-8 ${CARD} ${FLUID} hover:-translate-y-1 hover:border-accent`}>
+                    <span className={`${ICON_BOX} size-12 [&_svg]:size-6`}>{f.icon}</span>
+                    <h3 className="mt-4 text-lg font-bold text-text text-balance">{t(f.titleKey)}</h3>
+                    <p className="mt-2 text-sm text-muted text-pretty">{t(f.descKey)}</p>
+                  </article>
+                </Reveal>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </Container>
       </section>
 
-      <section className="section screenshots" id="screenshots">
-        <div className="wrap">
-          <div className="section-head">
-            <span className="eyebrow">{t("screenshotsEyebrow")}</span>
-            <h2>{t("screenshotsTitle")}</h2>
-            <p>{t("screenshotsDesc")}</p>
-          </div>
-          <div className="shots-carousel">
+      <section id="screenshots" className="border-y border-border bg-surface py-24">
+        <Container>
+          <Reveal>
+            <SectionHead eyebrow={t("screenshotsEyebrow")} title={t("screenshotsTitle")} lead={t("screenshotsDesc")} />
+          </Reveal>
+          <div className="flex items-center justify-center gap-4 md:gap-6">
             <button
               type="button"
-              className="shot-arrow"
+              className={ARROW}
               aria-label={t("phPrev")}
               disabled={shot === 0}
               onClick={() => setActiveShot((i) => Math.max(0, i - 1))}
             >
-              <svg viewBox="0 0 24 24">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
+              <CaretRight size={20} weight="bold" aria-hidden="true" className="ltr:rotate-180" />
             </button>
-            <div className="shot-viewport">
+            <div className="w-full overflow-hidden">
               <div
-                className="shot-track"
+                className={`flex ${FLUID}`}
                 style={{ transform: `translateX(${(dir === "rtl" ? 1 : -1) * shot * (100 / visible)}%)` }}
               >
                 {SCREENSHOTS.map(({ id, titleKey, Screen }) => (
-                  <div className="shot-slide" key={id} style={{ flex: `0 0 ${100 / visible}%` }}>
-                    <div className="phone">
+                  <div key={id} className="min-w-0 px-2 md:px-3" style={{ flex: `0 0 ${100 / visible}%` }}>
+                    <div className="phone shot-phone">
                       <div className="phone-notch" />
                       <div className="phone-screen live">
                         <Screen />
                       </div>
                     </div>
-                    <div className="screen-caption">{t(titleKey)}</div>
+                    <p className="mt-3 text-center text-sm text-muted">{t(titleKey)}</p>
                   </div>
                 ))}
               </div>
             </div>
             <button
               type="button"
-              className="shot-arrow"
+              className={ARROW}
               aria-label={t("phNext")}
               disabled={shot === maxShot}
               onClick={() => setActiveShot((i) => Math.min(maxShot, i + 1))}
             >
-              <svg viewBox="0 0 24 24">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
+              <CaretLeft size={20} weight="bold" aria-hidden="true" className="ltr:rotate-180" />
             </button>
           </div>
-          <div className="shot-dots">
+          <div className="mt-6 flex justify-center gap-2">
             {Array.from({ length: maxShot + 1 }, (_, i) => (
               <button
                 key={i}
                 type="button"
-                className={i === shot ? "on" : ""}
                 aria-label={`${i + 1}`}
+                aria-current={i === shot}
                 onClick={() => setActiveShot(i)}
+                className={`h-2 rounded-full ${FLUID} ${FOCUS} ${i === shot ? "w-6 bg-accent" : "w-2 bg-border"}`}
               />
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
-      <section className="section" id="download">
-        <div className="wrap">
-          <div className="section-head">
-            <span className="eyebrow">{t("downloadEyebrow")}</span>
-            <h2>{t("downloadTitle")}</h2>
-            <p>{t("downloadDesc")}</p>
+      <section id="download" className="py-24">
+        <Container>
+          <Reveal>
+            <SectionHead eyebrow={t("downloadEyebrow")} title={t("downloadTitle")} lead={t("downloadDesc")} />
+          </Reveal>
+          <div className="mx-auto grid max-w-[880px] gap-6 md:grid-cols-2">
+            {(
+              [
+                ["iPhone", APPLE_ICON, "downloadIos", "downloadAppStore"],
+                ["Android", ANDROID_ICON, "downloadAndroid", "downloadPlayStore"],
+              ] as const
+            ).map(([name, icon, desc, cta], i) => (
+              <Reveal key={name} delay={i * 100} className="h-full">
+                <article className={`flex h-full flex-col items-center p-8 text-center ${CARD} ${FLUID} hover:-translate-y-1 hover:border-accent`}>
+                  <span className={`${ICON_BOX} size-16 [&_svg]:size-8 [&_svg]:fill-current [&_svg]:stroke-0`}>{icon}</span>
+                  <h3 className="mt-4 text-xl font-bold text-text">{name}</h3>
+                  <p className="mt-2 mb-6 flex-1 text-sm text-muted text-pretty">{t(desc)}</p>
+                  <a href="#" className="btn btn-gold">
+                    {t(cta)}
+                  </a>
+                </article>
+              </Reveal>
+            ))}
           </div>
-          <div className="download-grid">
-            <div className="download-card">
-              <div className="os-icon">{APPLE_ICON}</div>
-              <h3>iPhone</h3>
-              <p>{t("downloadIos")}</p>
-              <a href="#" className="btn btn-gold">
-                {t("downloadAppStore")}
-              </a>
-            </div>
-            <div className="download-card">
-              <div className="os-icon">{ANDROID_ICON}</div>
-              <h3>Android</h3>
-              <p>{t("downloadAndroid")}</p>
-              <a href="#" className="btn btn-gold">
-                {t("downloadPlayStore")}
-              </a>
-            </div>
-          </div>
-        </div>
+        </Container>
       </section>
     </main>
   );

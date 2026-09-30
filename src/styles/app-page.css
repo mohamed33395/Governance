@@ -1,24 +1,7 @@
-/* ===== App download page (ported from app.html) ===== */
-.app-page .section-head{text-align:center;margin-bottom:48px;}
-.app-page .section-head h2{font-size:30px;}
-.app-page .section-head p{color:var(--stone);margin-top:12px;}
-
-/* app hero */
-.app-hero{padding:80px 0;background:var(--white);border-bottom:1px solid var(--line);}
-.app-hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:64px;align-items:center;}
-.app-hero h1{font-size:30px;}
-.app-hero p{color:var(--stone);margin-top:16px;max-width:520px;line-height:1.9;}
-.app-hero .store-badges{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px;}
-.store-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:12px 24px;border-radius:6px;
-  background:var(--green-deep);color:var(--white);
-  font-size:14px;font-weight:600;
-  transition:all 500ms cubic-bezier(.32,.72,0,1);
-}
-.store-badge:hover{transform:translateY(-3px);background:var(--green-mid);}
-.store-badge svg{width:22px;height:22px;fill:currentColor;}
-
+/* ===== Phone mockup artwork (/app page) =====
+   A drawing of the native app, not site UI: it keeps its own pinned palette
+   and compact type so the screens look like a real phone. Everything around
+   it (hero, features, carousel, downloads) is regular Tailwind. */
 /* phone mockup */
 .phone-mockup{position:relative;width:250px;max-width:100%;margin:0 auto;}
 .phone-mockup .phone-screen.live{aspect-ratio:auto;height:450px;min-height:0;}
@@ -128,82 +111,8 @@
 .login-tabs button{flex:1;text-align:center;font-size:12px;font-weight:700;padding:4px;border-radius:6px;color:var(--stone);border:0;background:transparent;font-family:inherit;cursor:pointer;}
 .login-tabs button.on{background:var(--green-deep);color:var(--white);}
 
-/* features */
-.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
-.app-page .feature-card{
-  background:var(--white);border:1px solid var(--line);border-radius:6px;
-  padding:40px 32px;text-align:center;
-  transition:all 500ms cubic-bezier(.32,.72,0,1);
-}
-.app-page .feature-card:hover{transform:translateY(-7px);box-shadow:var(--shadow);border-color:var(--gold);}
-.feature-icon{
-  width:60px;height:60px;border-radius:50%;
-  background:var(--green-deep);color:var(--gold-light);
-  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
-}
-.feature-icon svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-.app-page .feature-card h3{font-size:18px;}
-.app-page .feature-card p{color:var(--stone);font-size:14px;margin-top:8px;line-height:1.7;}
-
-/* screenshots carousel */
-.screenshots{background:var(--white);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
-.screenshots .wrap{max-width:1440px;}
-.shots-carousel{display:flex;align-items:center;justify-content:center;gap:24px;}
-.shot-viewport{width:100%;overflow:hidden;}
-.shot-track{display:flex;transition:all 500ms cubic-bezier(.32,.72,0,1);}
-.shot-slide{min-width:0;padding:0 12px;}
-.shot-slide .phone{width:100%;max-width:340px;margin:0 auto;}
-.shot-slide .phone-screen.live{aspect-ratio:auto;min-height:0;height:500px;}
-.screen-caption{text-align:center;margin-top:12px;font-size:12px;color:var(--stone);}
-.shot-arrow{
-  width:46px;height:46px;flex-shrink:0;border-radius:50%;
-  border:1px solid var(--line);background:var(--white);color:var(--green-deep);
-  display:flex;align-items:center;justify-content:center;
-  transition:all 500ms cubic-bezier(.32,.72,0,1);
-}
-.shot-arrow:hover:not(:disabled){background:var(--green-deep);color:var(--gold-light);border-color:var(--green-deep);transform:scale(1.06);}
-.shot-arrow:disabled{opacity:.35;cursor:default;}
-.shot-arrow svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.shot-dots{display:flex;justify-content:center;gap:8px;margin-top:24px;}
-.shot-dots button{
-  width:8px;height:8px;border-radius:999px;border:0;padding:0;
-  background:var(--line);transition:all 500ms cubic-bezier(.32,.72,0,1);
-}
-.shot-dots button.on{background:var(--gold);width:24px;}
-
-/* download */
-.download-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
-.download-card{
-  background:var(--white);border:1px solid var(--line);border-radius:6px;
-  padding:48px 32px;text-align:center;
-  transition:all 500ms cubic-bezier(.32,.72,0,1);
-}
-.download-card:hover{transform:translateY(-8px);box-shadow:var(--shadow);border-color:var(--gold);}
-.download-card .os-icon{
-  width:64px;height:64px;border-radius:50%;background:var(--green-deep);color:var(--gold-light);
-  display:flex;align-items:center;justify-content:center;margin:0 auto 24px;
-}
-.download-card .os-icon svg{width:32px;height:32px;fill:currentColor;}
-.download-card h3{font-size:20px;}
-.download-card p{color:var(--stone);font-size:14px;margin:12px 0 24px;}
-
-@media (max-width:1000px){
-  .app-hero .wrap{grid-template-columns:1fr;gap:48px;text-align:center;}
-  .app-hero p{margin:16px auto 0;}
-  .app-hero .store-badges{justify-content:center;}
-  .features-grid{grid-template-columns:1fr 1fr;}
-  .shots-carousel{gap:16px;}
-  .shot-arrow{width:40px;height:40px;}
-  .download-grid{grid-template-columns:1fr;max-width:520px;margin:0 auto;}
-}
+.shot-phone{width:100%;max-width:340px;margin:0 auto;}
+.shot-phone .phone-screen.live{aspect-ratio:auto;min-height:0;height:500px;}
 @media (max-width:680px){
-  .features-grid{grid-template-columns:1fr;}
-  .shot-slide{padding:0 8px;}
-  .shot-slide .phone-screen.live{height:480px;}
-  .store-badge{padding:8px 16px;font-size:12px;}
-}
-
-/* desktop type steps (from former clamp() sizes) */
-@media (min-width:768px){
-  .app-hero h1{font-size:48px;}
+  .shot-phone .phone-screen.live{height:480px;}
 }
