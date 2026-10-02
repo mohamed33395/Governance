@@ -148,43 +148,43 @@ function ConsultantsInner() {
         <>
           <div className="stat-grid">
             <KpiCard
-              family="cyan"
+              family="pine"
               label={t('nav.consultants')}
               hint={t('admin.hintConsultants')}
               value={statsQuery.data.total}
               context={`${t('admin.statsActive')}: ${statsQuery.data.active}`}
             />
             <KpiCard
-              family="blue"
+              family="gold"
               label={t('admin.statsPendingReports')}
               value={statsQuery.data.top_consultants.reduce((sum, c) => sum + c.pending_reports_count, 0)}
             />
             <KpiCard
-              family="violet"
+              family="sage"
               label={t('consultants.specializationField')}
               value={statsQuery.data.by_specialization.length}
             />
           </div>
 
           <div className="chart-row">
-            <ChartCard title={t('admin.consultantsBySpecialization')} accent="violet">
+            <ChartCard title={t('admin.consultantsBySpecialization')} accent="sage">
               <RankingList
                 data={statsQuery.data.by_specialization.map((s) => ({
                   label: s.specialization,
                   value: s.count,
-                  color: FAMILY.violet.light,
+                  color: FAMILY.sage.light,
                 }))}
                 label={t('admin.consultantsBySpecialization')}
               />
             </ChartCard>
-            <ChartCard title={t('admin.topConsultants')} accent="cyan">
+            <ChartCard title={t('admin.topConsultants')} accent="pine">
               <RankingList
                 data={statsQuery.data.top_consultants
                   .filter((c) => c.bookings_count > 0)
                   .map((c) => ({
                     label: c.consultant_name,
                     value: c.bookings_count,
-                    color: FAMILY.cyan.light,
+                    color: FAMILY.pine.light,
                   }))}
                 limit={5}
                 label={t('admin.topConsultants')}

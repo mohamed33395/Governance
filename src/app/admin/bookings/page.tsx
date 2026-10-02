@@ -28,7 +28,7 @@ import { CATEGORY_COLOR, FAMILY, type FamilyKey } from '@/components/admin/regis
 import { FilterPanel } from '@/components/admin/FilterPanel';
 import type { AdminBookingsStats, Booking, Consultant, Package, Paginated } from '@/types/api';
 
-const STATUS_FAMILY: Record<string, FamilyKey> = { pending_payment: 'orange', pending: 'blue', completed: 'green', cancelled: 'pink' };
+const STATUS_FAMILY: Record<string, FamilyKey> = { pending_payment: 'sand', pending: 'gold', completed: 'pine', cancelled: 'clay' };
 
 // §13.7 — bookings (BKG-01)
 export default function AdminBookingsPage() {
@@ -122,7 +122,7 @@ function BookingsInner() {
         <>
           <div className="stat-grid">
             <KpiCard
-              family="cyan"
+              family="pine"
               label={t('admin.statsBookings')}
               hint={t('admin.hintBookings')}
               value={statsQuery.data.total}
@@ -131,7 +131,7 @@ function BookingsInner() {
             {statsQuery.data.by_status.map((s) => (
               <KpiCard
                 key={s.status}
-                family={STATUS_FAMILY[s.status] ?? 'blue'}
+                family={STATUS_FAMILY[s.status] ?? 'gold'}
                 label={s.label}
                 value={s.count}
               />
@@ -139,12 +139,12 @@ function BookingsInner() {
           </div>
 
           <div className="chart-row">
-            <ChartCard title={t('admin.bookingsByStatus')} accent="cyan">
+            <ChartCard title={t('admin.bookingsByStatus')} accent="pine">
               {(() => {
                 const data = statsQuery.data.by_status.map((s) => ({
                   label: s.label,
                   value: s.count,
-                  color: CATEGORY_COLOR[s.status] ?? FAMILY.cyan.light,
+                  color: CATEGORY_COLOR[s.status] ?? FAMILY.pine.light,
                 }));
                 return (
                   <div className="flex items-center gap-8 flex-wrap">
@@ -154,9 +154,9 @@ function BookingsInner() {
                 );
               })()}
             </ChartCard>
-            <ChartCard title={t('admin.bookingsByMonth')} accent="blue">
+            <ChartCard title={t('admin.bookingsByMonth')} accent="gold">
               <BarChart
-                data={statsQuery.data.by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.blue.light }))}
+                data={statsQuery.data.by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.gold.light }))}
                 sort="label-asc"
                 label={t('admin.bookingsByMonth')}
               />
@@ -164,23 +164,23 @@ function BookingsInner() {
           </div>
 
           <div className="chart-row">
-            <ChartCard title={t('admin.bookingsByConsultant')} accent="violet">
+            <ChartCard title={t('admin.bookingsByConsultant')} accent="sage">
               <RankingList
                 data={statsQuery.data.by_consultant.map((c) => ({
                   label: c.consultant_name,
                   value: c.count,
-                  color: FAMILY.violet.light,
+                  color: FAMILY.sage.light,
                 }))}
                 limit={8}
                 label={t('admin.bookingsByConsultant')}
               />
             </ChartCard>
-            <ChartCard title={t('admin.bookingsByPackage')} accent="orange">
+            <ChartCard title={t('admin.bookingsByPackage')} accent="sand">
               <RankingList
                 data={statsQuery.data.by_package.map((p) => ({
                   label: p.package_name,
                   value: p.count,
-                  color: FAMILY.orange.light,
+                  color: FAMILY.sand.light,
                 }))}
                 limit={8}
                 label={t('admin.bookingsByPackage')}

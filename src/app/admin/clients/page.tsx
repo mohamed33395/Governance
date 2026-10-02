@@ -126,34 +126,34 @@ function ClientsInner() {
         <>
           <div className="stat-grid">
             <KpiCard
-              family="pink"
+              family="bronze"
               label={t('nav.clients')}
               hint={t('admin.hintClients')}
               value={statsQuery.data.total}
               context={`${t('admin.statsActive')}: ${statsQuery.data.active}`}
             />
-            <KpiCard family="blue" label={t('users.inactive')} value={statsQuery.data.inactive} />
+            <KpiCard family="sand" label={t('users.inactive')} value={statsQuery.data.inactive} />
             <KpiCard
-              family="green"
+              family="moss"
               label={t('admin.statsNewThisMonth')}
               value={statsQuery.data.new_this_month}
             />
           </div>
 
           <div className="chart-row">
-            <ChartCard title={t('admin.clientsGrowth')} accent="pink">
+            <ChartCard title={t('admin.clientsGrowth')} accent="bronze">
               <BarChart
-                data={statsQuery.data.new_by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.pink.light }))}
+                data={statsQuery.data.new_by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.bronze.light }))}
                 sort="label-asc"
                 label={t('admin.clientsGrowth')}
               />
             </ChartCard>
-            <ChartCard title={t('admin.topClients')} accent="green">
+            <ChartCard title={t('admin.topClients')} accent="moss">
               <RankingList
                 data={statsQuery.data.top_clients.slice(0, 5).map((c) => ({
                   label: c.company_name,
                   value: c.bookings_count,
-                  color: FAMILY.green.light,
+                  color: FAMILY.moss.light,
                 }))}
                 label={t('admin.topClients')}
               />

@@ -123,29 +123,29 @@ function ReportsInner() {
         <>
           <div className="stat-grid">
             <KpiCard
-              family="violet"
+              family="sage"
               label={t('nav.reports')}
               hint={t('admin.hintReports')}
               value={statsQuery.data.total}
             />
-            <KpiCard family="orange" label={t('reportStatus.pending')} value={statsQuery.data.pending} />
-            <KpiCard family="green" label={t('reportStatus.uploaded')} value={statsQuery.data.uploaded} />
+            <KpiCard family="sand" label={t('reportStatus.pending')} value={statsQuery.data.pending} />
+            <KpiCard family="pine" label={t('reportStatus.uploaded')} value={statsQuery.data.uploaded} />
           </div>
 
           <div className="chart-row">
-            <ChartCard title={t('admin.reportsByMonth')} accent="violet">
+            <ChartCard title={t('admin.reportsByMonth')} accent="sage">
               <BarChart
-                data={statsQuery.data.by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.violet.light }))}
+                data={statsQuery.data.by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.sage.light }))}
                 sort="label-asc"
                 label={t('admin.reportsByMonth')}
               />
             </ChartCard>
-            <ChartCard title={t('admin.reportsByConsultant')} accent="cyan">
+            <ChartCard title={t('admin.reportsByConsultant')} accent="pine">
               <RankingList
                 data={statsQuery.data.by_consultant.map((c) => ({
                   label: c.consultant_name,
                   value: c.count,
-                  color: FAMILY.cyan.light,
+                  color: FAMILY.pine.light,
                 }))}
                 limit={8}
                 label={t('admin.reportsByConsultant')}

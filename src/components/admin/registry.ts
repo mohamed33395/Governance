@@ -12,38 +12,41 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-// Yafa-UI color families. `strong` = thin marks/icons/text, `light` = thick marks
-// and icons on the dark sidebar, `soft` = pale tint behind icon tiles.
+// Brand color families derived from the logo palette (deep green #1A412E,
+// gold #C19B4A, cream #F6F4EE). `strong` = thin marks/icons/text,
+// `light` = thick marks and icons on the dark sidebar, `soft` = pale tint
+// behind icon tiles.
 export const FAMILY = {
-  cyan: { light: '#67e8f9', strong: '#0891b2', soft: '#ecfeff' },
-  blue: { light: '#5dadec', strong: '#2563eb', soft: '#eff6ff' },
-  green: { light: '#86efac', strong: '#059669', soft: '#ecfdf5' },
-  pink: { light: '#f9a8d4', strong: '#db2777', soft: '#fdf2f8' },
-  violet: { light: '#c4b5fd', strong: '#7c3aed', soft: '#f5f3ff' },
-  orange: { light: '#fdba74', strong: '#d97706', soft: '#fffbeb' },
+  pine: { light: '#4A7A60', strong: '#1A412E', soft: '#E9F1EC' },
+  gold: { light: '#C19B4A', strong: '#96762F', soft: '#F7EFDC' },
+  moss: { light: '#6F9A80', strong: '#33604A', soft: '#ECF3EE' },
+  sage: { light: '#9DB5A6', strong: '#5C7A68', soft: '#EFF4F1' },
+  bronze: { light: '#8A6D3B', strong: '#665021', soft: '#F2ECDD' },
+  sand: { light: '#CBB98E', strong: '#8C7B4F', soft: '#F6F1E2' },
+  clay: { light: '#C0654A', strong: '#8F3B2B', soft: '#F9ECE7' },
 } as const;
 
 export type FamilyKey = keyof typeof FAMILY;
 
-// Stable KPI accent sequence for distinct measures: cyan, blue, green, violet, pink.
-export const KPI_SEQUENCE: FamilyKey[] = ['cyan', 'blue', 'green', 'violet', 'pink'];
+// Stable KPI accent sequence for distinct measures.
+export const KPI_SEQUENCE: FamilyKey[] = ['pine', 'gold', 'moss', 'sage', 'bronze'];
 
 // Stable categorical mapping — bound to a domain key, never to array order.
 export const CATEGORY_COLOR: Record<string, string> = {
   // booking statuses (semantic outcomes)
-  pending_payment: '#d97706',
-  pending: '#2563eb',
-  completed: '#059669',
-  cancelled: '#dc2626',
+  pending_payment: '#8A6D3B',
+  pending: '#C19B4A',
+  completed: '#33604A',
+  cancelled: '#B3402A',
   // payment statuses
-  initiated: '#5dadec',
-  paid: '#059669',
-  failed: '#dc2626',
-  refunded: '#7c3aed',
+  initiated: '#9DB5A6',
+  paid: '#1A412E',
+  failed: '#B3402A',
+  refunded: '#665021',
 };
 
-// Neutral categorical palette (cyan, green, pink, violet, blue) for unlabeled categories.
-export const CATEGORY_PALETTE = [FAMILY.cyan, FAMILY.green, FAMILY.pink, FAMILY.violet, FAMILY.blue];
+// Neutral categorical palette for unlabeled categories.
+export const CATEGORY_PALETTE = [FAMILY.pine, FAMILY.gold, FAMILY.moss, FAMILY.sage, FAMILY.bronze];
 
 export interface RouteIdentity {
   key: string; // translation key
@@ -56,23 +59,23 @@ export interface RouteIdentity {
 
 // One registry: sidebar, page header and route identity all read from here.
 export const ROUTES: RouteIdentity[] = [
-  { key: 'nav.dashboard', href: '/admin', icon: LayoutDashboard, family: 'cyan', perm: 'view-dashboard' },
-  { key: 'nav.bookings', href: '/admin/bookings', icon: CalendarDays, family: 'blue', perm: 'view-bookings' },
-  { key: 'nav.reports', href: '/admin/reports', icon: FileText, family: 'violet', perm: 'view-reports' },
-  { key: 'nav.payments', href: '/admin/payments', icon: CreditCard, family: 'green', perm: 'view-payments' },
-  { key: 'nav.clients', href: '/admin/clients', icon: Users, family: 'pink', perm: 'view-clients' },
-  { key: 'nav.consultants', href: '/admin/consultants', icon: UserRound, family: 'cyan', perm: 'view-consultants' },
+  { key: 'nav.dashboard', href: '/admin', icon: LayoutDashboard, family: 'pine', perm: 'view-dashboard' },
+  { key: 'nav.bookings', href: '/admin/bookings', icon: CalendarDays, family: 'gold', perm: 'view-bookings' },
+  { key: 'nav.reports', href: '/admin/reports', icon: FileText, family: 'sage', perm: 'view-reports' },
+  { key: 'nav.payments', href: '/admin/payments', icon: CreditCard, family: 'moss', perm: 'view-payments' },
+  { key: 'nav.clients', href: '/admin/clients', icon: Users, family: 'bronze', perm: 'view-clients' },
+  { key: 'nav.consultants', href: '/admin/consultants', icon: UserRound, family: 'pine', perm: 'view-consultants' },
   {
     key: 'nav.my_availability',
     href: '/admin/my-availability',
     icon: CalendarClock,
-    family: 'orange',
+    family: 'sand',
     perm: 'view-availability',
     consultantOnly: true,
   },
-  { key: 'nav.packages', href: '/admin/packages', icon: Boxes, family: 'orange', perm: 'view-packages' },
-  { key: 'nav.users', href: '/admin/users', icon: ShieldCheck, family: 'blue', perm: 'view-users' },
-  { key: 'nav.roles', href: '/admin/roles', icon: KeyRound, family: 'violet', perm: 'view-roles' },
+  { key: 'nav.packages', href: '/admin/packages', icon: Boxes, family: 'sand', perm: 'view-packages' },
+  { key: 'nav.users', href: '/admin/users', icon: ShieldCheck, family: 'gold', perm: 'view-users' },
+  { key: 'nav.roles', href: '/admin/roles', icon: KeyRound, family: 'sage', perm: 'view-roles' },
 ];
 
 export interface NavGroup {
@@ -83,15 +86,15 @@ export interface NavGroup {
 
 // Grouped by user intent, stable order.
 export const NAV_GROUPS: NavGroup[] = [
-  { key: 'navGroup.overview', family: 'cyan', hrefs: ['/admin'] },
+  { key: 'navGroup.overview', family: 'pine', hrefs: ['/admin'] },
   {
     key: 'navGroup.operations',
-    family: 'blue',
+    family: 'gold',
     hrefs: ['/admin/bookings', '/admin/my-availability', '/admin/reports', '/admin/payments'],
   },
-  { key: 'navGroup.people', family: 'pink', hrefs: ['/admin/clients', '/admin/consultants'] },
-  { key: 'navGroup.catalog', family: 'orange', hrefs: ['/admin/packages'] },
-  { key: 'navGroup.access', family: 'violet', hrefs: ['/admin/users', '/admin/roles'] },
+  { key: 'navGroup.people', family: 'bronze', hrefs: ['/admin/clients', '/admin/consultants'] },
+  { key: 'navGroup.catalog', family: 'sand', hrefs: ['/admin/packages'] },
+  { key: 'navGroup.access', family: 'sage', hrefs: ['/admin/users', '/admin/roles'] },
 ];
 
 // Longest-prefix match so /admin/clients/5 resolves to the clients route.

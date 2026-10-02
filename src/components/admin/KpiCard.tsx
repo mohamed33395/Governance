@@ -79,7 +79,7 @@ function MetricTitle({ label, hint }: { label: string; hint?: string }) {
   );
 }
 
-export function KpiCard({ label, value, family = 'cyan', hint, context, delta, onClick, valueSize = 'md' }: KpiCardProps) {
+export function KpiCard({ label, value, family = 'pine', hint, context, delta, onClick, valueSize = 'md' }: KpiCardProps) {
   const accent = FAMILY[family];
   const interactive = !!onClick;
   return (

@@ -111,13 +111,14 @@ html[data-theme="dark"] {
 .ui-badge[data-color="green"] { background: var(--success-soft); color: var(--success); }
 .ui-badge[data-color="amber"] { background: var(--warning-soft); color: var(--warning); }
 .ui-badge[data-color="red"] { background: var(--danger-soft); color: var(--danger); }
-.ui-badge[data-color="blue"] { background: var(--info-soft); color: var(--info); }
-.ui-badge[data-color="purple"] { background: rgba(126, 87, 194, 0.14); color: #7E57C2; }
+.ui-badge[data-color="blue"] { background: rgba(193, 155, 74, 0.14); color: #96762F; }
+.ui-badge[data-color="purple"] { background: rgba(138, 109, 59, 0.14); color: #665021; }
 /* admin keeps its compact form controls */
 html[data-app="admin"] .ui-input {
   font-size: 14px;
 }
-html[data-theme="dark"] .ui-badge[data-color="purple"] { background: rgba(179, 136, 255, 0.16); color: #B388FF; }
+html[data-theme="dark"] .ui-badge[data-color="blue"] { background: rgba(193, 155, 74, 0.18); color: #D9BC7C; }
+html[data-theme="dark"] .ui-badge[data-color="purple"] { background: rgba(203, 185, 142, 0.16); color: #CBB98E; }
 
 .ui-input {
   width: 100%;

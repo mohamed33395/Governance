@@ -290,12 +290,12 @@ img.avatar{object-fit:cover;display:block;}
 /* ---- Yafa-UI: status = dot + plain text ---- */
 .status-dot-label{display:inline-flex;align-items:center;gap:7px;font-size:.86rem;color:var(--ink);white-space:nowrap;}
 .status-dot{width:8px;height:8px;border-radius:50%;background:var(--stone);flex-shrink:0;}
-.status-dot-label[data-color="green"] .status-dot{background:#059669;}
-.status-dot-label[data-color="red"] .status-dot{background:#dc2626;}
-.status-dot-label[data-color="amber"] .status-dot{background:#d97706;}
-.status-dot-label[data-color="blue"] .status-dot{background:#2563eb;}
+.status-dot-label[data-color="green"] .status-dot{background:#33604A;}
+.status-dot-label[data-color="red"] .status-dot{background:#B3402A;}
+.status-dot-label[data-color="amber"] .status-dot{background:#8A6D3B;}
+.status-dot-label[data-color="blue"] .status-dot{background:#C19B4A;}
 .status-dot-label[data-color="gold"] .status-dot{background:var(--gold);}
-.status-dot-label[data-color="purple"] .status-dot{background:#7c3aed;}
+.status-dot-label[data-color="purple"] .status-dot{background:#8C7B4F;}
 .status-dot-label[data-color="gray"] .status-dot{background:#94a3b8;}
 
 /* ---- Yafa-UI: charts ---- */
@@ -677,11 +677,11 @@ html[data-theme="dark"][data-app="admin"] .data-table tbody tr:nth-child(odd){ba
 html[data-theme="dark"][data-app="admin"] .data-table tbody tr:hover{background:rgba(255,255,255,.04);}
 html[data-theme="dark"][data-app="admin"] .data-table td{border-bottom-color:var(--line);}
 html[data-theme="dark"][data-app="admin"] .kpi-card:not(.kpi-card-link):hover{border-color:var(--line);}
-html[data-theme="dark"] .status-dot-label[data-color="green"] .status-dot{background:#34d399;}
-html[data-theme="dark"] .status-dot-label[data-color="red"] .status-dot{background:#f87171;}
-html[data-theme="dark"] .status-dot-label[data-color="amber"] .status-dot{background:#fbbf24;}
-html[data-theme="dark"] .status-dot-label[data-color="blue"] .status-dot{background:#60a5fa;}
-html[data-theme="dark"] .status-dot-label[data-color="purple"] .status-dot{background:#a78bfa;}
+html[data-theme="dark"] .status-dot-label[data-color="green"] .status-dot{background:#6F9A80;}
+html[data-theme="dark"] .status-dot-label[data-color="red"] .status-dot{background:#D0785F;}
+html[data-theme="dark"] .status-dot-label[data-color="amber"] .status-dot{background:#C9A45C;}
+html[data-theme="dark"] .status-dot-label[data-color="blue"] .status-dot{background:#D9BC7C;}
+html[data-theme="dark"] .status-dot-label[data-color="purple"] .status-dot{background:#CBB98E;}
 html[data-theme="dark"] .status-dot-label[data-color="gray"] .status-dot{background:#8b95a5;}
 
 /* ===== Admin light theme — soft cool-gray page, white cards, clearly visible borders =====

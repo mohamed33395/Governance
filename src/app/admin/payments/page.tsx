@@ -29,7 +29,7 @@ import {
 } from '@/components/ui';
 import type { AdminPaymentsStats, Booking, Paginated, Payment } from '@/types/api';
 
-const STATUS_FAMILY: Record<string, FamilyKey> = { initiated: 'orange', paid: 'green', failed: 'pink', refunded: 'violet' };
+const STATUS_FAMILY: Record<string, FamilyKey> = { initiated: 'sand', paid: 'pine', failed: 'clay', refunded: 'bronze' };
 
 // §13.12 — payments (PAY-01/02). gateway_response is never returned.
 export default function AdminPaymentsPage() {
@@ -86,7 +86,7 @@ function PaymentsInner() {
         <>
           <div className="stat-grid">
             <KpiCard
-              family="cyan"
+              family="pine"
               label={t('admin.totalAmount')}
               value={statsQuery.data.total_amount_formatted}
               valueSize="sm"
@@ -94,7 +94,7 @@ function PaymentsInner() {
             {statsQuery.data.by_status.map((s) => (
               <KpiCard
                 key={s.status}
-                family={STATUS_FAMILY[s.status] ?? 'blue'}
+                family={STATUS_FAMILY[s.status] ?? 'gold'}
                 label={t(`paymentStatus.${s.status}`)}
                 value={s.count}
                 context={s.amount_formatted}
@@ -103,14 +103,14 @@ function PaymentsInner() {
           </div>
 
           <div className="chart-row">
-            <ChartCard title={t('admin.paymentsByStatus')} accent="green">
+            <ChartCard title={t('admin.paymentsByStatus')} accent="moss">
               {(() => {
                 const data = statsQuery.data.by_status
                   .filter((s) => s.count > 0)
                   .map((s) => ({
                     label: t(`paymentStatus.${s.status}`),
                     value: s.count,
-                    color: CATEGORY_COLOR[s.status] ?? FAMILY.cyan.light,
+                    color: CATEGORY_COLOR[s.status] ?? FAMILY.pine.light,
                   }));
                 return (
                   <div className="flex items-center gap-8 flex-wrap">
@@ -120,9 +120,9 @@ function PaymentsInner() {
                 );
               })()}
             </ChartCard>
-            <ChartCard title={t('admin.paymentsByGateway')} accent="violet">
+            <ChartCard title={t('admin.paymentsByGateway')} accent="sage">
               <RankingList
-                data={statsQuery.data.by_gateway.map((g) => ({ label: g.gateway, value: g.count, color: FAMILY.violet.light }))}
+                data={statsQuery.data.by_gateway.map((g) => ({ label: g.gateway, value: g.count, color: FAMILY.sage.light }))}
                 label={t('admin.paymentsByGateway')}
               />
             </ChartCard>

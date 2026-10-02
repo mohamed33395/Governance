@@ -49,14 +49,14 @@ export default function AdminDashboardPage() {
 
       <div className="stat-grid">
         <KpiCard
-          family="cyan"
+          family="pine"
           label={t('admin.statsBookings')}
           hint={t('admin.hintBookings')}
           value={stats.bookings.total}
           context={`${t('admin.statsToday')}: ${stats.bookings.today} · ${t('admin.statsPending')}: ${stats.bookings.pending}`}
         />
         <KpiCard
-          family="blue"
+          family="gold"
           label={t('admin.statsReports')}
           hint={t('admin.hintReports')}
           value={stats.reports.total}
@@ -64,7 +64,7 @@ export default function AdminDashboardPage() {
           onClick={() => router.push('/admin/reports')}
         />
         <KpiCard
-          family="green"
+          family="moss"
           label={t('nav.clients')}
           hint={t('admin.hintClients')}
           value={stats.clients.total}
@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
         {/* admins only — the key is absent for consultants */}
         {stats.consultants && (
           <KpiCard
-            family="violet"
+            family="sage"
             label={t('nav.consultants')}
             hint={t('admin.hintConsultants')}
             value={stats.consultants.total}
@@ -83,7 +83,7 @@ export default function AdminDashboardPage() {
         )}
         {stats.revenue && (
           <KpiCard
-            family="pink"
+            family="bronze"
             label={t('admin.statsRevenueMonth')}
             hint={t('admin.hintRevenue')}
             value={stats.revenue.this_month_formatted}
@@ -94,13 +94,13 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="chart-row">
-        <ChartCard title={t('admin.bookingsByStatus')} accent="cyan">
+        <ChartCard title={t('admin.bookingsByStatus')} accent="pine">
           <div className="flex items-center gap-8 flex-wrap">
             <DonutChart data={statusData} label={t('admin.bookingsByStatus')} />
             <DonutLegend data={statusData} />
           </div>
         </ChartCard>
-        <ChartCard title={t('admin.revenueOverview')} accent="pink">
+        <ChartCard title={t('admin.revenueOverview')} accent="bronze">
           {stats.revenue ? (
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-lg border border-border p-4">
@@ -119,20 +119,20 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="chart-row">
-        <ChartCard title={t('admin.bookingsByMonth')} accent="cyan">
+        <ChartCard title={t('admin.bookingsByMonth')} accent="pine">
           <BarChart
-            data={stats.bookings.by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.cyan.light }))}
+            data={stats.bookings.by_month.map((m) => ({ label: m.month, value: m.count, color: FAMILY.pine.light }))}
             sort="label-asc"
             label={t('admin.bookingsByMonth')}
           />
         </ChartCard>
-        <ChartCard title={t('admin.revenueByMonth')} accent="pink">
+        <ChartCard title={t('admin.revenueByMonth')} accent="bronze">
           {stats.revenue ? (
             <BarChart
               data={stats.revenue.by_month.map((m) => ({
                 label: m.month,
                 value: Math.round(m.amount / 100),
-                color: FAMILY.pink.light,
+                color: FAMILY.bronze.light,
               }))}
               sort="label-asc"
               valueFormatter={(v) => `${v.toLocaleString()} SAR`}

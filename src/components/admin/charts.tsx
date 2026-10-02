@@ -90,7 +90,7 @@ export function DonutChart({
               cy={size / 2}
               r={radius}
               fill="none"
-              stroke={slice.color ?? FAMILY.cyan.light}
+              stroke={slice.color ?? FAMILY.pine.light}
               strokeWidth={thickness}
               strokeDasharray={`${Math.max(dash - gap, 0)} ${c - Math.max(dash - gap, 0)}`}
               strokeDashoffset={-offset}
@@ -125,7 +125,7 @@ export function DonutLegend({ data }: { data: ChartDatum[] }) {
             <span className="flex items-center gap-2.5">
               <span
                 className="inline-block rounded-full shrink-0"
-                style={{ width: 8, height: 8, background: slice.color ?? FAMILY.cyan.light }}
+                style={{ width: 8, height: 8, background: slice.color ?? FAMILY.pine.light }}
               />
               <span className="text-text">{slice.label}</span>
             </span>
@@ -191,7 +191,7 @@ export function BarChart({
         {sorted.map((d, i) => {
           const x = margin.left + i * slotW + (slotW - barW) / 2;
           const barH = Math.max(y(0) - y(d.value), d.value > 0 ? 2 : 0);
-          const fill = d.color ?? FAMILY.cyan.light;
+          const fill = d.color ?? FAMILY.pine.light;
           return (
             <g key={i}>
               <rect x={x} y={y(0) - barH} width={barW} height={barH} rx={4} ry={4} fill={fill} />
@@ -256,7 +256,7 @@ export function RankingList({
             <span className="ranking-track">
               <span
                 className="ranking-fill"
-                style={{ width: `${Math.max((d.value / max) * 100, d.value > 0 ? 3 : 0)}%`, background: d.color ?? FAMILY.cyan.light }}
+                style={{ width: `${Math.max((d.value / max) * 100, d.value > 0 ? 3 : 0)}%`, background: d.color ?? FAMILY.pine.light }}
               />
             </span>
           </span>
@@ -271,7 +271,7 @@ export function RankingList({
 // Every chart card answers one question: a short title, quiet divider, then the chart.
 export function ChartCard({
   title,
-  accent = 'cyan',
+  accent = 'pine',
   children,
 }: {
   title: string;
