@@ -73,7 +73,7 @@ html[dir="ltr"] .client-login-panel{text-align:left;}
 .client-nav button.active{background:rgba(193,155,74,.12);color:var(--gold-light);border-right-color:var(--gold);}
 html[dir="ltr"] .client-nav button{text-align:left;border-right:none;border-left:2px solid transparent;}
 html[dir="ltr"] .client-nav button.active{border-left-color:var(--gold);border-right:none;}
-.client-back{margin-top:26px;padding-top:20px;border-top:1px solid var(--line-dark);font-size:.9rem;}
+.client-back{margin-top:auto;padding-top:20px;border-top:1px solid var(--line-dark);font-size:.9rem;}
 .client-back a{color:rgba(255,255,255,.6);}
 .client-back a:hover{color:var(--gold-light);}
 
@@ -221,6 +221,9 @@ html[dir="ltr"] .client-table th,html[dir="ltr"] .client-table td{text-align:lef
   .client-sidebar{position:fixed;inset-inline-start:0;top:0;width:260px;transform:translateX(105%);transition:transform .25s ease;z-index:50;height:100vh;}
   html[dir="ltr"] .client-sidebar{left:auto;right:0;transform:translateX(100%);}
   .client-sidebar.open{transform:translateX(0);}
+  /* shared dash-sidebar inside the client shell: LTR slides off to the left */
+  html[dir="ltr"] .client-shell .dash-sidebar{transform:translateX(-105%);}
+  html[dir="ltr"] .client-shell .dash-sidebar.open{transform:translateX(0);}
   .client-menu-toggle{display:inline-flex;}
   .client-card-grid{grid-template-columns:1fr 1fr;}
   .client-packages{grid-template-columns:1fr;}

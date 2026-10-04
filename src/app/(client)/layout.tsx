@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import '@/styles/admin-dashboard.css';
 import '@/styles/client-portal.css';
 import { RequireClient } from '@/components/auth/RequireClient';
 import { ClientShell } from '@/components/client/ClientShell';

@@ -239,6 +239,114 @@ export interface ClientDashboard {
   active_subscriptions: Subscription[];
 }
 
+// ---------- notifications ----------
+export type NotificationType =
+  | 'new_booking'
+  | 'booking_confirmed'
+  | 'booking_cancelled'
+  | 'payment_failed'
+  | 'report_ready'
+  | 'client_welcome'
+  | 'staff_account_created'
+  | 'reset_password'
+  | 'join_request_submitted'
+  | 'review_submitted'
+  | 'payment_paid'
+  | 'support_ticket_created'
+  | 'support_ticket_message';
+
+export interface NotificationRecipient {
+  type: 'client' | 'user';
+  id: ID;
+  name: string;
+  email: string;
+}
+
+export interface Notification {
+  id: string;
+  type: NotificationType | string | null;
+  data: Record<string, unknown> & { type?: string; recipient?: NotificationRecipient };
+  read_at: string | null;
+  created_at: string;
+}
+
+// ---------- support tickets ----------
+export type SupportTicketCategory = 'general_inquiry' | 'booking_issue' | 'payment_issue' | 'technical' | 'consultant_complaint';
+export type SupportTicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+
+export interface SupportTicket {
+  id: ID;
+  reference?: string;
+  category: SupportTicketCategory;
+  category_label?: string;
+  status: SupportTicketStatus;
+  status_label?: string;
+  client?: { id: ID; name: string; company_name?: string; email?: string; phone?: string } | null;
+  consultant?: { id: ID; name: string } | null;
+  last_message_at?: string;
+  created_at: string;
+  messages?: SupportMessage[];
+}
+
+export interface TicketMedia {
+  name: string;
+  url: string;
+  mime_type: string;
+}
+
+export interface SupportMessage {
+  id: ID;
+  body: string | null;
+  image?: TicketMedia | null;
+  voice?: TicketMedia | null;
+  is_internal: boolean;
+  sender_type: 'client' | 'user' | 'system';
+  sender?: { id: ID; name: string; type?: string } | null;
+  created_at: string;
+}
+
+// ---------- join requests ----------
+export type JoinRequestStatus = 'pending' | 'approved' | 'rejected';
+
+export interface JoinRequest {
+  id: ID;
+  name: string;
+  email: string;
+  phone: string;
+  specialization: string;
+  bio: string | null;
+  linkedin_url: string | null;
+  cv_url?: string;
+  status: JoinRequestStatus;
+  user_id?: ID | null;
+  reviewed_by?: ID | null;
+  reviewer?: { id: ID; name: string } | null;
+  reviewed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---------- reviews ----------
+export type ReviewStatus = 'pending' | 'approved' | 'rejected';
+
+export interface Review {
+  id: ID;
+  client_id: ID;
+  client?: { id: ID; name: string; company_name: string } | null;
+  name: string;
+  title: string | null;
+  rating: number;
+  comment: string;
+  status: ReviewStatus;
+  status_label?: string;
+  rejection_reason: string | null;
+  reviewed_by?: ID | null;
+  reviewed_at?: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ---------- PUB-08 meta ----------
 export interface PublicMeta {
   booking_statuses: { value: string; label: string }[];

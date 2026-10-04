@@ -11,6 +11,7 @@ import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { Avatar } from '@/components/ui';
 import { BreadcrumbProvider } from '@/components/admin/Breadcrumbs';
 import { FAMILY, NAV_GROUPS, ROUTES, routeForPath } from '@/components/admin/registry';
@@ -128,6 +129,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <span className="dash-topbar-title">{t('auth.adminArea')}</span>
           </div>
           <div className="topbar-right">
+            <NotificationBell guard="admin" />
             <LanguageSwitcher />
             <ThemeToggle />
             <div className="admin-user-menu" ref={userMenuRef}>

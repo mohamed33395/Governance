@@ -4,9 +4,12 @@ import {
   CalendarDays,
   CreditCard,
   FileText,
+  Headset,
   KeyRound,
   LayoutDashboard,
   ShieldCheck,
+  Star,
+  UserPlus,
   UserRound,
   Users,
   type LucideIcon,
@@ -74,6 +77,9 @@ export const ROUTES: RouteIdentity[] = [
     consultantOnly: true,
   },
   { key: 'nav.packages', href: '/admin/packages', icon: Boxes, family: 'sand', perm: 'view-packages' },
+  { key: 'nav.support', href: '/admin/support-tickets', icon: Headset, family: 'bronze', perm: 'view-support-tickets' },
+  { key: 'nav.join_requests', href: '/admin/join-requests', icon: UserPlus, family: 'bronze', perm: 'view-join-requests' },
+  { key: 'nav.reviews', href: '/admin/reviews', icon: Star, family: 'gold', perm: 'view-reviews' },
   { key: 'nav.users', href: '/admin/users', icon: ShieldCheck, family: 'gold', perm: 'view-users' },
   { key: 'nav.roles', href: '/admin/roles', icon: KeyRound, family: 'sage', perm: 'view-roles' },
 ];
@@ -94,6 +100,7 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   { key: 'navGroup.people', family: 'bronze', hrefs: ['/admin/clients', '/admin/consultants'] },
   { key: 'navGroup.catalog', family: 'sand', hrefs: ['/admin/packages'] },
+  { key: 'navGroup.support', family: 'bronze', hrefs: ['/admin/support-tickets', '/admin/join-requests', '/admin/reviews'] },
   { key: 'navGroup.access', family: 'sage', hrefs: ['/admin/users', '/admin/roles'] },
 ];
 
