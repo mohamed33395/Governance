@@ -17,6 +17,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { disconnectEcho } from '@/lib/echo';
 import { useClientAuth } from '@/stores/client-auth';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
@@ -86,6 +87,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
   const logout = useMutation({
     mutationFn: () => api.post('/client/auth/logout'),
     onSettled: () => {
+      disconnectEcho('client');
       clear();
       router.replace('/login');
     },

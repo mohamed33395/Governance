@@ -9,6 +9,9 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ar';
 import 'dayjs/locale/en';
 import { api } from '@/lib/api';
+import { getEcho } from '@/lib/echo';
+import { useAdminAuth } from '@/stores/admin-auth';
+import { useClientAuth } from '@/stores/client-auth';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import type { Notification } from '@/types/api';
 
@@ -29,6 +32,25 @@ export function NotificationBell({ guard }: NotificationBellProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const prefix = `/${guard}/notifications`;
+  // admin portal subscribes with user.id, client portal with client.id
+  const authUser = useAdminAuth((s) => s.user);
+  const clientUser = useClientAuth((s) => s.user);
+  const channelId = guard === 'admin' ? authUser?.id : clientUser?.id;
+
+  // live push via Reverb — REST stays the source of truth; on a push we just
+  // invalidate so both the badge and the open list refetch (§3a).
+  useEffect(() => {
+    if (!channelId) return;
+    const echo = getEcho(guard);
+    if (!echo) return;
+    const channel = echo.private(`${guard}.${channelId}`);
+    channel.listen('.notification.received', () => {
+      queryClient.invalidateQueries({ queryKey: [guard, 'notifications'] });
+    });
+    return () => {
+      echo.leave(`private-${guard}.${channelId}`);
+    };
+  }, [guard, channelId, queryClient]);
 
   // poll unread count every 30 s
   const countQuery = useQuery({

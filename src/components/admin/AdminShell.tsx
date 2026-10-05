@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { Menu } from 'lucide-react';
 import { api } from '@/lib/api';
+import { disconnectEcho } from '@/lib/echo';
 import { useAdminAuth } from '@/stores/admin-auth';
 import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
@@ -50,6 +51,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const logout = useMutation({
     mutationFn: () => api.post('/admin/auth/logout'),
     onSettled: () => {
+      disconnectEcho('admin');
       clear();
       router.replace('/admin/login');
     },
