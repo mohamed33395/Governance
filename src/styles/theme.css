@@ -272,7 +272,7 @@ html[data-theme="dark"] .client-user-menu-btn:focus {
   background: rgba(255, 255, 255, 0.08);
 }
 html[data-theme="dark"] .client-user-dropdown {
-  background: var(--green-darker);
+  background: var(--raised, var(--green-darker));
   border-color: var(--line-dark);
 }
 html[data-theme="dark"] .client-user-dropdown a,
@@ -290,19 +290,14 @@ html[data-theme="dark"] .client-dropdown-header {
   border-color: var(--line-dark);
   color: var(--gold);
 }
-/* dashboard surfaces: dark green cards, light text, gold accents */
-html[data-theme="dark"] .client-shell,
-html[data-theme="dark"] .client-modal-card {
-  --green-deep: #F6F4EE;
-  --white: #1F1F1F;
-  --ink: #F6F4EE;
-  --stone: #9DB5A6;
-  --line: #313131;
-  --line-dark: rgba(255,255,255,.12);
-  --green-darker: #000000;
-  --green-mid: #4A7A60;
-  --gold: #C19B4A;
-  --gold-light: #E7CE9C;
+/* dashboard surfaces: same neutral-charcoal palette as the admin area.
+   The tokens themselves live on <html> via data-app="client" (see
+   admin-dashboard.css) so portaled UI and the page canvas match too. */
+html[data-theme="dark"][data-app="client"] .client-topbar h2 {
+  color: var(--ink);
+}
+html[data-theme="dark"][data-app="client"] .client-modal-overlay {
+  background: var(--backdrop, rgba(5,8,12,.72));
 }
 /* sidebar stays deepest green */
 html[data-theme="dark"] .client-sidebar {
@@ -325,7 +320,7 @@ html[data-theme="dark"] .client-shell textarea,
 html[data-theme="dark"] .client-modal-card input,
 html[data-theme="dark"] .client-modal-card textarea {
   background: var(--cream) !important;
-  color: #F6F4EE !important;
+  color: var(--ink) !important;
   border-color: var(--line) !important;
 }
 html[data-theme="dark"] .client-shell input:focus,
@@ -333,7 +328,7 @@ html[data-theme="dark"] .client-shell select:focus,
 html[data-theme="dark"] .client-shell textarea:focus,
 html[data-theme="dark"] .client-modal-card input:focus,
 html[data-theme="dark"] .client-modal-card textarea:focus {
-  background: #000000 !important;
+  background: var(--green-darker) !important;
   border-color: var(--gold) !important;
 }
 /* stat numbers + prices in gold like the admin dashboard */
@@ -341,14 +336,14 @@ html[data-theme="dark"] .client-stat-card .num,
 html[data-theme="dark"] .client-package-card .price {
   color: var(--gold-light);
 }
-/* welcome banner + featured package stay deep green */
+/* welcome banner sits on the page canvas; featured package pops as a raised card */
 html[data-theme="dark"] .client-welcome {
-  background: #131209;
+  background: var(--green-darker);
 }
 html[data-theme="dark"] .client-package-card.featured {
-  background: #1A2E24;
+  background: var(--raised, #1A2E24);
   border-color: var(--gold);
-  color: #F6F4EE;
+  color: var(--ink);
 }
 /* modal + messages */
 html[data-theme="dark"] .client-modal-close {
