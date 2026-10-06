@@ -230,7 +230,9 @@ function PaymentDrawer({ payment, onClose }: { payment: Payment | null; onClose:
   const query = useQuery({
     queryKey: ['admin', 'payments', payment?.id],
     queryFn: () =>
-      api.get(`/admin/payments/${payment!.id}`).then((r) => r.data.data as Payment & { booking?: Booking }),
+      api
+        .get(`/admin/payments/${payment!.id}`)
+        .then((r) => r.data.data.payment as Payment),
     enabled: !!payment,
   });
   const details = query.data ?? payment;

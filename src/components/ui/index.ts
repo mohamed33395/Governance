@@ -25,6 +25,8 @@ export { EmptyState } from './EmptyState';
 export { ErrorState } from './ErrorState';
 export { Avatar } from './Avatar';
 export { FileDrop } from './FileDrop';
+export { AttachButton } from './AttachButton';
+export { VoiceRecorderButton } from './VoiceRecorderButton';
 export { StatCard } from './StatCard';
 export { PageHeader } from './PageHeader';
 export { Alert } from './Alert';

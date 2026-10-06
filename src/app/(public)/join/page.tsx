@@ -1,52 +1,89 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle } from "@phosphor-icons/react";
+import { api } from "@/lib/api";
+import { isApiError } from "@/lib/errors";
+import { applyValidationErrors } from "@/lib/form-errors";
+import { useI18n } from "@/lib/i18n/i18n-context";
+import { joinRequestSchema, type JoinRequestValues } from "@/schemas/join";
 import { Container, PageHero } from "@/components/public/Section";
 import { Reveal } from "@/components/public/Reveal";
-import { FormMessage, TextField } from "@/components/public/FormField";
+import { FormMessage } from "@/components/public/FormField";
+import { Button, FileDrop, Input, Textarea } from "@/components/ui";
 import { CARD } from "@/components/public/tokens";
 
-const RULES = [
-  "لا يسمح باستخدام الذكاء الاصطناعي في تحليل الأعمال أو صياغة التقارير.",
-  "لا يسمح باستخدام الأسماء المستعارة أو الكنى.",
-  "لا يسمح بإعطاء العملاء الأرقام الشخصية أو حسابات البريد الإلكتروني أو حسابات التواصل الاجتماعي الشخصية — التواصل مع العميل يتم داخل المنصة فقط.",
-  "يجب التوقيع على اتفاقية عدم الإفشاء والسرية قبل البدء بأداء المهام.",
-  "يتعين على الاستشاري متابعة تاريخ صلاحية ترخيصه.",
-  "يتعين رفع البيانات التالية قبل تسجيل الاستشاري: رقم الحساب البنكي، العنوان الوطني، رقم الهوية وتاريخ الميلاد، السجل التجاري، عقد التأسيس، شهادة تسجيل الضريبة.",
-  "يجب رفع السيرة الذاتية.",
-  "يجب إعداد سابقة الأعمال.",
-];
+const CV_ACCEPT = ".pdf,.doc,.docx";
+const CV_MAX_MB = 5;
 
 export default function JoinPage() {
+  const { t, lang } = useI18n();
+  const [cv, setCv] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    document.title = "انضم إلينا — مكتب المتخصصون في الحوكمة والامتثال للاستشارات الإدارية";
-  }, []);
+    document.title = `${t("public.join.title")} — ${t("brandName")}`;
+  }, [t, lang]);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSubmitted(true);
-    e.currentTarget.reset();
-  }
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<JoinRequestValues>({
+    resolver: zodResolver(joinRequestSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      specialization: "",
+      bio: "",
+      linkedin_url: "",
+    },
+  });
 
-  const POINTS = [
-    "مراجعة الملفات من قبل فريق مختص خلال أيام عمل",
-    "فرص تعاون في مشاريع استشارية نشطة",
-    "عضوية ضمن شبكة أعمال معتمدة ومرخصة",
-  ];
+  const mutation = useMutation({
+    mutationFn: async (values: JoinRequestValues) => {
+      const fd = new FormData();
+      fd.append("name", values.name);
+      fd.append("email", values.email);
+      fd.append("phone", values.phone);
+      fd.append("specialization", values.specialization);
+      if (values.bio) fd.append("bio", values.bio);
+      if (values.linkedin_url) fd.append("linkedin_url", values.linkedin_url);
+      if (cv) fd.append("cv", cv);
+      return api.post("/public/join-requests", fd);
+    },
+    onSuccess: () => {
+      setSubmitted(true);
+    },
+    onError: (e) => {
+      if (isApiError(e) && e.code === "VALIDATION_ERROR") {
+        applyValidationErrors(setError, e);
+      } else if (isApiError(e)) {
+        // eslint-disable-next-line no-console
+        console.error(e.message);
+      }
+    },
+  });
+
+  const err = (key?: string) => (key ? t(key) : undefined);
+
+  const POINTS = [t("joinPoint1"), t("joinPoint2"), t("joinPoint3")];
 
   return (
     <main>
       <PageHero
-        eyebrow="شبكة الخبراء"
-        title="انضم إلى شبكة خبرائنا المعتمدين"
-        lead="نبني شبكة من الخبراء والاستشاريين المعتمدين في مختلف المجالات. زودنا ببياناتك المهنية لينضم ملفك إلى قاعدة الخبراء لدينا."
+        eyebrow={t("public.join.title")}
+        title={t("joinAsExpert")}
+        lead={t("joinHeroLead")}
       >
         <ul className="flex flex-col gap-3">
-          {POINTS.map((p) => (
-            <li key={p} className="flex items-start gap-2 text-base text-text">
+          {POINTS.map((p, i) => (
+            <li key={i} className="flex items-start gap-2 text-base text-text">
               <CheckCircle size={24} weight="fill" aria-hidden="true" className="shrink-0 text-accent" />
               {p}
             </li>
@@ -57,53 +94,79 @@ export default function JoinPage() {
       <section className="py-24">
         <Container>
           <Reveal>
-            <form onSubmit={handleSubmit} className={`mx-auto max-w-[880px] p-6 md:p-8 ${CARD}`}>
+            <form
+              onSubmit={handleSubmit((v) => mutation.mutate(v))}
+              className={`mx-auto max-w-[880px] p-6 md:p-8 ${CARD}`}
+            >
               <div className="grid gap-6 sm:grid-cols-2">
-                <TextField label="الاسم" type="text" autoComplete="name" required />
-                <TextField label="المؤهل" type="text" required />
-                <TextField label="الخبرات المهنية" type="text" />
-                <TextField label="مجالات تقديم الخدمة" type="text" />
-                <TextField label="الرخص أو الاعتمادات المهنية" type="text" />
-                <TextField label="رقم الجوال" type="tel" dir="ltr" autoComplete="tel" required />
-                <TextField label="البريد الإلكتروني" type="email" dir="ltr" autoComplete="email" required />
-                <TextField label="الدولة – المدينة" type="text" />
-                <TextField label="حسابات التواصل الاجتماعي" type="text" full />
-                <TextField label="حساب اللينكدإن" type="text" dir="ltr" full />
-              </div>
-
-              <div className="mt-8 rounded-xl border border-border bg-background p-2">
-                <div className="max-h-64 overflow-y-auto rounded-lg p-4" tabIndex={0} role="region" aria-labelledby="rules-title">
-                  <h2 id="rules-title" className="text-base font-bold text-text">
-                    القواعد والتعليمات
-                  </h2>
-                  <ol className="mt-4 flex flex-col gap-3">
-                    {RULES.map((rule, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <span
-                          aria-hidden="true"
-                          className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-accent-soft"
-                        >
-                          {i + 1}
-                        </span>
-                        <p className="pt-1 text-sm text-muted text-pretty">{rule}</p>
-                      </li>
-                    ))}
-                  </ol>
+                <Input
+                  label={t("fullName")}
+                  autoComplete="name"
+                  error={err(errors.name?.message)}
+                  {...register("name")}
+                />
+                <Input
+                  label={t("email")}
+                  type="email"
+                  dir="ltr"
+                  autoComplete="email"
+                  error={err(errors.email?.message)}
+                  {...register("email")}
+                />
+                <Input
+                  label={t("phone")}
+                  type="tel"
+                  dir="ltr"
+                  autoComplete="tel"
+                  error={err(errors.phone?.message)}
+                  {...register("phone")}
+                />
+                <Input
+                  label={t("joinRequests.specialization")}
+                  error={err(errors.specialization?.message)}
+                  {...register("specialization")}
+                />
+                <div className="sm:col-span-2">
+                  <Input
+                    label={t("joinRequests.linkedin")}
+                    type="url"
+                    dir="ltr"
+                    error={err(errors.linkedin_url?.message)}
+                    {...register("linkedin_url")}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <Textarea
+                    label={t("joinRequests.bio")}
+                    rows={4}
+                    error={err(errors.bio?.message)}
+                    {...register("bio")}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <span className="text-sm text-muted block mb-2">
+                    {t("joinRequests.cv")}
+                  </span>
+                  <FileDrop
+                    accept={CV_ACCEPT}
+                    maxMb={CV_MAX_MB}
+                    onFile={setCv}
+                    label={cv?.name}
+                  />
                 </div>
               </div>
 
-              <label className="mt-6 flex cursor-pointer items-start gap-3 text-sm text-text">
-                <input type="checkbox" required className="mt-1 size-4 shrink-0 accent-primary" />
-                <span>أقر بأنني اطلعت على القواعد والتعليمات الموضحة أعلاه وأوافق عليها</span>
-              </label>
-
-              <button type="submit" className="btn btn-gold mt-8 w-full">
-                إرسال الطلب
-              </button>
+              <Button
+                type="submit"
+                className="mt-8 w-full"
+                loading={isSubmitting || mutation.isPending}
+              >
+                {t("sendRequest")}
+              </Button>
               <p className="mt-4 text-sm text-muted text-pretty">
-                بإرسال هذا النموذج فإنك توافق على مراجعة فريقنا لبياناتك المهنية لأغراض الانضمام فقط.
+                {t("joinFormNote")}
               </p>
-              <FormMessage show={submitted}>تم استلام طلبك بنجاح، سيتواصل معك فريقنا قريباً.</FormMessage>
+              <FormMessage show={submitted}>{t("public.join.success")}</FormMessage>
             </form>
           </Reveal>
         </Container>
