@@ -29,11 +29,13 @@ import {
   Switch,
   Table,
   TableSkeleton,
+  Tabs,
   Textarea,
   useToast,
 } from '@/components/ui';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import { FilterPanel } from '@/components/admin/FilterPanel';
+import { DraftsTab, useTrashedCount } from '@/components/admin/DraftsTab';
 import { AVATAR_ACCEPT, AVATAR_MAX_MB } from '@/lib/files';
 import type { Paginated, Role, User } from '@/types/api';
 
@@ -62,6 +64,7 @@ function UsersInner() {
   const [rolesOf, setRolesOf] = useState<User | null>(null);
   const [deleting, setDeleting] = useState<User | null>(null);
   const [toggling, setToggling] = useState<User | null>(null);
+  const [tab, setTab] = useState<'live' | 'drafts'>('live');
 
   const query = useQuery({
     queryKey: ['admin', 'users', { search, type, roleFilter, activeFilter, page }],
@@ -80,6 +83,7 @@ function UsersInner() {
         .then((r) => r.data as Paginated<User>),
   });
   const data = query.data;
+  const trashedCount = useTrashedCount('users').data;
 
   // role filter options
   const rolesQuery = useQuery({
@@ -132,150 +136,211 @@ function UsersInner() {
         }
       />
 
-      <FilterPanel>
-        <SearchInput
-          value={search}
-          onChange={(v) => {
-            setSearch(v);
-            setPage(1);
-          }}
-          className="flex-1 min-w-[200px]"
-        />
-        <Select
-          options={[
-            { value: 'admin', label: t('users.typeAdmin') },
-            { value: 'consultant', label: t('users.typeConsultant') },
-          ]}
-          placeholder={t('users.typeAll')}
-          value={type}
-          onChange={(e) => {
-            setType(e.target.value);
-            setPage(1);
-          }}
-          style={{ maxWidth: 170 }}
-        />
-        <Select
-          options={(rolesQuery.data ?? []).map((r) => ({ value: r.name, label: r.name }))}
-          placeholder={t('users.roleAll')}
-          value={roleFilter}
-          onChange={(e) => {
-            setRoleFilter(e.target.value);
-            setPage(1);
-          }}
-          style={{ maxWidth: 170 }}
-        />
-        <Select
-          options={[
-            { value: '1', label: t('users.active') },
-            { value: '0', label: t('users.inactive') },
-          ]}
-          placeholder={t('common.status')}
-          value={activeFilter}
-          onChange={(e) => {
-            setActiveFilter(e.target.value);
-            setPage(1);
-          }}
-          style={{ maxWidth: 150 }}
-        />
-      </FilterPanel>
+      <Tabs
+        tabs={[
+          { key: 'live', label: t('users.title') },
+          { key: 'drafts', label: t('drafts.title'), count: trashedCount },
+        ]}
+        active={tab}
+        onChange={(k) => setTab(k as 'live' | 'drafts')}
+        className="mb-6"
+      />
 
-      {query.isLoading ? (
-        <TableSkeleton rows={5} />
-      ) : query.isError || !data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
-        <>
-          <Table
-            columns={[
-              {
-                key: 'user',
-                header: t('auth.name'),
-                render: (u) => (
-                  <span className="flex items-center gap-3">
-                    <Avatar src={u.avatar_thumb_url} name={u.name} size="sm" />
-                    <span>
-                      <strong className="block">{u.name}</strong>
-                      <span className="text-muted text-[0.8rem]" dir="ltr">
-                        {u.email}
-                      </span>
+      {tab === 'drafts' ? (
+        <DraftsTab<User>
+          resource="users"
+          permission="delete-users"
+          rowKey={(u) => u.id}
+          columns={[
+            {
+              key: 'user',
+              header: t('auth.name'),
+              render: (u) => (
+                <span className="flex items-center gap-3">
+                  <Avatar src={u.avatar_thumb_url} name={u.name} size="sm" />
+                  <span>
+                    <strong className="block">{u.name}</strong>
+                    <span className="text-muted text-[0.8rem]" dir="ltr">
+                      {u.email}
                     </span>
                   </span>
-                ),
-              },
-              { key: 'phone', header: t('auth.phone'), render: (u) => (u.phone ? <span dir="ltr">{u.phone}</span> : '—') },
-              {
-                key: 'type',
-                header: t('users.type'),
-                render: (u) => (
-                  <Badge color={u.type === 'consultant' ? 'blue' : 'purple'}>
-                    {u.type === 'consultant' ? t('users.typeConsultant') : t('users.typeAdmin')}
-                  </Badge>
-                ),
-              },
-              {
-                key: 'roles',
-                header: t('users.roles'),
-                render: (u) => (
-                  <span className="flex gap-1.5 flex-wrap">
-                    {u.roles.map((r) => (
-                      <Badge key={r} color="gray" dot={false}>
-                        {r}
+                </span>
+              ),
+            },
+            {
+              key: 'type',
+              header: t('users.type'),
+              render: (u) => (
+                <Badge color={u.type === 'consultant' ? 'blue' : 'purple'}>
+                  {u.type === 'consultant' ? t('users.typeConsultant') : t('users.typeAdmin')}
+                </Badge>
+              ),
+            },
+            {
+              key: 'roles',
+              header: t('users.roles'),
+              render: (u) => (
+                <span className="flex gap-1.5 flex-wrap">
+                  {u.roles.length === 0
+                    ? '—'
+                    : u.roles.map((r) => (
+                        <Badge key={r} color="gray" dot={false}>
+                          {r}
+                        </Badge>
+                      ))}
+                </span>
+              ),
+            },
+          ]}
+        />
+      ) : (
+        <>
+          <FilterPanel>
+            <SearchInput
+              value={search}
+              onChange={(v) => {
+                setSearch(v);
+                setPage(1);
+              }}
+              className="flex-1 min-w-[200px]"
+            />
+            <Select
+              options={[
+                { value: 'admin', label: t('users.typeAdmin') },
+                { value: 'consultant', label: t('users.typeConsultant') },
+              ]}
+              placeholder={t('users.typeAll')}
+              value={type}
+              onChange={(e) => {
+                setType(e.target.value);
+                setPage(1);
+              }}
+              style={{ maxWidth: 170 }}
+            />
+            <Select
+              options={(rolesQuery.data ?? []).map((r) => ({ value: r.name, label: r.name }))}
+              placeholder={t('users.roleAll')}
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value);
+                setPage(1);
+              }}
+              style={{ maxWidth: 170 }}
+            />
+            <Select
+              options={[
+                { value: '1', label: t('users.active') },
+                { value: '0', label: t('users.inactive') },
+              ]}
+              placeholder={t('common.status')}
+              value={activeFilter}
+              onChange={(e) => {
+                setActiveFilter(e.target.value);
+                setPage(1);
+              }}
+              style={{ maxWidth: 150 }}
+            />
+          </FilterPanel>
+
+          {query.isLoading ? (
+            <TableSkeleton rows={5} />
+          ) : query.isError || !data ? (
+            <ErrorState onRetry={() => query.refetch()} />
+          ) : (
+            <>
+              <Table
+                columns={[
+                  {
+                    key: 'user',
+                    header: t('auth.name'),
+                    render: (u) => (
+                      <span className="flex items-center gap-3">
+                        <Avatar src={u.avatar_thumb_url} name={u.name} size="sm" />
+                        <span>
+                          <strong className="block">{u.name}</strong>
+                          <span className="text-muted text-[0.8rem]" dir="ltr">
+                            {u.email}
+                          </span>
+                        </span>
+                      </span>
+                    ),
+                  },
+                  { key: 'phone', header: t('auth.phone'), render: (u) => (u.phone ? <span dir="ltr">{u.phone}</span> : '—') },
+                  {
+                    key: 'type',
+                    header: t('users.type'),
+                    render: (u) => (
+                      <Badge color={u.type === 'consultant' ? 'blue' : 'purple'}>
+                        {u.type === 'consultant' ? t('users.typeConsultant') : t('users.typeAdmin')}
                       </Badge>
-                    ))}
-                    {can('assign-roles') && (
-                      <Button variant="ghost" size="sm" onClick={() => setRolesOf(u)}>
-                        {t('common.edit')}
-                      </Button>
-                    )}
-                  </span>
-                ),
-              },
-              {
-                key: 'active',
-                header: t('common.status'),
-                render: (u) => (
-                  <Switch
-                    checked={u.is_active}
-                    disabled={!can('update-users')}
-                    onChange={() => (u.is_active ? setToggling(u) : statusMutation.mutate({ id: u.id, is_active: true }))}
-                    aria-label={t('common.status')}
-                  />
-                ),
-              },
-              {
-                key: 'last_login',
-                header: t('users.lastLogin'),
-                render: (u) => (u.last_login_at ? u.last_login_at.slice(0, 16).replace('T', ' ') : '—'),
-              },
-              {
-                key: 'actions',
-                header: t('common.actions'),
-                render: (u) => (
-                  <ActionsMenu
-                    ariaLabel={t('common.actions')}
-                    items={[
-                      ...(can('update-users')
-                        ? [{ key: 'edit', label: t('common.edit'), onClick: () => setEditing(u) }]
-                        : []),
-                      ...(can('delete-users')
-                        ? [
-                            {
-                              key: 'delete',
-                              label: t('common.delete'),
-                              danger: true,
-                              onClick: () => setDeleting(u),
-                            },
-                          ]
-                        : []),
-                    ]}
-                  />
-                ),
-              },
-            ]}
-            rows={data.data}
-            rowKey={(u) => u.id}
-          />
-          <Pagination meta={data.meta} onPage={setPage} className="mt-6" />
+                    ),
+                  },
+                  {
+                    key: 'roles',
+                    header: t('users.roles'),
+                    render: (u) => (
+                      <span className="flex gap-1.5 flex-wrap">
+                        {u.roles.map((r) => (
+                          <Badge key={r} color="gray" dot={false}>
+                            {r}
+                          </Badge>
+                        ))}
+                        {can('assign-roles') && (
+                          <Button variant="ghost" size="sm" onClick={() => setRolesOf(u)}>
+                            {t('common.edit')}
+                          </Button>
+                        )}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: 'active',
+                    header: t('common.status'),
+                    render: (u) => (
+                      <Switch
+                        checked={u.is_active}
+                        disabled={!can('update-users')}
+                        onChange={() => (u.is_active ? setToggling(u) : statusMutation.mutate({ id: u.id, is_active: true }))}
+                        aria-label={t('common.status')}
+                      />
+                    ),
+                  },
+                  {
+                    key: 'last_login',
+                    header: t('users.lastLogin'),
+                    render: (u) => (u.last_login_at ? u.last_login_at.slice(0, 16).replace('T', ' ') : '—'),
+                  },
+                  {
+                    key: 'actions',
+                    header: t('common.actions'),
+                    render: (u) => (
+                      <ActionsMenu
+                        ariaLabel={t('common.actions')}
+                        items={[
+                          ...(can('update-users')
+                            ? [{ key: 'edit', label: t('common.edit'), onClick: () => setEditing(u) }]
+                            : []),
+                          ...(can('delete-users')
+                            ? [
+                                {
+                                  key: 'delete',
+                                  label: t('common.delete'),
+                                  danger: true,
+                                  onClick: () => setDeleting(u),
+                                },
+                              ]
+                            : []),
+                        ]}
+                      />
+                    ),
+                  },
+                ]}
+                rows={data.data}
+                rowKey={(u) => u.id}
+              />
+              <Pagination meta={data.meta} onPage={setPage} className="mt-6" />
+            </>
+          )}
         </>
       )}
 

@@ -16,7 +16,7 @@ import { StepLocation } from '@/components/wizard/StepLocation';
 import { StepPayment } from '@/components/wizard/StepPayment';
 import { StepConfirm, type TerminalState } from '@/components/wizard/StepConfirm';
 import { BookingResult } from '@/components/wizard/BookingResult';
-import type { Package, Quote } from '@/types/api';
+import type { Package, Quote, Subscription } from '@/types/api';
 
 type StepKey = 'account' | 'consultant' | 'datetime' | 'location' | 'payment' | 'confirm';
 
@@ -51,10 +51,44 @@ export default function BookingWizardPage() {
     queryFn: () => api.get(`/public/packages/${slug}`).then((r) => r.data.data as Package),
   });
 
+  // the public endpoint serves only live packages — when it fails, fall back to
+  // the client's own subscription snapshot (drafted/deactivated package, §4)
+  const subsQuery = useQuery({
+    queryKey: ['client', 'subscriptions', 'active'],
+    queryFn: () => api.get('/client/subscriptions/active').then((r) => r.data.data as Subscription[]),
+    enabled: !!token && pkgQuery.isError,
+  });
+
   useEffect(() => {
-    if (pkgQuery.data) wizard.setPackage(slug, pkgQuery.data);
+    if (pkgQuery.data) {
+      wizard.setPackage(slug, pkgQuery.data);
+      return;
+    }
+    // purchases are frozen at purchase time: the subscription carries its own
+    // package snapshot, so the wizard proceeds with the drafted package too
+    const sub = subsQuery.data?.find((s) => s.package?.slug === slug);
+    if (sub?.package) {
+      wizard.setPackage(slug, {
+        ...sub.package,
+        description: null,
+        description_ar: null,
+        description_en: null,
+        features: [],
+        features_localized: [],
+        price: sub.price_paid,
+        price_formatted: sub.price_paid_formatted,
+        currency: 'SAR',
+        billing_period_days: 0,
+        consultations_limit: sub.consultations_limit,
+        documents_limit: null,
+        is_unlimited: sub.is_unlimited,
+        is_featured: false,
+        is_active: false,
+        sort_order: 0,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pkgQuery.data, slug]);
+  }, [pkgQuery.data, subsQuery.data, slug]);
 
   // fresh store per package / on leave
   useEffect(() => {
@@ -140,14 +174,17 @@ export default function BookingWizardPage() {
     if (prev) setStep(prev);
   };
 
-  if (pkgQuery.isLoading) {
+  // drafted/deactivated package resolved from the client's subscription (§4)
+  const fallbackPkg = wizard.packageSlug === slug ? pkg : null;
+
+  if (pkgQuery.isLoading || (pkgQuery.isError && !!token && subsQuery.isLoading)) {
     return (
       <div className="page-loader" style={{ minHeight: '50vh' }}>
         <span className="spinner" />
       </div>
     );
   }
-  if (pkgQuery.isError || !pkgQuery.data) {
+  if (!pkgQuery.data && !fallbackPkg) {
     return (
       <div className="section-padding container">
         {pkgQuery.isError ? (

@@ -20,6 +20,7 @@ export interface User {
   roles: string[];
   permissions?: string[];          // only in /me and /profile
   created_at: string; updated_at: string;
+  deleted_at?: string | null;         // set when drafted (soft-deleted), null on live records
 }
 
 export interface Consultant extends User {
@@ -53,6 +54,7 @@ export interface Client {
   bookings_count?: number; reports_count?: number;
   active_subscription?: Subscription | null;
   created_at: string; updated_at: string;
+  deleted_at?: string | null;         // set when drafted (soft-deleted), null on live records
 }
 
 export interface ClientMe extends Client {
@@ -79,6 +81,8 @@ export interface Package {
   billing_period_days: number;
   consultations_limit: number | null; documents_limit: number | null;   // null = unlimited
   is_unlimited: boolean; is_featured: boolean; is_active: boolean; sort_order: number;
+  subscriptions_count?: number;      // on the admin/trashed lists
+  deleted_at?: string | null;         // set when drafted (soft-deleted), null on live records
 }
 
 export type SubscriptionStatus = 'active' | 'expired' | 'cancelled';

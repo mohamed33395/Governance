@@ -12,6 +12,7 @@ import { useI18n } from '@/lib/i18n/i18n-context';
 import { packageSchema, type PackageValues } from '@/schemas/packages';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import { FilterPanel } from '@/components/admin/FilterPanel';
+import { DraftsTab, useTrashedCount } from '@/components/admin/DraftsTab';
 import {
   ActionsMenu,
   Badge,
@@ -28,6 +29,7 @@ import {
   SearchInput,
   Select,
   Switch,
+  Tabs,
   Textarea,
   useToast,
 } from '@/components/ui';
@@ -53,6 +55,7 @@ function PackagesInner() {
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<Package | 'new' | null>(null);
   const [deleting, setDeleting] = useState<Package | null>(null);
+  const [tab, setTab] = useState<'live' | 'drafts'>('live');
 
   const query = useQuery({
     queryKey: ['admin', 'packages', { search, activeFilter, page }],
@@ -64,6 +67,7 @@ function PackagesInner() {
         .then((r) => r.data as Paginated<Package>),
   });
   const data = query.data;
+  const trashedCount = useTrashedCount('packages').data;
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin', 'packages'] });
 
@@ -91,19 +95,8 @@ function PackagesInner() {
     },
   });
 
-  return (
+  const liveSection = (
     <>
-      <PageHeader
-        title={t('nav.packages')}
-        actions={
-          can('create-packages') ? (
-            <Button size="sm" onClick={() => setEditing('new')}>
-              + {t('packagesAdmin.add')}
-            </Button>
-          ) : undefined
-        }
-      />
-
       <FilterPanel>
         <SearchInput
           value={search}
@@ -200,6 +193,57 @@ function PackagesInner() {
           </div>
           <Pagination meta={data.meta} onPage={setPage} className="mt-6" />
         </>
+      )}
+    </>
+  );
+
+  return (
+    <>
+      <PageHeader
+        title={t('nav.packages')}
+        actions={
+          can('create-packages') ? (
+            <Button size="sm" onClick={() => setEditing('new')}>
+              + {t('packagesAdmin.add')}
+            </Button>
+          ) : undefined
+        }
+      />
+
+      <Tabs
+        tabs={[
+          { key: 'live', label: t('nav.packages') },
+          { key: 'drafts', label: t('drafts.title'), count: trashedCount },
+        ]}
+        active={tab}
+        onChange={(k) => setTab(k as 'live' | 'drafts')}
+        className="mb-6"
+      />
+
+      {tab === 'drafts' ? (
+        <DraftsTab<Package>
+          resource="packages"
+          permission="delete-packages"
+          rowKey={(p) => p.id}
+          columns={[
+            {
+              key: 'name',
+              header: t('nav.packages'),
+              render: (p) => (
+                <span>
+                  <strong className="block">{p.name}</strong>
+                  <span className="text-muted text-[0.8rem]" dir="ltr">
+                    {p.name_en}
+                  </span>
+                </span>
+              ),
+            },
+            { key: 'price', header: t('packagesAdmin.priceSar'), render: (p) => <PriceTag formatted={p.price_formatted} /> },
+            { key: 'subs', header: t('drafts.subscriptions'), render: (p) => p.subscriptions_count ?? 0 },
+          ]}
+        />
+      ) : (
+        liveSection
       )}
 
       {editing && (

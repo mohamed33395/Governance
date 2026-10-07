@@ -22,6 +22,7 @@ import {
 } from '@/components/admin/AvailabilityEditor';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import { FilterPanel } from '@/components/admin/FilterPanel';
+import { DraftsTab, useTrashedCount } from '@/components/admin/DraftsTab';
 import {
   Avatar,
   ActionsMenu,
@@ -39,6 +40,7 @@ import {
   Switch,
   Table,
   TableSkeleton,
+  Tabs,
   Textarea,
   useToast,
 } from '@/components/ui';
@@ -72,6 +74,7 @@ function ConsultantsInner() {
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<Consultant | null>(null);
   const [toggling, setToggling] = useState<Consultant | null>(null);
+  const [tab, setTab] = useState<'live' | 'drafts'>('live');
 
   const query = useQuery({
     queryKey: ['admin', 'consultants', { search, activeFilter, specialization, page }],
@@ -88,6 +91,7 @@ function ConsultantsInner() {
         .then((r) => r.data as Paginated<Consultant>),
   });
   const data = query.data;
+  const trashedCount = useTrashedCount('consultants').data;
 
   const statsQuery = useQuery({
     queryKey: ['admin', 'consultants', 'stats'],
@@ -131,19 +135,8 @@ function ConsultantsInner() {
     return d ? d.name : String(dow); // meta names arrive localized
   };
 
-  return (
+  const liveSection = (
     <>
-      <PageHeader
-        title={t('nav.consultants')}
-        actions={
-          can('create-consultants') ? (
-            <Button size="sm" onClick={() => setCreating(true)}>
-              + {t('consultants.add')}
-            </Button>
-          ) : undefined
-        }
-      />
-
       {can('view-consultants') && statsQuery.data && (
         <>
           <div className="stat-grid">
@@ -325,6 +318,58 @@ function ConsultantsInner() {
           />
           <Pagination meta={data.meta} onPage={setPage} className="mt-6" />
         </>
+      )}
+
+    </>
+  );
+
+  return (
+    <>
+      <PageHeader
+        title={t('nav.consultants')}
+        actions={
+          can('create-consultants') ? (
+            <Button size="sm" onClick={() => setCreating(true)}>
+              + {t('consultants.add')}
+            </Button>
+          ) : undefined
+        }
+      />
+
+      <Tabs
+        tabs={[
+          { key: 'live', label: t('nav.consultants') },
+          { key: 'drafts', label: t('drafts.title'), count: trashedCount },
+        ]}
+        active={tab}
+        onChange={(k) => setTab(k as 'live' | 'drafts')}
+        className="mb-6"
+      />
+
+      {tab === 'drafts' ? (
+        <DraftsTab<Consultant>
+          resource="consultants"
+          permission="delete-consultants"
+          rowKey={(c) => c.id}
+          columns={[
+            {
+              key: 'consultant',
+              header: t('bookings.consultant'),
+              render: (c) => (
+                <span className="flex items-center gap-3">
+                  <Avatar src={c.avatar_thumb_url} name={c.name} size="sm" />
+                  <span>
+                    <strong className="block">{c.name}</strong>
+                    {c.title && <span className="text-muted text-[0.8rem]">{c.title}</span>}
+                  </span>
+                </span>
+              ),
+            },
+            { key: 'spec', header: t('consultants.specializationField'), render: (c) => c.specialization ?? '—' },
+          ]}
+        />
+      ) : (
+        liveSection
       )}
 
       {creating && (

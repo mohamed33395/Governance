@@ -9,6 +9,7 @@ import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import { FilterPanel } from '@/components/admin/FilterPanel';
+import { DraftsTab, useTrashedCount } from '@/components/admin/DraftsTab';
 import {
   ActionsMenu,
   Avatar,
@@ -23,6 +24,7 @@ import {
   Switch,
   Table,
   TableSkeleton,
+  Tabs,
   useToast,
 } from '@/components/ui';
 import { ChartCard, BarChart, RankingList } from '@/components/admin/charts';
@@ -53,6 +55,7 @@ function ClientsInner() {
   const [page, setPage] = useState(1);
   const [toggling, setToggling] = useState<Client | null>(null);
   const [deleting, setDeleting] = useState<Client | null>(null);
+  const [tab, setTab] = useState<'live' | 'drafts'>('live');
 
   const query = useQuery({
     queryKey: ['admin', 'clients', { search, activeFilter, consultantId, hasSub, page }],
@@ -70,6 +73,7 @@ function ClientsInner() {
         .then((r) => r.data as Paginated<Client>),
   });
   const data = query.data;
+  const trashedCount = useTrashedCount('clients').data;
 
   const consultantsQuery = useQuery({
     queryKey: ['admin', 'consultants', 'options'],
@@ -118,10 +122,8 @@ function ClientsInner() {
 
   const resetPage = () => setPage(1);
 
-  return (
+  const liveSection = (
     <>
-      <PageHeader title={t('nav.clients')} />
-
       {can('view-clients') && statsQuery.data && (
         <>
           <div className="stat-grid">
@@ -297,6 +299,50 @@ function ClientsInner() {
           />
           <Pagination meta={data.meta} onPage={setPage} className="mt-6" />
         </>
+      )}
+
+    </>
+  );
+
+  return (
+    <>
+      <PageHeader title={t('nav.clients')} />
+
+      <Tabs
+        tabs={[
+          { key: 'live', label: t('nav.clients') },
+          { key: 'drafts', label: t('drafts.title'), count: trashedCount },
+        ]}
+        active={tab}
+        onChange={(k) => setTab(k as 'live' | 'drafts')}
+        className="mb-6"
+      />
+
+      {tab === 'drafts' ? (
+        <DraftsTab<Client>
+          resource="clients"
+          permission="delete-clients"
+          rowKey={(c) => c.id}
+          columns={[
+            {
+              key: 'client',
+              header: t('auth.name'),
+              render: (c) => (
+                <span className="flex items-center gap-3">
+                  <Avatar src={c.avatar_thumb_url ?? c.avatar_url} name={c.name} size="sm" />
+                  <span>
+                    <strong className="block">{c.name}</strong>
+                    <span className="text-muted text-[0.8rem]">{c.company_name}</span>
+                  </span>
+                </span>
+              ),
+            },
+            { key: 'email', header: t('auth.email'), render: (c) => <span dir="ltr">{c.email}</span> },
+            { key: 'phone', header: t('auth.phone'), render: (c) => <span dir="ltr">{c.phone}</span> },
+          ]}
+        />
+      ) : (
+        liveSection
       )}
 
       {/* deactivating revokes the client's tokens */}
