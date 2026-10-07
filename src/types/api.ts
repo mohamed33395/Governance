@@ -351,6 +351,50 @@ export interface Review {
   updated_at: string;
 }
 
+// ---------- activity logs (LOG-01/02) ----------
+export type ActivityLogName = 'system' | 'api';
+export type ActivityEvent =
+  | 'created'
+  | 'updated'
+  | 'deleted'
+  | 'restored'
+  | 'login'
+  | 'logout'
+  | 'login_failed';
+
+export interface ActivityLogActor { type: 'User' | 'Client'; id: ID; name: string }
+export interface ActivityLogSubject { type: string; id: ID; name: string | null }
+
+export interface ActivityLog {
+  id: ID;
+  log_name: ActivityLogName | string;        // "system" = DB events, "api" = auth/api events
+  module: string;                            // users | consultants | clients | packages | bookings | payments | reports | auth | …
+  event: ActivityEvent | string;
+  description: string;
+  subject: ActivityLogSubject | null;        // null for auth events
+  causer: ActivityLogActor | null;           // null for console/queue work
+  properties: {
+    attributes?: Record<string, unknown>;    // created (new values) / deleted (final snapshot)
+    changes?: Record<string, unknown>;       // updated — new values only
+    old?: Record<string, unknown>;           // updated — previous values
+    force?: boolean;                         // deleted — true = purge, false = draft
+    guard?: 'admin' | 'client' | string;     // auth events
+    email?: string;                          // login_failed
+    reason?: string;                         // e.g. "account_disabled"
+    device_name?: string;
+    request?: { method?: string; url?: string; user_agent?: string };
+    [key: string]: unknown;
+  };
+  ip_address: string | null;
+  created_at: string;
+}
+
+export interface ActivityLogsMeta {
+  modules: string[];
+  events: string[];
+  log_names: string[];
+}
+
 // ---------- PUB-08 meta ----------
 export interface PublicMeta {
   booking_statuses: { value: string; label: string }[];

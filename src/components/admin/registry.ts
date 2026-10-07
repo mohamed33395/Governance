@@ -5,6 +5,7 @@ import {
   CreditCard,
   FileText,
   Headset,
+  History,
   KeyRound,
   LayoutDashboard,
   ShieldCheck,
@@ -82,6 +83,7 @@ export const ROUTES: RouteIdentity[] = [
   { key: 'nav.reviews', href: '/admin/reviews', icon: Star, family: 'gold', perm: 'view-reviews' },
   { key: 'nav.users', href: '/admin/users', icon: ShieldCheck, family: 'gold', perm: 'view-users' },
   { key: 'nav.roles', href: '/admin/roles', icon: KeyRound, family: 'sage', perm: 'view-roles' },
+  { key: 'nav.activity_logs', href: '/admin/activity-logs', icon: History, family: 'sage', perm: 'view-activity-logs' },
 ];
 
 export interface NavGroup {
@@ -101,7 +103,7 @@ export const NAV_GROUPS: NavGroup[] = [
   { key: 'navGroup.people', family: 'bronze', hrefs: ['/admin/clients', '/admin/consultants'] },
   { key: 'navGroup.catalog', family: 'sand', hrefs: ['/admin/packages'] },
   { key: 'navGroup.support', family: 'bronze', hrefs: ['/admin/support-tickets', '/admin/join-requests', '/admin/reviews'] },
-  { key: 'navGroup.access', family: 'sage', hrefs: ['/admin/users', '/admin/roles'] },
+  { key: 'navGroup.access', family: 'sage', hrefs: ['/admin/users', '/admin/roles', '/admin/activity-logs'] },
 ];
 
 // Longest-prefix match so /admin/clients/5 resolves to the clients route.
