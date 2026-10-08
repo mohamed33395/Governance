@@ -1,17 +1,20 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { useClientAuth } from '@/stores/client-auth';
-import { Avatar, EmptyState, ErrorState, StatusBadge } from '@/components/ui';
-import type { ClientDashboard } from '@/types/api';
+import { Avatar, Button, EmptyState, ErrorState, StatusBadge } from '@/components/ui';
+import { BookSessionModal, canBookSession } from '@/components/client/BookSessionModal';
+import type { ClientDashboard, Subscription } from '@/types/api';
 
 // §12.1 — client dashboard home (CLI-DSH-01)
 export default function DashboardPage() {
   const { t } = useI18n();
   const user = useClientAuth((s) => s.user);
+  const [bookingSub, setBookingSub] = useState<Subscription | null>(null);
 
   const dashboardQuery = useQuery({
     queryKey: ['client', 'dashboard'],
@@ -124,10 +127,18 @@ export default function DashboardPage() {
                   <strong>{sub.ends_at}</strong>
                 </li>
               </ul>
+              {/* §5.8 — book the next session covered by this subscription */}
+              {canBookSession(sub) && (
+                <Button variant="primary" size="sm" className="mt-4 w-full" onClick={() => setBookingSub(sub)}>
+                  {t('bookSession.title')}
+                </Button>
+              )}
             </div>
           ))}
         </div>
       )}
+
+      <BookSessionModal subscription={bookingSub} onClose={() => setBookingSub(null)} />
     </>
   );
 }

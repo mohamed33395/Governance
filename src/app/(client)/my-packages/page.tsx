@@ -7,7 +7,8 @@ import dayjs from 'dayjs';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePublicMeta } from '@/lib/meta';
-import { EmptyState, ErrorState, PageHeader, Pagination, PriceTag, StatusBadge, Tabs } from '@/components/ui';
+import { Button, EmptyState, ErrorState, PageHeader, Pagination, PriceTag, StatusBadge, Tabs } from '@/components/ui';
+import { BookSessionModal, canBookSession } from '@/components/client/BookSessionModal';
 import type { Paginated, Subscription } from '@/types/api';
 
 // §12.5 — my packages / subscriptions (CLI-SUB-01)
@@ -16,6 +17,7 @@ export default function MyPackagesPage() {
   const meta = usePublicMeta();
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
+  const [bookingSub, setBookingSub] = useState<Subscription | null>(null);
 
   const query = useQuery({
     queryKey: ['client', 'subscriptions', { status, page }],
@@ -107,6 +109,13 @@ export default function MyPackagesPage() {
                     <span className="text-muted">{t('wizard.total')}</span>
                     <PriceTag formatted={sub.price_paid_formatted} />
                   </div>
+
+                  {/* §5.8 — an active subscription with quota left books its next session with no payment */}
+                  {canBookSession(sub) && (
+                    <Button variant="primary" size="sm" className="mt-4 w-full" onClick={() => setBookingSub(sub)}>
+                      {t('bookSession.title')}
+                    </Button>
+                  )}
                 </div>
               );
             })}
@@ -114,6 +123,8 @@ export default function MyPackagesPage() {
           <Pagination meta={data.meta} onPage={setPage} className="mt-6" />
         </>
       )}
+
+      <BookSessionModal subscription={bookingSub} onClose={() => setBookingSub(null)} />
     </>
   );
 }

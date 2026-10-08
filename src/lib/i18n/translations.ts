@@ -1043,6 +1043,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     "myPackages.period": "الفترة",
     "myPackages.empty": "لا توجد اشتراكات",
     "myPackages.browse": "تصفح الباقات",
+    "bookSession.title": "احجز جلسة",
+    "bookSession.subtitle": "هذه الجلسة مشمولة بباقتك — لن يتم خصم أي مبلغ.",
 
     // ===== profile =====
     "profile.title": "الملف الشخصي",
@@ -2521,6 +2523,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     "myPackages.period": "Period",
     "myPackages.empty": "No subscriptions",
     "myPackages.browse": "Browse packages",
+    "bookSession.title": "Book a session",
+    "bookSession.subtitle": "This session is covered by your package — no charge.",
 
     // ===== profile =====
     "profile.title": "Profile",
