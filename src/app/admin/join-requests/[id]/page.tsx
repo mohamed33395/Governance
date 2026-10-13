@@ -116,12 +116,10 @@ function JoinRequestDetailInner() {
           <span className="text-muted">{t('joinRequests.specialization')}</span>
           <span>{request.specialization}</span>
         </div>
-        {request.linkedin_url && (
+        {request.licenses && (
           <div className={row}>
             <span className="text-muted">{t('joinRequests.linkedin')}</span>
-            <a href={request.linkedin_url} target="_blank" rel="noreferrer" className="text-primary hover:underline" dir="ltr">
-              {request.linkedin_url}
-            </a>
+            <span>{request.licenses}</span>
           </div>
         )}
         {request.bio && (

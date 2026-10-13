@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { Reveal } from "./Reveal";
+import { HorizontalCarousel } from "./HorizontalCarousel";
 import { CARD } from "./tokens";
 import type { Paginated, Review } from "@/types/api";
 
@@ -25,9 +26,9 @@ export function Testimonials() {
   }
 
   return (
-    <ul className="grid gap-6 md:grid-cols-3">
+    <HorizontalCarousel>
       {reviews.map((review, i) => (
-        <li key={review.id}>
+        <li key={review.id} className="w-[88%] shrink-0 snap-start sm:w-[calc(50%-0.75rem)] md:w-[calc(33.333%-1rem)]">
           <Reveal delay={(i % 3) * 100} className="h-full">
             <figure className={`flex h-full flex-col p-8 ${CARD}`}>
               <div className="flex gap-1 text-accent" role="img" aria-label={`${review.rating} / 5`}>
@@ -59,7 +60,7 @@ export function Testimonials() {
           </Reveal>
         </li>
       ))}
-    </ul>
+    </HorizontalCarousel>
   );
 }
 
@@ -68,9 +69,9 @@ const INITIALS = ["م.ر", "ن.ع", "ف.ح"] as const;
 function StaticTestimonials() {
   const { t } = useI18n();
   return (
-    <ul className="grid gap-6 md:grid-cols-3">
+    <HorizontalCarousel>
       {[1, 2, 3].map((i) => (
-        <li key={i}>
+        <li key={i} className="w-[88%] shrink-0 snap-start sm:w-[calc(50%-0.75rem)] md:w-[calc(33.333%-1rem)]">
           <Reveal delay={(i - 1) * 100} className="h-full">
             <figure className={`flex h-full flex-col p-8 ${CARD}`}>
               <div className="flex gap-1 text-accent" role="img" aria-label="5 / 5">
@@ -97,6 +98,6 @@ function StaticTestimonials() {
           </Reveal>
         </li>
       ))}
-    </ul>
+    </HorizontalCarousel>
   );
 }

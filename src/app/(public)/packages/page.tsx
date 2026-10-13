@@ -12,7 +12,7 @@ export default function PackagesPage() {
 
   return (
     <main>
-      <PageHero eyebrow={t('packages.eyebrow')} title={t('packages.title')} lead={t('packages.subtitle')} />
+      <PageHero eyebrow={t('packages.eyebrow')} title={t('packages.title')} />
       <section id="packages" className="py-24">
         <Container>
           <Reveal>

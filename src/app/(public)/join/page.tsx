@@ -41,7 +41,7 @@ export default function JoinPage() {
       phone: "",
       specialization: "",
       bio: "",
-      linkedin_url: "",
+      licenses: "",
     },
   });
 
@@ -53,7 +53,7 @@ export default function JoinPage() {
       fd.append("phone", values.phone);
       fd.append("specialization", values.specialization);
       if (values.bio) fd.append("bio", values.bio);
-      if (values.linkedin_url) fd.append("linkedin_url", values.linkedin_url);
+      if (values.licenses) fd.append("licenses", values.licenses);
       if (cv) fd.append("cv", cv);
       return api.post("/public/join-requests", fd);
     },
@@ -129,10 +129,8 @@ export default function JoinPage() {
                 <div className="sm:col-span-2">
                   <Input
                     label={t("joinRequests.linkedin")}
-                    type="url"
-                    dir="ltr"
-                    error={err(errors.linkedin_url?.message)}
-                    {...register("linkedin_url")}
+                    error={err(errors.licenses?.message)}
+                    {...register("licenses")}
                   />
                 </div>
                 <div className="sm:col-span-2">

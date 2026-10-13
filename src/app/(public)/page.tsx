@@ -35,7 +35,7 @@ const STEPS = [
   { n: "3", title: "lp.s3Title", body: "lp.s3Body" },
 ] as const;
 
-const FAQ_COUNT = 8;
+const FAQ_COUNT = 7;
 
 export default function HomePage() {
   const { t, lang } = useI18n();

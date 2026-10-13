@@ -9,8 +9,11 @@
 ---
 
 ## Table of Contents
+``  
+0**-+\ZXC VB
 
-0. [How to work with this plan](#0-how-to-work-with-this-plan)
+0. [How to work with this plan](#0-how-to-work-with-this-plan)a|szD
+1. .3+69-/*
 1. [What you are building](#1-what-you-are-building)
 2. [Tech stack and project setup](#2-tech-stack-and-project-setup)
 3. [Theme integration (CSS variables contract)](#3-theme-integration-css-variables-contract)
