@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { EmptyState, ErrorState } from "@/components/ui";
 import type { Package } from "@/types/api";
+import { HorizontalCarousel } from "./HorizontalCarousel";
 import { FLUID, FOCUS } from "./tokens";
 
 const MEDALS = ["bg-[#cd8b5a]", "bg-[#e6e6e6]", "bg-accent-soft"] as const;
@@ -44,11 +45,11 @@ export function PackageGrid({ withDetails = false }: { withDetails?: boolean }) 
         </defs>
       </svg>
 
-      <ul className="grid items-stretch gap-6 md:grid-cols-3">
+      <HorizontalCarousel>
         {packages.map((pkg, i) => {
           const featured = pkg.is_featured;
           return (
-            <li key={pkg.id} className="flex">
+            <li key={pkg.id} className="flex w-[88%] shrink-0 snap-start sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
               <article
                 className={`relative flex w-full flex-col rounded-2xl border p-8 ${FLUID} hover:-translate-y-1 ${
                   featured
@@ -109,7 +110,7 @@ export function PackageGrid({ withDetails = false }: { withDetails?: boolean }) 
             </li>
           );
         })}
-      </ul>
+      </HorizontalCarousel>
     </>
   );
 }

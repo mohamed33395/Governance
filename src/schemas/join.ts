@@ -7,6 +7,6 @@ export const joinRequestSchema = z.object({
   phone,
   specialization: z.string().min(1, 'required').max(191),
   bio: z.string().max(5000).optional().or(z.literal('')),
-  linkedin_url: z.string().max(500).optional().or(z.literal('')),
+  licenses: z.string().max(500).optional().or(z.literal('')),
 });
 export type JoinRequestValues = z.infer<typeof joinRequestSchema>;

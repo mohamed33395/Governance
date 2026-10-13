@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePublicMeta } from '@/lib/meta';
-import { Avatar, EmptyState, ErrorState, Pagination, SearchInput } from '@/components/ui';
+import { Avatar, EmptyState, ErrorState, SearchInput } from '@/components/ui';
 import { Container, PageHero } from '@/components/public/Section';
+import { HorizontalCarousel } from '@/components/public/HorizontalCarousel';
 import { PersonCard } from '@/components/public/PersonCard';
 import { FIELD, FOCUS } from '@/components/public/tokens';
 import type { Paginated, PublicConsultant } from '@/types/api';
@@ -18,15 +19,13 @@ export default function ConsultantsPage() {
   const meta = usePublicMeta();
   const [search, setSearch] = useState('');
   const [specialization, setSpecialization] = useState('');
-  const [page, setPage] = useState(1);
 
   const consultantsQuery = useQuery({
-    queryKey: ['public', 'consultants', { search, specialization, page }],
+    queryKey: ['public', 'consultants', { search, specialization }],
     queryFn: () =>
       api
-        .get('/public/consultants', { params: { search: search || undefined, specialization: specialization || undefined, page, per_page: 12 } })
+        .get('/public/consultants', { params: { search: search || undefined, specialization: specialization || undefined, per_page: 100 } })
         .then((r) => r.data as Paginated<PublicConsultant>),
-    placeholderData: keepPreviousData,
   });
 
   const dayName = (d: number) =>
@@ -40,10 +39,10 @@ export default function ConsultantsPage() {
       <section className="py-24">
         <Container>
           <div className="mb-12 flex flex-wrap gap-3">
-            <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} className="min-w-64 flex-1" />
+            <SearchInput value={search} onChange={setSearch} className="min-w-64 flex-1" />
             <input
               value={specialization}
-              onChange={(e) => { setSpecialization(e.target.value); setPage(1); }}
+              onChange={(e) => setSpecialization(e.target.value)}
               placeholder={t('consultants.specializationFilter')}
               aria-label={t('consultants.specializationFilter')}
               className={`${FIELD} max-w-[260px]`}
@@ -61,34 +60,31 @@ export default function ConsultantsPage() {
           ) : !result || result.data.length === 0 ? (
             <EmptyState title={t('common.empty')} />
           ) : (
-            <>
-              <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {result.data.map((c) => (
-                  <li key={c.id}>
-                    <Link href={`/consultants/${c.id}`} className={`block h-full rounded-2xl ${FOCUS}`}>
-                      <PersonCard
-                        avatar={<Avatar src={c.avatar_thumb_url ?? c.avatar_url} name={c.name} size="lg" />}
-                        name={c.name}
-                        role={c.title}
-                        field={c.specialization}
-                        footer={
-                          c.working_days.length > 0 ? (
-                            <span className="mt-4 flex flex-wrap justify-center gap-1">
-                              {c.working_days.map((d) => (
-                                <span key={d} className="ui-badge" data-color="green">
-                                  {dayName(d)}
-                                </span>
-                              ))}
-                            </span>
-                          ) : null
-                        }
-                      />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <Pagination meta={result.meta} onPage={setPage} />
-            </>
+            <HorizontalCarousel>
+              {result.data.map((c) => (
+                <li key={c.id} className="w-[88%] shrink-0 snap-start sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)]">
+                  <Link href={`/consultants/${c.id}`} className={`block h-full rounded-2xl ${FOCUS}`}>
+                    <PersonCard
+                      avatar={<Avatar src={c.avatar_thumb_url ?? c.avatar_url} name={c.name} size="lg" />}
+                      name={c.name}
+                      role={c.title}
+                      field={c.specialization}
+                      footer={
+                        c.working_days.length > 0 ? (
+                          <span className="mt-4 flex flex-wrap justify-center gap-1">
+                            {c.working_days.map((d) => (
+                              <span key={d} className="ui-badge" data-color="green">
+                                {dayName(d)}
+                              </span>
+                            ))}
+                          </span>
+                        ) : null
+                      }
+                    />
+                  </Link>
+                </li>
+              ))}
+            </HorizontalCarousel>
           )}
         </Container>
       </section>

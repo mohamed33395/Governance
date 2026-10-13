@@ -168,4 +168,40 @@
   html[data-theme="dark"] .btn-ghost {
     color: var(--ink);
   }
+
+  /* ===== Footer dev-company logo: sweep in, hold, fade out — 5s loop ===== */
+  .footer-dev-logo {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    animation: footer-logo-cycle 5s ease-in-out infinite;
+  }
+
+  @keyframes footer-logo-cycle {
+    0% {
+      opacity: 0;
+      clip-path: inset(0 100% 0 0);
+    }
+    18% {
+      opacity: 0.8;
+    }
+    45% {
+      clip-path: inset(0 0 0 0);
+    }
+    70% {
+      opacity: 0.8;
+      clip-path: inset(0 0 0 0);
+    }
+    100% {
+      opacity: 0;
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer-dev-logo {
+      animation: none;
+      opacity: 0.8;
+      clip-path: none;
+    }
+  }
 }

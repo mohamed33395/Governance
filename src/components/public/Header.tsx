@@ -21,7 +21,6 @@ const LINKS = [
   { href: "/consultants", key: "nav.consultants" },
   { href: "/about", key: "about" },
   { href: "/join", key: "join" },
-  { href: "/team", key: "team" },
   { href: "/contact", key: "contact" },
 ] as const;
 

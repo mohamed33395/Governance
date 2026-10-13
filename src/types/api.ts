@@ -319,7 +319,7 @@ export interface JoinRequest {
   phone: string;
   specialization: string;
   bio: string | null;
-  linkedin_url: string | null;
+  licenses: string | null;
   cv_url?: string;
   status: JoinRequestStatus;
   user_id?: ID | null;
