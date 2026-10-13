@@ -197,11 +197,30 @@
     }
   }
 
+  /* ===== Footer office logo: gentle grow/shrink pulse (transform — no layout shift) ===== */
+  .footer-brand-logo {
+    transform-origin: center;
+    animation: footer-brand-pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes footer-brand-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(2);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .footer-dev-logo {
       animation: none;
       opacity: 0.8;
       clip-path: none;
+    }
+    .footer-brand-logo {
+      animation: none;
     }
   }
 }

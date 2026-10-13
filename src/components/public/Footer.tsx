@@ -1,11 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { CaretDown, Envelope, Phone } from "@phosphor-icons/react";
+import {
+  CaretDown,
+  Envelope,
+  FacebookLogo,
+  InstagramLogo,
+  Phone,
+  SnapchatLogo,
+  TelegramLogo,
+  TiktokLogo,
+  WhatsappLogo,
+  XLogo,
+  YoutubeLogo,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 
-const FOOTER_SERVICES = Array.from({ length: 14 }, (_, i) => `footSvc${i + 1}`);
+// Split by text length so both columns render ~equal height
+const SERVICES_COLS = [
+  ["footSvc1", "footSvc3", "footSvc4", "footSvc5", "footSvc7", "footSvc9", "footSvc13"],
+  ["footSvc2", "footSvc6", "footSvc8", "footSvc10", "footSvc11", "footSvc12", "footSvc14"],
+];
 
 const COMPANY_LINKS = [
   { href: "/about", key: "about" },
@@ -31,6 +47,17 @@ const EMAILS = [
   "noreply@gcmc.sa",
 ] as const;
 
+const SOCIALS = [
+  { label: "Facebook", href: "https://www.facebook.com/share/1EVSS5h1Ud/", Icon: FacebookLogo },
+  { label: "Instagram", href: "https://www.instagram.com/alhawkamah", Icon: InstagramLogo },
+  { label: "X", href: "https://x.com/alhawkamah", Icon: XLogo },
+  { label: "TikTok", href: "https://www.tiktok.com/@alhawkamah", Icon: TiktokLogo },
+  { label: "Snapchat", href: "https://snapchat.com/t/fpooV3uz", Icon: SnapchatLogo },
+  { label: "YouTube", href: "https://youtube.com/@alhawkamah", Icon: YoutubeLogo },
+  { label: "WhatsApp", href: "https://wa.me/966554181166", Icon: WhatsappLogo },
+  { label: "Telegram", href: "https://t.me/+966554181166", Icon: TelegramLogo },
+] as const;
+
 const LINK =
   "rounded-lg text-sm text-white/70 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
@@ -41,17 +68,21 @@ export function Footer() {
 
   return (
     <footer id="contact" className="bg-secondary text-white/70">
-      <div className="mx-auto max-w-[1180px] px-6 pt-16 pb-6 md:px-8">
-        <div className="grid gap-10 border-b border-white/15 pb-12 md:grid-cols-2 lg:grid-cols-[1.1fr_0.7fr_1.5fr_1.7fr]">
+      <div className="mx-auto max-w-[1180px] px-6 pt-10 pb-5 md:px-8">
+        <div className="grid gap-8 border-b border-white/15 pb-8 md:grid-cols-2 lg:grid-cols-[1.1fr_0.7fr_1.5fr_1.7fr]">
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo_icon.png" alt={t("logoAlt")} className="mb-4 h-10 w-auto" />
+            <img
+              src="/logo_mark.png"
+              alt={t("logoAlt")}
+              className="footer-brand-logo mx-auto mb-6 h-10 w-auto"
+            />
             <p className="max-w-[32ch] text-sm text-pretty">{t("brandDesc")}</p>
           </div>
 
           <nav aria-label={t("footerCompany")}>
-            <h2 className="mb-4 text-sm font-semibold text-white">{t("footerCompany")}</h2>
-            <ul className="flex flex-col gap-3">
+            <h2 className="mb-3 text-sm font-semibold text-white">{t("footerCompany")}</h2>
+            <ul className="flex flex-col gap-2.5">
               {COMPANY_LINKS.map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className={LINK}>
@@ -63,24 +94,35 @@ export function Footer() {
           </nav>
 
           <nav aria-label={t("footerServices")}>
-            <h2 className="mb-4 text-sm font-semibold text-white">{t("footerServices")}</h2>
-            <ul className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
-              {FOOTER_SERVICES.map((key) => (
-                <li key={key}>
-                  <Link href="/services" className={`${LINK} text-xs`}>
-                    {t(key)}
-                  </Link>
-                </li>
+            <div className="grid gap-x-8 sm:grid-cols-2">
+              {SERVICES_COLS.map((col, i) => (
+                <div key={i}>
+                  <h2
+                    className={`mb-3 text-sm font-semibold text-white ${i > 0 ? "hidden sm:block" : ""}`}
+                    aria-hidden={i > 0 || undefined}
+                  >
+                    {t("footerServices")}
+                  </h2>
+                  <ul className="flex flex-col gap-1.5">
+                    {col.map((key) => (
+                      <li key={key}>
+                        <Link href="/services" className={`${LINK} text-xs`}>
+                          {t(key)}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           </nav>
 
           <div>
-            <h2 className="mb-4 text-sm font-semibold text-white">{t("footerContactTitle")}</h2>
-            <div className="grid gap-x-8 gap-y-5 min-[480px]:grid-cols-2">
+            <h2 className="mb-3 text-sm font-semibold text-white">{t("footerContactTitle")}</h2>
+            <div className="grid gap-x-8 gap-y-4 min-[480px]:grid-cols-2">
               <div>
                 <h3 className="mb-2 text-xs font-semibold text-white/50">{t("emailLabel")}</h3>
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-1.5">
                   {(showAllEmails ? EMAILS : EMAILS.slice(0, 1)).map((email) => (
                     <li key={email}>
                       <a href={`mailto:${email}`} className={`${LINK} inline-flex items-center gap-2`}>
@@ -109,7 +151,7 @@ export function Footer() {
               </div>
               <div>
                 <h3 className="mb-2 text-xs font-semibold text-white/50">{t("phoneLabel")}</h3>
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-1.5">
                   {(showAllPhones ? PHONES : PHONES.slice(0, 1)).map((p) => (
                     <li key={p.tel}>
                       <a href={`tel:${p.tel}`} className={`${LINK} inline-flex items-center gap-2`}>
@@ -137,10 +179,29 @@ export function Footer() {
                 </button>
               </div>
             </div>
+
+            <div className="mt-4">
+              <h3 className="mb-2 text-xs font-semibold text-white/50">{t("socialLabel")}</h3>
+              <ul className="flex flex-wrap items-center gap-2.5">
+                {SOCIALS.map(({ label, href, Icon }) => (
+                  <li key={label}>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                      className="inline-flex size-8 items-center justify-center rounded-full border border-white/20 text-white/70 transition-all duration-300 hover:scale-105 hover:border-white/50 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                    >
+                      <Icon size={16} weight="fill" aria-hidden="true" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
-        <p className="pt-6 text-xs text-pretty">{t("footerCopyright")}</p>
+        <p className="pt-5 text-xs text-pretty">{t("footerCopyright")}</p>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 text-xs">
           <p className="flex flex-wrap items-center gap-2">
             <span className="font-semibold text-white/90">{t("footerBankLabel")}:</span>
