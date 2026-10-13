@@ -75,7 +75,7 @@ export function Footer() {
             <img
               src="/logo_mark.png"
               alt={t("logoAlt")}
-              className="footer-brand-logo mx-auto mb-6 h-10 w-auto"
+              className="mx-auto mb-6 h-10 w-auto"
             />
             <p className="max-w-[32ch] text-sm text-pretty">{t("brandDesc")}</p>
           </div>
