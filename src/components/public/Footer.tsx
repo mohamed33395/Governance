@@ -208,14 +208,13 @@ export function Footer() {
             <span dir="ltr">SA51 1500 0900 1468 9515 0002</span>
             <span>— {t("footerBankName")}</span>
           </p>
+          {/* CodeHouse credit hidden per request — kept in code, do not delete:
           <span dir="ltr" className="inline-flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/LOG-icon.png"
               alt="CodeHouse"
               className="h-9 w-auto opacity-80 grayscale md:h-10"
             />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/LOG-text.png"
               alt=""
@@ -223,6 +222,7 @@ export function Footer() {
               className="footer-dev-logo h-3 w-auto grayscale md:h-3.5"
             />
           </span>
+          */}
         </div>
       </div>
     </footer>
