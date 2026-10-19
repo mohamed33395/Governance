@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { isApiError } from '@/lib/errors';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { Alert, Button } from '@/components/ui';
 import { BookingResult } from '@/components/wizard/BookingResult';
@@ -19,7 +18,7 @@ export default function PaymentCallbackPage() {
     | { kind: 'loading' }
     | { kind: 'missing' }
     | { kind: 'success'; bookingId: number }
-    | { kind: 'failed' }
+    | { kind: 'failed'; reason: string | null }
     | { kind: 'confirming'; bookingId: number }
   >({ kind: 'loading' });
   const tries = useRef(0);
@@ -51,24 +50,21 @@ export default function PaymentCallbackPage() {
           setState({ kind: 'success', bookingId: pending.booking_id });
         } else if (payment.status === 'failed') {
           localStorage.removeItem('pending_payment');
-          setState({ kind: 'failed' });
-        } else if (tries.current < 5) {
-          // still initiated — poll again in a few seconds (max ~5 tries)
+          setState({ kind: 'failed', reason: payment.failure_reason });
+        } else if (tries.current < 10) {
+          // still initiated — poll again in a few seconds (max ~30 s)
           tries.current += 1;
-          setTimeout(verify, 4_000);
+          setTimeout(verify, 3_000);
         } else {
           localStorage.removeItem('pending_payment');
           setState({ kind: 'confirming', bookingId: pending.booking_id });
         }
       } catch (e) {
         if (cancelled) return;
-        if (isApiError(e) && e.code === 'PAYMENT_PENDING_CONFIRMATION') {
-          // 503 — gateway unreachable; the charge may have gone through
-          localStorage.removeItem('pending_payment');
-          setState({ kind: 'confirming', bookingId: pending.booking_id });
-        } else if (tries.current < 5) {
+        // 503 PAYMENT_PENDING_CONFIRMATION or transient error — keep polling, never recharge
+        if (tries.current < 10) {
           tries.current += 1;
-          setTimeout(verify, 4_000);
+          setTimeout(verify, 3_000);
         } else {
           localStorage.removeItem('pending_payment');
           setState({ kind: 'confirming', bookingId: pending.booking_id });
@@ -103,7 +99,7 @@ export default function PaymentCallbackPage() {
   if (state.kind === 'failed') {
     return (
       <div className="max-w-md mx-auto text-center py-12">
-        <Alert color="danger" title={t('wizard.paymentFailed')} body={t('wizard.paymentFailedBody')} className="text-start mb-6" />
+        <Alert color="danger" title={t('wizard.paymentFailed')} body={state.reason || t('wizard.paymentFailedBody')} className="text-start mb-6" />
         <Link href="/packages">
           <Button variant="primary">{t('wizard.tryAgain')}</Button>
         </Link>

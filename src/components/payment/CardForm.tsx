@@ -13,9 +13,11 @@ import { Alert, Button, Input, Radio } from '@/components/ui';
 export function CardForm({
   onToken,
   className = '',
+  reusable = false,
 }: {
   onToken: (token: string | null) => void;
   className?: string;
+  reusable?: boolean; // moyasar: create a reusable token (3DS verification) to save the card
 }) {
   const { t } = useI18n();
   const meta = usePublicMeta();
@@ -24,9 +26,12 @@ export function CardForm({
   if (driver === 'moyasar') {
     return (
       <MoyasarCardForm
-        publishableKey={meta.data?.payment_gateway.publishable_key ?? ''}
+        publishableKey={
+          process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY ?? meta.data?.payment_gateway.publishable_key ?? ''
+        }
         onToken={onToken}
         className={className}
+        reusable={reusable}
       />
     );
   }
@@ -87,10 +92,12 @@ function MoyasarCardForm({
   publishableKey,
   onToken,
   className = '',
+  reusable = false,
 }: {
   publishableKey: string;
   onToken: (token: string | null) => void;
   className?: string;
+  reusable?: boolean;
 }) {
   const { t } = useI18n();
   const [name, setName] = useState('');
@@ -108,21 +115,29 @@ function MoyasarCardForm({
     try {
       const res = await fetch('https://api.moyasar.com/v1/tokens', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${btoa(`${publishableKey}:`)}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
+          publishable_api_key: publishableKey,
+          ...(reusable
+            ? { callback_url: `${window.location.origin}/payment-methods/callback` }
+            : { save_only: true }),
+          name: name.trim(),
           number: number.replace(/\s+/g, ''),
+          month: Number(month),
+          year: Number(year.length === 4 ? year.slice(2) : year),
           cvc,
-          month,
-          year,
-          save_only: true,
         }),
       });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body?.message ?? 'tokenization failed');
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || !body.id) throw new Error(body?.message ?? 'tokenization failed');
+      setNumber('');
+      setCvc('');
+      if (reusable) {
+        if (!body.verification_url) throw new Error(body?.message ?? 'tokenization failed');
+        sessionStorage.setItem('pending_card_token', body.id as string);
+        window.location.href = body.verification_url as string; // 3-D Secure
+        return;
+      }
       setDone(true);
       onToken(body.id as string);
     } catch (e) {
@@ -155,7 +170,7 @@ function MoyasarCardForm({
       </div>
       {error && <Alert color="danger" body={error} />}
       <Button type="button" variant="outline" size="sm" onClick={tokenize} loading={busy} disabled={!name || !number || !month || !year || !cvc}>
-        {t('cardForm.verifyCard')}
+        {reusable ? t('cardForm.verifyAndSave') : t('cardForm.verifyCard')}
       </Button>
     </div>
   );

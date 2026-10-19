@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { isApiError } from '@/lib/errors';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { CardForm } from '@/components/payment/CardForm';
+import { usePublicMeta } from '@/lib/meta';
 import {
   ActionsMenu,
   Badge,
@@ -146,6 +147,8 @@ function AddCardModal({ open, onClose, onSaved }: { open: boolean; onClose: () =
   const toast = useToast();
   const [token, setToken] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const meta = usePublicMeta();
+  const isMoyasar = meta.data?.payment_gateway.driver === 'moyasar';
 
   const save = async () => {
     if (!token) return;
@@ -174,13 +177,15 @@ function AddCardModal({ open, onClose, onSaved }: { open: boolean; onClose: () =
           <Button variant="ghost" onClick={onClose} disabled={busy}>
             {t('common.cancel')}
           </Button>
-          <Button onClick={save} loading={busy} disabled={!token}>
-            {t('common.save')}
-          </Button>
+          {!isMoyasar && (
+            <Button onClick={save} loading={busy} disabled={!token}>
+              {t('common.save')}
+            </Button>
+          )}
         </>
       }
     >
-      <CardForm onToken={setToken} />
+      <CardForm onToken={setToken} reusable />
     </Modal>
   );
 }

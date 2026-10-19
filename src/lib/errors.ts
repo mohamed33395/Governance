@@ -5,6 +5,7 @@ export type ApiError = {
   code: string;                     // error_code, e.g. 'SLOT_NOT_AVAILABLE', or 'NETWORK_ERROR'
   message: string;                  // translated, safe to toast
   errors: Record<string, string[]>; // field errors for VALIDATION_ERROR, else {}
+  data?: unknown;                   // raw `data` of the error envelope (e.g. payment on 503)
 };
 
 export function normalizeApiError(error: unknown): ApiError {
@@ -18,7 +19,7 @@ export function normalizeApiError(error: unknown): ApiError {
       };
     }
     const body = error.response.data as
-      | { message?: string; error_code?: string; errors?: Record<string, string[]> }
+      | { message?: string; error_code?: string; errors?: Record<string, string[]>; data?: unknown }
       | null
       | undefined;
     return {
@@ -26,6 +27,7 @@ export function normalizeApiError(error: unknown): ApiError {
       code: body?.error_code ?? 'SERVER_ERROR',
       message: body?.message ?? error.message,
       errors: body?.errors ?? {},
+      data: body?.data,
     };
   }
   return { status: 0, code: 'UNKNOWN_ERROR', message: String(error), errors: {} };

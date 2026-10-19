@@ -6,13 +6,13 @@ import { api } from '@/lib/api';
 import { useWizard } from '@/stores/wizard';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { CardForm } from '@/components/payment/CardForm';
-import { Checkbox, ErrorState, Radio } from '@/components/ui';
+import { ErrorState, Radio } from '@/components/ui';
 import type { PaymentMethod } from '@/types/api';
 
 // §11.5 step 6 — saved cards (CLI-PM-01) or a new card via <CardForm>
 export function StepPayment() {
   const { t } = useI18n();
-  const { paymentMethodId, cardToken, saveCard, setPaymentMethod, setCardToken, setSaveCard } = useWizard();
+  const { paymentMethodId, cardToken, setPaymentMethod, setCardToken } = useWizard();
   const [mode, setMode] = useState<'saved' | 'new'>(paymentMethodId ? 'saved' : cardToken ? 'new' : 'saved');
 
   const query = useQuery({
@@ -104,13 +104,6 @@ export function StepPayment() {
         {mode === 'new' && (
           <div className="mt-4 rounded-2xl border border-border bg-background p-5">
             <CardForm onToken={(token) => setCardToken(token)} />
-            <div className="mt-4">
-              <Checkbox
-                label={t('wizard.saveCard')}
-                checked={saveCard}
-                onChange={(e) => setSaveCard(e.target.checked)}
-              />
-            </div>
           </div>
         )}
       </div>

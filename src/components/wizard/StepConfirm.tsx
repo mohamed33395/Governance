@@ -33,11 +33,11 @@ export function StepConfirm({
     location,
     paymentMethodId,
     cardToken,
-    saveCard,
     clientNotes,
     quote,
     setTime,
     setQuote,
+    setCardToken,
   } = useWizard();
 
   const requote = async () => {
@@ -65,7 +65,7 @@ export function StepConfirm({
           ...(paymentMethodId
             ? { payment_method_id: paymentMethodId }
             : cardToken
-              ? { card_token: cardToken, save_card: saveCard }
+              ? { card_token: cardToken }
               : {}),
           ...(clientNotes.trim() ? { client_notes: clientNotes.trim() } : {}),
         })
@@ -76,6 +76,13 @@ export function StepConfirm({
       // covered by subscription, or instantly paid
       if (!payment || payment.status === 'paid') {
         onTerminal({ kind: 'success', bookingId: booking.id });
+        return;
+      }
+      // card tokens are single use — a failed charge needs a new one
+      if (payment.status === 'failed') {
+        setCardToken(null);
+        toast.error(payment.failure_reason || t('wizard.paymentFailed'));
+        onGoTo('payment');
         return;
       }
       // 3-D Secure
@@ -103,6 +110,7 @@ export function StepConfirm({
       if (!isApiError(e)) return;
       switch (e.code) {
         case 'PAYMENT_FAILED': // 402 — stay on the payment step with the message
+          setCardToken(null); // single use
           toast.error(e.message || t('wizard.paymentFailed'));
           onGoTo('payment');
           break;
@@ -124,6 +132,18 @@ export function StepConfirm({
           break;
         }
         case 'PAYMENT_PENDING_CONFIRMATION': // 503 — gateway unreachable; charge may have gone through
+          // outcome unknown: never charge again — verify (polled on the callback page)
+          {
+            const pending = e.data as { payment?: { id: number }; booking?: { id: number } } | undefined;
+            if (pending?.payment?.id) {
+              localStorage.setItem(
+                'pending_payment',
+                JSON.stringify({ payment_id: pending.payment.id, booking_id: pending.booking?.id ?? 0 }),
+              );
+              window.location.href = '/bookings/payment-callback';
+              break;
+            }
+          }
           onTerminal({ kind: 'confirming', bookingId: 0 });
           break;
         case 'VALIDATION_ERROR':

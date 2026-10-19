@@ -1000,6 +1000,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     "cardForm.expYear": "السنة",
     "cardForm.cvc": "رمز الأمان",
     "cardForm.verifyCard": "تحقق من البطاقة",
+    "cardForm.verifyAndSave": "تحقق وحفظ البطاقة",
+    "paymentMethods.callbackNoCard": "لا توجد بطاقة لحفظها.",
+    "paymentMethods.callbackFailed": "تعذّر التحقق من البطاقة.",
     "cardForm.cardReady": "تم التحقق من البطاقة وجاهزة للدفع",
 
     // ===== client bookings =====
@@ -2482,6 +2485,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     "cardForm.expYear": "Year",
     "cardForm.cvc": "CVC",
     "cardForm.verifyCard": "Verify card",
+    "cardForm.verifyAndSave": "Verify and save card",
+    "paymentMethods.callbackNoCard": "No card to save.",
+    "paymentMethods.callbackFailed": "Card verification failed.",
     "cardForm.cardReady": "Card verified and ready for payment",
 
     // ===== client bookings =====
