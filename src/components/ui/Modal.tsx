@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
+import { useI18n } from '@/lib/i18n/i18n-context';
 
 const SIZES = {
   sm: 'max-w-md',
@@ -24,6 +25,7 @@ export function Modal({
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const { t } = useI18n();
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export function Modal({
         <button
           type="button"
           onClick={onClose}
-          aria-label="close"
+          aria-label={t('a11yClose')}
           className="absolute top-3 end-3 w-8 h-8 rounded-full border border-border bg-background text-muted hover:bg-primary hover:text-white transition-colors text-lg leading-none"
         >
           ×

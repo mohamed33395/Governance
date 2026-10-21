@@ -240,7 +240,7 @@ export default function HomePage() {
             <ExpertCard
               eyebrow={t("expertEyebrow")}
               name={t("expertName")}
-              sub="Consultant. Abdul Kareem Al-Ghamdi"
+              sub={t("expertSub")}
               role={t("expertRole")}
               bio={t("expertBio")}
               photo="/WhatsApp Image 2026-09-07 at 4.14.04 PM.png"

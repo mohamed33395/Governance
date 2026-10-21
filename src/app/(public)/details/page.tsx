@@ -7,8 +7,11 @@ import { Container, PageHero, SectionHead } from "@/components/public/Section";
 import { Reveal } from "@/components/public/Reveal";
 import { CARD, FLUID, FOCUS } from "@/components/public/tokens";
 import { DETAIL_ITEMS, DIR_STRUCTURE, type DetailItem } from "@/lib/data/details-content";
+import { useI18n } from "@/lib/i18n/i18n-context";
 
 function DetailView({ item }: { item: DetailItem }) {
+  const { t } = useI18n();
+
   return (
     <>
       <PageHero
@@ -16,7 +19,7 @@ function DetailView({ item }: { item: DetailItem }) {
         title={item.title}
         lead={item.lead}
         before={
-          <nav aria-label="breadcrumb" className="mb-6">
+          <nav aria-label={t("a11yBreadcrumb")} className="mb-6">
             <ol className="flex flex-wrap items-center gap-2 text-sm text-muted">
               <li>
                 <Link href="/" className={`rounded-lg ${FLUID} hover:text-text ${FOCUS}`}>
