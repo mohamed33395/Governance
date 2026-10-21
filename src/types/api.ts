@@ -330,6 +330,20 @@ export interface JoinRequest {
   updated_at: string;
 }
 
+// ---------- team members ----------
+export interface TeamMember {
+  id: ID;
+  name: string;
+  job_title: string;
+  experience_years: number;
+  avatar_url: string | null;
+  avatar_thumb_url: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // ---------- reviews ----------
 export type ReviewStatus = 'pending' | 'approved' | 'rejected';
 

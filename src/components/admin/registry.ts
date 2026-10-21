@@ -13,6 +13,7 @@ import {
   UserPlus,
   UserRound,
   Users,
+  UsersRound,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -69,6 +70,7 @@ export const ROUTES: RouteIdentity[] = [
   { key: 'nav.payments', href: '/admin/payments', icon: CreditCard, family: 'moss', perm: 'view-payments' },
   { key: 'nav.clients', href: '/admin/clients', icon: Users, family: 'bronze', perm: 'view-clients' },
   { key: 'nav.consultants', href: '/admin/consultants', icon: UserRound, family: 'pine', perm: 'view-consultants' },
+  { key: 'nav.team', href: '/admin/team', icon: UsersRound, family: 'moss', perm: 'view-team' },
   {
     key: 'nav.my_availability',
     href: '/admin/my-availability',
@@ -100,7 +102,7 @@ export const NAV_GROUPS: NavGroup[] = [
     family: 'gold',
     hrefs: ['/admin/bookings', '/admin/my-availability', '/admin/reports', '/admin/payments'],
   },
-  { key: 'navGroup.people', family: 'bronze', hrefs: ['/admin/clients', '/admin/consultants'] },
+  { key: 'navGroup.people', family: 'bronze', hrefs: ['/admin/clients', '/admin/consultants', '/admin/team'] },
   { key: 'navGroup.catalog', family: 'sand', hrefs: ['/admin/packages'] },
   { key: 'navGroup.support', family: 'bronze', hrefs: ['/admin/support-tickets', '/admin/join-requests', '/admin/reviews'] },
   { key: 'navGroup.access', family: 'sage', hrefs: ['/admin/users', '/admin/roles', '/admin/activity-logs'] },
