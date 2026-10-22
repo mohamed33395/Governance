@@ -7,9 +7,9 @@ import { api } from '@/lib/api';
 import { isApiError } from '@/lib/errors';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePermissions } from '@/lib/permissions';
-import { downloadFile } from '@/lib/files';
+import { downloadFile, useBlobUrl } from '@/lib/files';
 import { RequirePermission } from '@/components/admin/RequirePermission';
-import { Badge, Button, ErrorState, useToast } from '@/components/ui';
+import { Avatar, Badge, Button, ErrorState, Input, useToast } from '@/components/ui';
 import type { JoinRequest } from '@/types/api';
 
 export default function JoinRequestDetailPage() {
@@ -37,11 +37,14 @@ function JoinRequestDetailInner() {
 
   const [rejectReason, setRejectReason] = useState('');
   const [showReject, setShowReject] = useState(false);
+  // null → untouched; the admin may adjust the specialization before approving
+  const [specDraft, setSpecDraft] = useState<string | null>(null);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin', 'join-requests', requestId] });
 
   const approve = useMutation({
-    mutationFn: () => api.patch(`/admin/join-requests/${requestId}/approve`),
+    mutationFn: (specialization: string | undefined) =>
+      api.patch(`/admin/join-requests/${requestId}/approve`, specialization ? { specialization } : {}),
     onSuccess: () => {
       toast.success(t('joinRequests.approved'));
       invalidate();
@@ -72,6 +75,8 @@ function JoinRequestDetailInner() {
   }
 
   const row = 'flex justify-between gap-3 py-2 border-b border-border/60 text-[0.9rem]';
+  const canReview = request.status === 'pending' && can('manage-join-requests');
+  const finalSpec = (specDraft ?? request.specialization).trim();
 
   return (
     <>
@@ -86,9 +91,14 @@ function JoinRequestDetailInner() {
           <Button variant="outline" size="sm" onClick={() => router.push('/admin/join-requests')}>
             {t('common.back')}
           </Button>
-          {request.status === 'pending' && can('manage-join-requests') && (
+          {canReview && (
             <>
-              <Button size="sm" onClick={() => approve.mutate()} loading={approve.isPending}>
+              <Button
+                size="sm"
+                onClick={() => approve.mutate(finalSpec !== request.specialization ? finalSpec : undefined)}
+                loading={approve.isPending}
+                disabled={!finalSpec}
+              >
                 {t('joinRequests.approve')}
               </Button>
               <Button variant="danger" size="sm" onClick={() => setShowReject(true)}>
@@ -102,7 +112,10 @@ function JoinRequestDetailInner() {
       <div className="panel-card" style={{ marginBottom: 24 }}>
         <div className={row}>
           <span className="text-muted">{t('joinRequests.name')}</span>
-          <span>{request.name}</span>
+          <span className="flex items-center gap-3">
+            {request.name}
+            <RequestPhoto url={request.photo_url} name={request.name} />
+          </span>
         </div>
         <div className={row}>
           <span className="text-muted">{t('joinRequests.email')}</span>
@@ -116,12 +129,36 @@ function JoinRequestDetailInner() {
           <span className="text-muted">{t('joinRequests.specialization')}</span>
           <span>{request.specialization}</span>
         </div>
-        {request.licenses && (
-          <div className={row}>
-            <span className="text-muted">{t('joinRequests.linkedin')}</span>
-            <span>{request.licenses}</span>
+        {canReview && (
+          <div className={row} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
+            <span className="text-muted">{t('joinRequests.finalSpecialization')}</span>
+            <Input
+              value={specDraft ?? request.specialization}
+              onChange={(e) => setSpecDraft(e.target.value)}
+              maxLength={191}
+            />
           </div>
         )}
+        <div className={row} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
+          <span className="text-muted">{t('joinRequests.licenses')}</span>
+          {request.licenses.length === 0 ? (
+            <span className="text-muted text-[0.85rem]">{t('joinRequests.noLicenses')}</span>
+          ) : (
+            <ul className="flex flex-wrap gap-2">
+              {request.licenses.map((f) => (
+                <li key={f.id}>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-[0.82rem] text-primary hover:underline"
+                    onClick={() => downloadFile(f.download_url, f.name)}
+                  >
+                    <span dir="ltr">{f.name}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         {request.bio && (
           <div className={row} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
             <span className="text-muted">{t('joinRequests.bio')}</span>
@@ -179,6 +216,12 @@ function JoinRequestDetailInner() {
       )}
     </>
   );
+}
+
+function RequestPhoto({ url, name }: { url: string | null; name: string }) {
+  const blobUrl = useBlobUrl(url);
+  if (!url) return null;
+  return <Avatar src={blobUrl} name={name} size="md" />;
 }
 
 function statusColor(status: JoinRequest['status']) {

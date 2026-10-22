@@ -312,6 +312,14 @@ export interface SupportMessage {
 // ---------- join requests ----------
 export type JoinRequestStatus = 'pending' | 'approved' | 'rejected';
 
+export interface JoinRequestFile {
+  id: ID;
+  name: string;
+  mime_type: string;
+  size: number;
+  download_url: string;
+}
+
 export interface JoinRequest {
   id: ID;
   name: string;
@@ -319,7 +327,8 @@ export interface JoinRequest {
   phone: string;
   specialization: string;
   bio: string | null;
-  licenses: string | null;
+  photo_url: string | null;
+  licenses: JoinRequestFile[];
   cv_url?: string;
   status: JoinRequestStatus;
   user_id?: ID | null;
