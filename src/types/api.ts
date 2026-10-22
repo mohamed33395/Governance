@@ -17,6 +17,7 @@ export interface User {
   title: string | null; specialization: string | null; bio: string | null;
   avatar_url: string | null; avatar_thumb_url: string | null;
   is_active: boolean; last_login_at: string | null;
+  consultant_stage?: 'active' | 'training';   // only on consultant records
   roles: string[];
   permissions?: string[];          // only in /me and /profile
   created_at: string; updated_at: string;
@@ -26,6 +27,25 @@ export interface User {
 export interface Consultant extends User {
   stats?: { pending_bookings: number; completed_bookings: number; pending_reports: number; reports: number; clients: number };
   working_days?: number[];         // 0 = Sunday … 6 = Saturday
+}
+
+// ---------- consultant training ----------
+export interface TrainingSession {
+  id: ID; consultant_id: ID;
+  starts_at: string; duration_minutes: number;
+  meeting_url: string | null; notes: string | null;
+  scheduled_by?: { id: ID; name: string } | null;
+  created_at: string;
+}
+
+export interface Trainee {
+  id: ID; name: string; email: string; phone: string | null;
+  title: string | null; specialization: string | null;
+  avatar_url: string | null; avatar_thumb_url: string | null;
+  is_active: boolean; consultant_stage: 'training';
+  sessions_count: number; next_session_at: string | null;
+  sessions?: TrainingSession[];
+  created_at: string;
 }
 
 export interface PublicConsultant {
@@ -312,6 +332,14 @@ export interface SupportMessage {
 // ---------- join requests ----------
 export type JoinRequestStatus = 'pending' | 'approved' | 'rejected';
 
+export interface JoinRequestFile {
+  id: ID;
+  name: string;
+  mime_type: string;
+  size: number;
+  download_url: string;
+}
+
 export interface JoinRequest {
   id: ID;
   name: string;
@@ -319,13 +347,28 @@ export interface JoinRequest {
   phone: string;
   specialization: string;
   bio: string | null;
-  licenses: string | null;
+  photo_url: string | null;
+  licenses: JoinRequestFile[];
   cv_url?: string;
   status: JoinRequestStatus;
   user_id?: ID | null;
   reviewed_by?: ID | null;
   reviewer?: { id: ID; name: string } | null;
   reviewed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---------- team members ----------
+export interface TeamMember {
+  id: ID;
+  name: string;
+  job_title: string;
+  experience_years: number;
+  avatar_url: string | null;
+  avatar_thumb_url: string | null;
+  sort_order: number;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }

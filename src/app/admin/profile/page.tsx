@@ -11,7 +11,8 @@ import { AVATAR_ACCEPT, AVATAR_MAX_MB, uploadFile } from '@/lib/files';
 import { adminProfileSchema, changePasswordSchema, type AdminProfileValues, type ChangePasswordValues } from '@/schemas/profile';
 import { useAdminAuth } from '@/stores/admin-auth';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { Alert, Avatar, Button, ConfirmDialog, Input, PageHeader, Textarea, useToast } from '@/components/ui';
+import { ConsultantIdCard } from '@/components/admin/ConsultantIdCard';
+import { Alert, Avatar, Button, ConfirmDialog, Input, PageHeader, Tabs, Textarea, useToast } from '@/components/ui';
 import type { User } from '@/types/api';
 
 // §13.13 — admin profile (ADM-PRF-01..05). Consultants also edit
@@ -19,16 +20,26 @@ import type { User } from '@/types/api';
 export default function AdminProfilePage() {
   const { t } = useI18n();
   const user = useAdminAuth((s) => s.user);
+  const isConsultant = user?.type === 'consultant';
+  const [tab, setTab] = useState('info');
+
+  // the ID-card tab exists only for consultant accounts
+  const tabs = [
+    { key: 'info', label: t('profile.info') },
+    { key: 'avatar', label: t('profile.avatar') },
+    { key: 'password', label: t('profile.password') },
+    ...(isConsultant ? [{ key: 'card', label: t('consultantCard.title') }] : []),
+  ];
 
   return (
     <>
       <PageHeader title={t('profile.title')} />
-      <div className="grid lg:grid-cols-2 gap-5 items-start">
-        <div className="flex flex-col gap-5">
-          <ProfileForm key={user?.updated_at ?? 'form'} />
-          <PasswordCard />
-        </div>
-        <AvatarCard />
+      <Tabs tabs={tabs} active={tab} onChange={setTab} className="mb-5" />
+      <div className="max-w-2xl">
+        {tab === 'info' && <ProfileForm key={user?.updated_at ?? 'form'} />}
+        {tab === 'avatar' && <AvatarCard />}
+        {tab === 'password' && <PasswordCard />}
+        {tab === 'card' && isConsultant && <ConsultantIdCard />}
       </div>
     </>
   );

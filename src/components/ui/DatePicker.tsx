@@ -20,7 +20,7 @@ export function DatePicker({
   onMonthChange?: (month: string) => void; // YYYY-MM of the visible month
   className?: string;
 }) {
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const [month, setMonth] = useState(() => dayjs().format('YYYY-MM'));
 
   const first = dayjs(`${month}-01`);
@@ -52,7 +52,7 @@ export function DatePicker({
         <button
           type="button"
           onClick={() => changeMonth(-1)}
-          aria-label="previous month"
+          aria-label={t('a11yPrevMonth')}
           className="w-8 h-8 rounded-lg border border-border bg-background text-text hover:border-accent cursor-pointer"
         >
           <span className="inline-block rtl:-scale-x-100">‹</span>
@@ -61,7 +61,7 @@ export function DatePicker({
         <button
           type="button"
           onClick={() => changeMonth(1)}
-          aria-label="next month"
+          aria-label={t('a11yNextMonth')}
           className="w-8 h-8 rounded-lg border border-border bg-background text-text hover:border-accent cursor-pointer"
         >
           <span className="inline-block rtl:-scale-x-100">›</span>

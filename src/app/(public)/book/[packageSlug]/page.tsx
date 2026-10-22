@@ -208,7 +208,7 @@ export default function BookingWizardPage() {
     <div className="section-padding container">
       <div className="max-w-4xl mx-auto mb-16">
       {/* stepper */}
-      <ol className="flex items-center justify-center gap-1.5 flex-wrap mb-8" aria-label="steps">
+      <ol className="flex items-center justify-center gap-1.5 flex-wrap mb-8" aria-label={t('a11ySteps')}>
         {steps.map((s, i) => {
           const done = i < index;
           const current = i === index;

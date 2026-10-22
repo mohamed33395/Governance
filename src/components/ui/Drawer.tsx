@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, type ReactNode } from 'react';
+import { useI18n } from '@/lib/i18n/i18n-context';
 
 // side panel (end side — left in RTL, right in LTR)
 export function Drawer({
@@ -16,6 +17,8 @@ export function Drawer({
   children: ReactNode;
   width?: number;
 }) {
+  const { t } = useI18n();
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -43,7 +46,7 @@ export function Drawer({
           <button
             type="button"
             onClick={onClose}
-            aria-label="close"
+            aria-label={t('a11yClose')}
             className="w-8 h-8 rounded-full border border-border bg-background text-muted hover:bg-primary hover:text-white transition-colors text-lg leading-none"
           >
             ×

@@ -47,8 +47,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      {/* top-start corner */}
-      <div className="fixed top-4 start-4 z-[200] flex flex-col gap-2 max-w-[min(360px,90vw)]" aria-live="polite">
+      {/* bottom-start corner */}
+      <div className="fixed bottom-4 start-4 z-[200] flex flex-col gap-2 max-w-[min(360px,90vw)]" aria-live="polite">
         {toasts.map((t) => {
           const s = KIND_STYLES[t.kind];
           return (

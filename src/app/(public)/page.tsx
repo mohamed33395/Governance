@@ -19,6 +19,7 @@ import { ServicesTabs } from "@/components/public/ServicesTabs";
 import { PackageGrid } from "@/components/public/PackageGrid";
 import { ExpertCard } from "@/components/public/ExpertCard";
 import { Testimonials } from "@/components/public/Testimonials";
+import { TeamSection } from "@/components/public/TeamSection";
 import { VisionValues } from "@/components/public/VisionValues";
 import { FLUID, FOCUS } from "@/components/public/tokens";
 
@@ -239,7 +240,7 @@ export default function HomePage() {
             <ExpertCard
               eyebrow={t("expertEyebrow")}
               name={t("expertName")}
-              sub="Consultant. Abdul Kareem Al-Ghamdi"
+              sub={t("expertSub")}
               role={t("expertRole")}
               bio={t("expertBio")}
               photo="/WhatsApp Image 2026-09-07 at 4.14.04 PM.png"
@@ -251,6 +252,16 @@ export default function HomePage() {
               ]}
             />
           </Reveal>
+        </Container>
+      </section>
+
+      {/* TEAM — admin-managed members; grid hides itself when empty */}
+      <section id="team" className="py-24">
+        <Container>
+          <Reveal>
+            <SectionHead eyebrow={t("lp.teamEyebrow")} title={t("lp.teamTitle")} lead={t("lp.teamDesc")} />
+          </Reveal>
+          <TeamSection />
         </Container>
       </section>
 

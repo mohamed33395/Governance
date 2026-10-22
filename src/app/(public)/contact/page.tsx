@@ -20,7 +20,6 @@ const CONTACT_EMAILS = [
   "info@gcmc.sa",
   "consultant@gcmc.sa",
   "it@gcmc.sa",
-  "noreply@gcmc.sa",
 ] as const;
 
 export default function ContactPage() {

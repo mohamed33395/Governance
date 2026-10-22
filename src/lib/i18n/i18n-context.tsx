@@ -12,6 +12,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { getLocale, setLocale, type Locale } from "@/i18n/locale";
 import { translations, type Lang } from "./translations";
+import "dayjs/locale/ar";
+import "dayjs/locale/en";
 
 const STORAGE_KEY = "siteLang";
 
