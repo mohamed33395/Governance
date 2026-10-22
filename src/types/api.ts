@@ -17,6 +17,7 @@ export interface User {
   title: string | null; specialization: string | null; bio: string | null;
   avatar_url: string | null; avatar_thumb_url: string | null;
   is_active: boolean; last_login_at: string | null;
+  consultant_stage?: 'active' | 'training';   // only on consultant records
   roles: string[];
   permissions?: string[];          // only in /me and /profile
   created_at: string; updated_at: string;
@@ -26,6 +27,25 @@ export interface User {
 export interface Consultant extends User {
   stats?: { pending_bookings: number; completed_bookings: number; pending_reports: number; reports: number; clients: number };
   working_days?: number[];         // 0 = Sunday … 6 = Saturday
+}
+
+// ---------- consultant training ----------
+export interface TrainingSession {
+  id: ID; consultant_id: ID;
+  starts_at: string; duration_minutes: number;
+  meeting_url: string | null; notes: string | null;
+  scheduled_by?: { id: ID; name: string } | null;
+  created_at: string;
+}
+
+export interface Trainee {
+  id: ID; name: string; email: string; phone: string | null;
+  title: string | null; specialization: string | null;
+  avatar_url: string | null; avatar_thumb_url: string | null;
+  is_active: boolean; consultant_stage: 'training';
+  sessions_count: number; next_session_at: string | null;
+  sessions?: TrainingSession[];
+  created_at: string;
 }
 
 export interface PublicConsultant {
