@@ -31,6 +31,7 @@ import {
   Switch,
   Table,
   TableSkeleton,
+  Textarea,
   useToast,
 } from '@/components/ui';
 import { AVATAR_ACCEPT, AVATAR_MAX_MB } from '@/lib/files';
@@ -318,6 +319,15 @@ function MemberFormModal({
           error={err(errors.sort_order?.message)}
           {...register('sort_order')}
         />
+
+        <div className="sm:col-span-2">
+          <Textarea
+            label={t('team.bio')}
+            rows={3}
+            error={err(errors.bio?.message)}
+            {...register('bio')}
+          />
+        </div>
 
         <div className="sm:col-span-2">
           <span className="text-[0.82rem] text-muted block mb-2">{t('profile.avatar')}</span>

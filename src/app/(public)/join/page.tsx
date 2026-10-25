@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CameraPlus, CheckCircle } from "@phosphor-icons/react";
+import { CameraPlus, CheckCircle, FilePdf, X } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { isApiError } from "@/lib/errors";
 import { applyValidationErrors } from "@/lib/form-errors";
@@ -57,16 +57,23 @@ export default function JoinPage() {
   const [cv, setCv] = useState<File | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [licenseFiles, setLicenseFiles] = useState<File[]>([]);
+  const [licenseFiles, setLicenseFiles] = useState<{ file: File; url: string | null }[]>([]);
   const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  // every object URL handed out for a license preview, revoked on unmount
+  const licenseUrls = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     return () => {
       if (photoPreview) URL.revokeObjectURL(photoPreview);
     };
   }, [photoPreview]);
+
+  useEffect(() => {
+    const urls = licenseUrls.current;
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, []);
 
   useEffect(() => {
     document.title = `${t("public.join.title")} — ${t("brandName")}`;
@@ -125,6 +132,27 @@ export default function JoinPage() {
     clearFileError("photo");
   };
 
+  const addLicense = (file: File) => {
+    setLicenseFiles((prev) => {
+      if (prev.length >= LICENSES_MAX_COUNT) return prev;
+      const url = file.type.startsWith("image/") ? URL.createObjectURL(file) : null;
+      if (url) licenseUrls.current.add(url);
+      return [...prev, { file, url }];
+    });
+    clearFileError("licenses");
+  };
+
+  const removeLicense = (index: number) => {
+    setLicenseFiles((prev) => {
+      const item = prev[index];
+      if (item?.url) {
+        URL.revokeObjectURL(item.url);
+        licenseUrls.current.delete(item.url);
+      }
+      return prev.filter((_, j) => j !== index);
+    });
+  };
+
   const mutation = useMutation({
     mutationFn: async (values: JoinRequestValues) => {
       const fd = new FormData();
@@ -138,7 +166,7 @@ export default function JoinPage() {
       fd.append("specialization", specialization);
       if (values.bio) fd.append("bio", values.bio);
       if (photo) fd.append("photo", photo);
-      licenseFiles.forEach((f) => fd.append("licenses[]", f));
+      licenseFiles.forEach((l) => fd.append("licenses[]", l.file));
       if (cv) fd.append("cv", cv);
       return api.post("/public/join-requests", fd);
     },
@@ -188,15 +216,15 @@ export default function JoinPage() {
           <Reveal>
             <form
               onSubmit={handleSubmit((v) => mutation.mutate(v))}
-              className={`mx-auto max-w-[880px] p-6 md:p-8 ${CARD}`}
+              className={`mx-auto max-w-[720px] p-5 md:p-7 ${CARD}`}
             >
               {/* personal photo — circular picker with instant preview */}
-              <div className="mb-8 flex flex-col items-center gap-2">
+              <div className="mb-6 flex flex-col items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => photoInputRef.current?.click()}
                   aria-label={t("joinRequests.photo")}
-                  className="group relative flex size-28 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed transition-colors"
+                  className="group relative flex size-24 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed transition-colors"
                   style={{
                     borderColor: fileErrors.photo ? "var(--danger)" : "var(--border)",
                     background: "var(--background)",
@@ -207,7 +235,7 @@ export default function JoinPage() {
                     <img src={photoPreview} alt="" className="size-full object-cover" />
                   ) : (
                     <CameraPlus
-                      size={30}
+                      size={26}
                       weight="duotone"
                       aria-hidden="true"
                       className="text-muted transition-colors group-hover:text-accent"
@@ -246,7 +274,7 @@ export default function JoinPage() {
                 />
               </div>
 
-              <div className="grid gap-6 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <Input
                   label={t("fullName")}
                   autoComplete="name"
@@ -334,44 +362,59 @@ export default function JoinPage() {
                     />
                   </div>
                 )}
-                <div className="sm:col-span-2">
+                <div>
                   <span className="text-sm text-muted block mb-2">
                     {t("joinRequests.licenses")}
                   </span>
                   <FileDrop
                     accept={LICENSES_ACCEPT}
                     maxMb={LICENSES_MAX_MB}
-                    onFile={(f) => {
-                      setLicenseFiles((prev) =>
-                        prev.length >= LICENSES_MAX_COUNT ? prev : [...prev, f]
-                      );
-                    }}
+                    onFile={addLicense}
                     error={fileErrors.licenses}
+                    compact
                   />
                   {licenseFiles.length > 0 && (
-                    <ul className="mt-3 flex flex-wrap gap-2">
-                      {licenseFiles.map((f, i) => (
+                    <ul className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-3">
+                      {licenseFiles.map(({ file, url }, i) => (
                         <li
-                          key={`${f.name}-${i}`}
-                          className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-[0.8rem]"
+                          key={`${file.name}-${i}`}
+                          className="group relative overflow-hidden rounded-xl border border-border bg-surface"
                         >
-                          <span dir="ltr">{f.name}</span>
+                          {url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={url}
+                              alt={file.name}
+                              className="aspect-[4/3] w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-1.5 bg-background text-muted">
+                              <FilePdf size={30} weight="duotone" aria-hidden="true" />
+                              <span dir="ltr" className="text-[0.65rem] font-semibold tracking-wide uppercase">
+                                PDF · {(file.size / 1024 / 1024).toFixed(1)} MB
+                              </span>
+                            </div>
+                          )}
+                          <span
+                            dir="ltr"
+                            className="pointer-events-none absolute inset-x-0 bottom-0 block truncate bg-linear-to-t from-black/80 to-transparent px-2.5 pb-1.5 pt-6 text-start text-[0.68rem] text-white"
+                          >
+                            {file.name}
+                          </span>
                           <button
                             type="button"
                             aria-label={t("common.remove")}
-                            className="text-danger hover:underline"
-                            onClick={() =>
-                              setLicenseFiles((prev) => prev.filter((_, j) => j !== i))
-                            }
+                            onClick={() => removeLicense(i)}
+                            className="absolute end-1.5 top-1.5 inline-flex size-6 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-danger"
                           >
-                            ×
+                            <X size={13} weight="bold" aria-hidden="true" />
                           </button>
                         </li>
                       ))}
                     </ul>
                   )}
                 </div>
-                <div className="sm:col-span-2">
+                <div>
                   <span className="text-sm text-muted block mb-2">
                     {t("joinRequests.cv")}
                   </span>
@@ -381,18 +424,19 @@ export default function JoinPage() {
                     onFile={setCv}
                     label={cv?.name}
                     error={fileErrors.cv}
+                    compact
                   />
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="mt-8 w-full"
+                className="mt-6 w-full"
                 loading={isSubmitting || mutation.isPending}
               >
                 {t("sendRequest")}
               </Button>
-              <p className="mt-4 text-sm text-muted text-pretty">
+              <p className="mt-3 text-xs text-muted text-pretty">
                 {t("joinFormNote")}
               </p>
               <FormMessage show={submitted}>{t("public.join.success")}</FormMessage>

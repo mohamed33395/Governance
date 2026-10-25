@@ -21,6 +21,7 @@ import { ExpertCard } from "@/components/public/ExpertCard";
 import { Testimonials } from "@/components/public/Testimonials";
 import { TeamSection } from "@/components/public/TeamSection";
 import { VisionValues } from "@/components/public/VisionValues";
+import { CountUp } from "@/components/public/CountUp";
 import { FLUID, FOCUS } from "@/components/public/tokens";
 
 const BENEFITS = [
@@ -100,9 +101,11 @@ export default function HomePage() {
                     ["expertStatCons", "expertStat2"],
                     ["expertStatEst", "expertStat3"],
                   ] as const
-                ).map(([value, label]) => (
-                  <div key={value}>
-                    <strong className="block text-3xl font-bold text-text">{t(value)}</strong>
+                ).map(([stat, label]) => (
+                  <div key={stat}>
+                    <strong className="block text-3xl font-bold text-text">
+                      <CountUp value={t(stat)} />
+                    </strong>
                     <span className="text-sm text-muted">{t(label)}</span>
                   </div>
                 ))}
@@ -259,7 +262,7 @@ export default function HomePage() {
       <section id="team" className="py-24">
         <Container>
           <Reveal>
-            <SectionHead eyebrow={t("lp.teamEyebrow")} title={t("lp.teamTitle")} lead={t("lp.teamDesc")} />
+            <SectionHead title={t("lp.teamTitle")} lead={t("lp.teamDesc")} />
           </Reveal>
           <TeamSection />
         </Container>
