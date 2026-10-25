@@ -23,24 +23,29 @@ export default function AdminProfilePage() {
   const isConsultant = user?.type === 'consultant';
   const [tab, setTab] = useState('info');
 
-  // the ID-card tab exists only for consultant accounts
   const tabs = [
     { key: 'info', label: t('profile.info') },
     { key: 'avatar', label: t('profile.avatar') },
     { key: 'password', label: t('profile.password') },
-    ...(isConsultant ? [{ key: 'card', label: t('consultantCard.title') }] : []),
   ];
 
   return (
     <>
       <PageHeader title={t('profile.title')} />
       <Tabs tabs={tabs} active={tab} onChange={setTab} className="mb-5" />
-      <div className="max-w-2xl">
-        {tab === 'info' && <ProfileForm key={user?.updated_at ?? 'form'} />}
-        {tab === 'avatar' && <AvatarCard />}
-        {tab === 'password' && <PasswordCard />}
-        {tab === 'card' && isConsultant && <ConsultantIdCard />}
-      </div>
+      {tab === 'info' && isConsultant ? (
+        // consultant sees the form next to his printable ID card
+        <div className="grid items-start gap-5 xl:grid-cols-2">
+          <ProfileForm key={user?.updated_at ?? 'form'} />
+          <ConsultantIdCard />
+        </div>
+      ) : (
+        <div className="max-w-2xl">
+          {tab === 'info' && <ProfileForm key={user?.updated_at ?? 'form'} />}
+          {tab === 'avatar' && <AvatarCard />}
+          {tab === 'password' && <PasswordCard />}
+        </div>
+      )}
     </>
   );
 }

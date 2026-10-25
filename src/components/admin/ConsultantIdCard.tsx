@@ -19,6 +19,11 @@ const getFontEmbedCss = () =>
     .then((r) => r.text())
     .catch(() => ''));
 
+// Fixed brand colors: the card is a printable artifact and must look identical
+// in both themes — --green-deep resolves to WHITE under data-theme="dark".
+const BRAND_GREEN = '#1A412E';
+const BRAND_GOLD = '#C19B4A';
+
 // Printable consultant ID card: photo + name + specialization + QR that opens
 // the public consultant profile (/consultants/{id}). Shown on /admin/profile
 // for consultant accounts only.
@@ -112,40 +117,90 @@ export function ConsultantIdCard() {
     <div className="bg-surface border border-border rounded-2xl p-6">
       <h3 className="text-[1rem] mb-5 pb-3 border-b border-border">{t('consultantCard.title')}</h3>
 
-      <div
-        ref={cardRef}
-        className="mx-auto w-[300px] overflow-hidden rounded-3xl border border-border bg-surface"
-      >
-        <div className="h-24" style={{ background: 'var(--gold)' }} />
-        <div className="-mt-11 flex flex-col items-center px-6 pb-6">
-          {/* avatar goes through /api/media so the PNG/PDF export can fetch it
-              same-origin (artisan serve sends no CORS headers on /storage) */}
-          <Avatar
-            src={user.avatar_url ? `/api/media?url=${encodeURIComponent(user.avatar_url)}` : null}
-            name={user.name}
-            size="xl"
-          />
-          {/* nowrap: in the export the name can wrap differently and the 2nd
-              line renders under the solid badge — one centered line + ellipsis
-              keeps it fully visible */}
-          <h4 className="mt-3 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center font-bold leading-snug">
-            {user.name}
-          </h4>
-          {(user.specialization || user.title) && (
-            <span
-              className="mt-2 inline-block whitespace-nowrap rounded-lg px-4 py-1.5 text-[0.8rem] text-white"
-              style={{ background: 'var(--primary)' }}
-            >
-              {user.specialization || user.title}
+      <div ref={cardRef} className="mx-auto w-[300px]">
+        {/* card body — rounded top, white lower half; the pointed cap is the
+            SVG wedge below so the gold outline can follow the chevron edge */}
+        <div className="rounded-t-3xl border border-b-0 border-border bg-surface">
+          {/* brand-green header: card-type label on one side, logo chip on the
+              other, brand name centered below — always green, even in dark mode */}
+          <div
+            className="flex h-[148px] flex-col rounded-t-3xl px-4 pt-3.5"
+            style={{ background: BRAND_GREEN }}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[0.55rem] font-medium tracking-[0.25em] text-white/70">
+                {t('consultantCard.idCard')}
+              </span>
+              {/* logo mark on a small white chip — keeps the original artwork
+                  readable on the green without recoloring it */}
+              <span className="inline-flex items-center justify-center rounded-md bg-white px-1.5 py-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo_icon.png" alt="" className="h-6 w-auto" />
+              </span>
+            </div>
+            <span className="mt-4 text-center text-[0.72rem] font-bold leading-tight text-white">
+              {t('phBrand')}
             </span>
-          )}
-          <div ref={qrRef} className="mt-5 rounded-xl bg-white p-3">
-            {profileUrl && <QRCode value={profileUrl} size={132} />}
           </div>
-          <span className="mt-2 whitespace-nowrap text-[0.75rem] text-muted">
-            {t('consultantCard.scanQr')}
-          </span>
+          {/* white lower half — gold V dipping below the photo (~32px), with
+              a clear gap before the name line (~64px); the V apex follows the
+              photo's -mt so the photo↔V distance never changes */}
+          <div className="relative flex flex-col items-center px-6 pb-5">
+            <svg
+              className="pointer-events-none absolute inset-x-0 top-0 h-[58px] w-full"
+              viewBox="0 0 300 58"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M0 0 L150 52 L300 0" fill="none" style={{ stroke: BRAND_GOLD }} strokeWidth="1.5" />
+            </svg>
+            {/* avatar goes through /api/media so the PNG/PDF export can fetch it
+                same-origin (artisan serve sends no CORS headers on /storage) */}
+            <span
+              className="relative -mt-14 overflow-hidden rounded-full border-4 shadow-md"
+              style={{ borderColor: BRAND_GOLD }}
+            >
+              <Avatar
+                src={user.avatar_url ? `/api/media?url=${encodeURIComponent(user.avatar_url)}` : null}
+                name={user.name}
+                size="xl"
+              />
+            </span>
+            {/* fixed spacer — a real block so the name reliably clears the V
+                apex (heading margins can be reset by the legacy base styles) */}
+            <div aria-hidden="true" className="h-4 shrink-0" />
+            {/* nowrap: in the export the name can wrap differently — one centered
+                line + ellipsis keeps it fully visible */}
+            <h4 className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-center font-bold leading-snug">
+              {user.name}
+            </h4>
+            {(user.specialization || user.title) && (
+              <span
+                className="mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[0.72rem] font-semibold tracking-wide"
+                style={{ color: BRAND_GOLD }}
+              >
+                {user.specialization || user.title}
+              </span>
+            )}
+            <span className="mt-2 whitespace-nowrap text-[0.72rem] text-muted">
+              {t('consultantCard.memberId')} :{' '}
+              <b dir="ltr" className="text-text">GCMC-{String(user.id).padStart(4, '0')}</b>
+            </span>
+            <div ref={qrRef} className="mt-4 rounded-lg border border-border bg-white p-2">
+              {profileUrl && <QRCode value={profileUrl} size={72} />}
+            </div>
+          </div>
         </div>
+        {/* pointed badge bottom — gold-edged chevron like the reference */}
+        <svg
+          className="block w-full"
+          viewBox="0 0 300 26"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path d="M0 0 L150 24 L300 0 Z" className="fill-surface" />
+          <path d="M0 0 L150 24 L300 0" fill="none" style={{ stroke: BRAND_GOLD }} strokeWidth="1.5" />
+        </svg>
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-2">

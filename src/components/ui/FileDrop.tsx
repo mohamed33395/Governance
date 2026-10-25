@@ -11,6 +11,7 @@ export function FileDrop({
   error,
   label,
   className = '',
+  compact = false,
 }: {
   accept: string;         // e.g. '.pdf,.doc,.docx'
   maxMb: number;
@@ -18,6 +19,8 @@ export function FileDrop({
   error?: string;
   label?: string;
   className?: string;
+  /** tighter padding + smaller icon — for dense forms */
+  compact?: boolean;
 }) {
   const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -68,13 +71,13 @@ export function FileDrop({
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={onDrop}
-        className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-5 py-8 text-center cursor-pointer transition-colors"
+        className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed text-center cursor-pointer transition-colors ${compact ? 'gap-1.5 px-4 py-5' : 'gap-2 px-5 py-8'}`}
         style={{
           borderColor: shownError ? 'var(--danger)' : dragOver ? 'var(--accent)' : 'var(--border)',
           background: dragOver ? 'var(--warning-soft)' : 'var(--background)',
         }}
       >
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="text-muted">
+        <svg width={compact ? 22 : 30} height={compact ? 22 : 30} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="text-muted">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
           <path d="m17 8-5-5-5 5" />
           <path d="M12 3v12" />

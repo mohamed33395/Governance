@@ -364,6 +364,7 @@ export interface TeamMember {
   id: ID;
   name: string;
   job_title: string;
+  bio: string | null;
   experience_years: number;
   avatar_url: string | null;
   avatar_thumb_url: string | null;

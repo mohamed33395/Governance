@@ -5,10 +5,11 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { FOCUS } from "./tokens";
 
-export function HorizontalCarousel({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function HorizontalCarousel({ children, className = "", autoAdvanceMs }: { children: ReactNode; className?: string; autoAdvanceMs?: number }) {
   const { t, dir } = useI18n();
   const viewportRef = useRef<HTMLDivElement>(null);
   const [hasOverflow, setHasOverflow] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -20,6 +21,27 @@ export function HorizontalCarousel({ children, className = "" }: { children: Rea
     if (viewport.firstElementChild) observer.observe(viewport.firstElementChild);
     return () => observer.disconnect();
   }, [children]);
+
+  // Auto-advance one card per interval; wraps back to the first card at the end.
+  useEffect(() => {
+    if (!autoAdvanceMs || !hasOverflow || paused) return;
+    const id = window.setInterval(() => {
+      if (document.hidden) return;
+      const viewport = viewportRef.current;
+      const list = viewport?.firstElementChild;
+      const firstCard = list?.firstElementChild;
+      if (!(viewport instanceof HTMLElement) || !(list instanceof HTMLElement) || !(firstCard instanceof HTMLElement)) return;
+      const gap = Number.parseFloat(getComputedStyle(list).columnGap) || 0;
+      const rtlFactor = dir === "rtl" ? -1 : 1;
+      const max = viewport.scrollWidth - viewport.clientWidth;
+      if (Math.abs(viewport.scrollLeft) >= max - 8) {
+        viewport.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        viewport.scrollBy({ left: rtlFactor * (firstCard.offsetWidth + gap), behavior: "smooth" });
+      }
+    }, autoAdvanceMs);
+    return () => window.clearInterval(id);
+  }, [autoAdvanceMs, hasOverflow, paused, dir]);
 
   const move = (physicalDirection: -1 | 1) => {
     const viewport = viewportRef.current;
@@ -33,9 +55,15 @@ export function HorizontalCarousel({ children, className = "" }: { children: Rea
   };
 
   return (
-    <div className="relative">
-      <div ref={viewportRef} className="overflow-x-auto scroll-smooth py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" tabIndex={0}>
-        <ul className={`flex snap-x snap-mandatory items-stretch gap-6 ${className}`}>
+    <div
+      className="relative"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+    >
+      <div ref={viewportRef} className="snap-x snap-mandatory overflow-x-auto scroll-smooth py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" tabIndex={0}>
+        <ul className={`flex items-stretch gap-6 ${className}`}>
           {children}
         </ul>
       </div>
