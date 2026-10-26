@@ -156,8 +156,17 @@ function ActivitySection({
           <table className="sub-table">
             <thead>
               <tr>
-                {headers.map((h) => (
-                  <th key={h}>{h}</th>
+                {headers.map((h, idx) => (
+                  <th key={h}>
+                    {idx === 0 ? (
+                      <span className="th-logo">
+                        <img src="/logo_white_background_transparent.gif" alt="" aria-hidden="true" />
+                        {h}
+                      </span>
+                    ) : (
+                      h
+                    )}
+                  </th>
                 ))}
               </tr>
             </thead>

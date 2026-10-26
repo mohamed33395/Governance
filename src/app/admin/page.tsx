@@ -154,7 +154,12 @@ export default function AdminDashboardPage() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>{t('admin.reference')}</th>
+                  <th>
+                    <span className="th-logo">
+                      <img src="/logo_white_background_transparent.gif" alt="" aria-hidden="true" />
+                      {t('admin.reference')}
+                    </span>
+                  </th>
                   <th>{t('nav.clients')}</th>
                   <th>{t('nav.consultants')}</th>
                   <th>{t('common.date')}</th>

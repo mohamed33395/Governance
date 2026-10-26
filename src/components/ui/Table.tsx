@@ -24,17 +24,25 @@ export function Table<T>({
   className?: string;
 }) {
   return (
-    <div className={`overflow-x-auto rounded-lg border border-border bg-surface ${className}`}>
+    <div className={`relative overflow-x-auto rounded-lg border border-border bg-surface ${className}`}>
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr>
-            {columns.map((c) => (
+            {columns.map((c, i) => (
               <th
                 key={c.key}
                 className="text-start font-semibold text-muted text-[0.78rem] px-4 py-3 whitespace-nowrap border-b border-border"
                 style={{ background: 'color-mix(in srgb, var(--primary) 7%, var(--surface))', minWidth: c.minWidth }}
               >
-                {c.header}
+                {i === 0 ? (
+                  <span className="th-logo">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/logo_white_background_transparent.gif" alt="" aria-hidden="true" />
+                    {c.header}
+                  </span>
+                ) : (
+                  c.header
+                )}
               </th>
             ))}
           </tr>
@@ -62,8 +70,16 @@ export function Table<T>({
 
 export function TableSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-surface animate-pulse">
-      <div className="h-11 border-b border-border" style={{ background: 'color-mix(in srgb, var(--primary) 7%, var(--surface))' }} />
+    <div className="relative overflow-hidden rounded-lg border border-border bg-surface animate-pulse">
+      <div
+        className="h-11 border-b border-border flex items-center px-4"
+        style={{ background: 'color-mix(in srgb, var(--primary) 7%, var(--surface))' }}
+      >
+        <span className="th-logo">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo_white_background_transparent.gif" alt="" aria-hidden="true" />
+        </span>
+      </div>
       {Array.from({ length: rows }).map((_, r) => (
         <div key={r} className="flex gap-4 px-4 py-4 border-b border-border/60">
           {Array.from({ length: cols }).map((_, c) => (
