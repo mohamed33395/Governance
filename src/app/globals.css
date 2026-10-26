@@ -288,3 +288,22 @@ html[data-theme="dark"] .auth-link {
     transform: rotate(360deg);
   }
 }
+
+/* ===== Table header logo — brand mark next to the first column ===== */
+.th-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  vertical-align: middle;
+}
+
+.th-logo img {
+  height: 22px;
+  width: auto;
+  max-width: none;
+  display: inline-block;
+}
+
+html[data-theme='dark'] .th-logo img {
+  filter: brightness(0) invert(1);
+}

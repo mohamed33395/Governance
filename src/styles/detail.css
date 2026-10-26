@@ -58,6 +58,7 @@
 .detail-page .sub-table{width:100%;border-collapse:collapse;font-size:12px;}
 .detail-page .sub-table th{text-align:right;padding:12px 16px;background:var(--green-deep);color:#fff;font-weight:600;font-size:12px;white-space:nowrap;}
 .detail-page .sub-table td{padding:12px 16px;color:var(--ink);vertical-align:middle;border-bottom:1px solid rgba(0,0,0,.08);}
+.detail-page .sub-table tbody{}
 .detail-page .sub-table tbody tr:nth-child(odd){background:rgba(0,0,0,.03);}
 .detail-page .sub-table tbody tr:hover{background:rgba(0,0,0,.055);}
 .detail-page .sub-table tbody tr:last-child td{border-bottom:none;}

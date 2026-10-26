@@ -328,6 +328,7 @@ html[data-theme="dark"]{--chart-grid:rgba(255,255,255,.1);}
 table.data-table{width:100%;border-collapse:collapse;font-size:14px;}
 table.data-table th{text-align:start;background:color-mix(in srgb,var(--primary) 7%,var(--white));color:var(--stone);font-weight:600;padding:12px 16px;font-size:.78rem;border-bottom:1px solid var(--line);}
 table.data-table td{text-align:right;padding:14px 16px;border-bottom:1px solid rgba(0,0,0,0.08);color:var(--ink);}
+table.data-table tbody{}
 table.data-table tbody tr:nth-child(odd){background:rgba(0,0,0,0.04);}
 table.data-table tbody tr:hover{background:rgba(0,0,0,0.06);}
 table.data-table tbody tr:last-child td{border-bottom:none;}
