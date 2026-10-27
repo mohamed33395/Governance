@@ -17,6 +17,7 @@ import {
   ConfirmDialog,
   CopyButton,
   ErrorState,
+  LogoLoader,
   PriceTag,
   StatusBadge,
   Textarea,
@@ -57,9 +58,7 @@ export default function ClientBookingDetailsPage() {
 
   if (query.isLoading) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (query.isError || !booking) return <ErrorState onRetry={() => query.refetch()} />;

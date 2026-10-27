@@ -19,10 +19,10 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   Pagination,
   SearchInput,
   Table,
-  TableSkeleton,
   Textarea,
   useToast,
 } from '@/components/ui';
@@ -114,7 +114,7 @@ function TrainingInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={6} cols={6} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

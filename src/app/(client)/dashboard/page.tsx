@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { useClientAuth } from '@/stores/client-auth';
-import { Avatar, Button, EmptyState, ErrorState, StatusBadge } from '@/components/ui';
+import { Avatar, Button, EmptyState, ErrorState, LogoLoader, StatusBadge } from '@/components/ui';
 import { BookSessionModal, canBookSession } from '@/components/client/BookSessionModal';
 import type { ClientDashboard, Subscription } from '@/types/api';
 
@@ -24,9 +24,7 @@ export default function DashboardPage() {
 
   if (dashboardQuery.isLoading) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (dashboardQuery.isError || !data) {

@@ -22,6 +22,7 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   Modal,
   PageHeader,
   Pagination,
@@ -122,9 +123,7 @@ function PackagesInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <div className="page-loader">
-          <span className="spinner" />
-        </div>
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

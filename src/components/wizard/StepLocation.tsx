@@ -10,7 +10,7 @@ import { applyValidationErrors } from '@/lib/form-errors';
 import { locationSchema, type LocationValues } from '@/schemas/locations';
 import { useWizard } from '@/stores/wizard';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { Button, EmptyState, ErrorState, Input, useToast } from '@/components/ui';
+import { Button, EmptyState, ErrorState, Input, LogoLoader, useToast } from '@/components/ui';
 import type { Location } from '@/types/api';
 
 // §11.2 step 5 — pick a saved location (CLI-LOC-01) or add one inline (CLI-LOC-02)
@@ -35,9 +35,7 @@ export function StepLocation() {
   return (
     <div>
       {query.isLoading ? (
-        <div className="page-loader">
-          <span className="spinner" />
-        </div>
+        <LogoLoader />
       ) : query.isError || !locations ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (

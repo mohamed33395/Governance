@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePublicMeta } from '@/lib/meta';
-import { EmptyState, ErrorState, PageHeader, StatusBadge, Switch, Table, TableSkeleton, Tabs } from '@/components/ui';
+import { EmptyState, ErrorState, LogoLoader, PageHeader, StatusBadge, Switch, Table, Tabs } from '@/components/ui';
 import type { Booking } from '@/types/api';
 
 // §12.2 — my bookings (CLI-BKG-03)
@@ -47,7 +47,7 @@ export default function ClientBookingsPage() {
       </div>
 
       {query.isLoading ? (
-        <TableSkeleton rows={5} />
+        <LogoLoader />
       ) : query.isError || !bookings ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : bookings.length === 0 ? (

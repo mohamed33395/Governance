@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { Alert, Button } from '@/components/ui';
+import { Alert, Button, LogoLoader } from '@/components/ui';
 import { BookingResult } from '@/components/wizard/BookingResult';
 import type { Booking, Payment } from '@/types/api';
 
@@ -79,9 +79,7 @@ export default function PaymentCallbackPage() {
 
   if (state.kind === 'loading') {
     return (
-      <div className="page-loader" style={{ minHeight: '40vh' }}>
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
 

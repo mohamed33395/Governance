@@ -18,6 +18,7 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   PageHeader,
   Pagination,
   PriceTag,
@@ -25,7 +26,6 @@ import {
   Select,
   StatusBadge,
   Table,
-  TableSkeleton,
 } from '@/components/ui';
 import type { AdminPaymentsStats, Booking, Paginated, Payment } from '@/types/api';
 
@@ -173,7 +173,7 @@ function PaymentsInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={5} cols={6} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

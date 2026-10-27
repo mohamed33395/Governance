@@ -15,11 +15,11 @@ import {
   Button,
   EmptyState,
   ErrorState,
+  LogoLoader,
   Pagination,
   SearchInput,
   Select,
   Table,
-  TableSkeleton,
   useToast,
 } from '@/components/ui';
 import type { JoinRequest, JoinRequestStatus, Paginated } from '@/types/api';
@@ -120,7 +120,7 @@ function JoinRequestsInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={6} cols={6} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

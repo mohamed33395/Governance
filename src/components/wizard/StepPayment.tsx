@@ -6,7 +6,7 @@ import { api } from '@/lib/api';
 import { useWizard } from '@/stores/wizard';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { CardForm } from '@/components/payment/CardForm';
-import { ErrorState, Radio } from '@/components/ui';
+import { ErrorState, LogoLoader, Radio } from '@/components/ui';
 import type { PaymentMethod } from '@/types/api';
 
 // §11.5 step 6 — saved cards (CLI-PM-01) or a new card via <CardForm>
@@ -37,9 +37,7 @@ export function StepPayment() {
 
   if (query.isLoading) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (query.isError || !cards) return <ErrorState onRetry={() => query.refetch()} />;

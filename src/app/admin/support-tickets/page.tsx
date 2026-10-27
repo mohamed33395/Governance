@@ -14,10 +14,10 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   Pagination,
   Select,
   Table,
-  TableSkeleton,
 } from '@/components/ui';
 import type { Paginated, SupportTicket, SupportTicketStatus } from '@/types/api';
 
@@ -127,7 +127,7 @@ function SupportTicketsInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={6} cols={5} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

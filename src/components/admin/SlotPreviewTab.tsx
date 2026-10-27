@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { ErrorState, Input, SlotPicker } from '@/components/ui';
+import { ErrorState, Input, LogoLoader, SlotPicker } from '@/components/ui';
 import type { Slot } from '@/types/api';
 
 // §13.5 tab 8 / §13.6 — read-only slot preview: what clients see
@@ -34,9 +34,7 @@ export function SlotPreviewTab({ basePath }: { basePath: string }) {
         className="mb-5"
       />
       {query.isLoading ? (
-        <div className="page-loader">
-          <span className="spinner" />
-        </div>
+        <LogoLoader />
       ) : query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (

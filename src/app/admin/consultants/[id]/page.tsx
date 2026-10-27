@@ -27,6 +27,7 @@ import {
   ErrorState,
   FileDrop,
   Input,
+  LogoLoader,
   PageHeader,
   Pagination,
   SearchInput,
@@ -34,7 +35,6 @@ import {
   StatusBadge,
   Switch,
   Table,
-  TableSkeleton,
   Tabs,
   Textarea,
   useToast,
@@ -82,9 +82,7 @@ function DetailsInner() {
 
   if (consultantQuery.isLoading) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (consultantQuery.isError || !consultant) return <ErrorState onRetry={() => consultantQuery.refetch()} />;
@@ -319,7 +317,7 @@ function ClientsTab({ basePath }: { basePath: string }) {
         className="mb-5 max-w-sm"
       />
       {query.isLoading ? (
-        <TableSkeleton rows={3} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (
@@ -403,7 +401,7 @@ function BookingsTab({ basePath }: { basePath: string }) {
         />
       </div>
       {query.isLoading ? (
-        <TableSkeleton rows={4} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (
@@ -463,7 +461,7 @@ function PendingReportsTab({ basePath }: { basePath: string }) {
   return (
     <div>
       {query.isLoading ? (
-        <TableSkeleton rows={3} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (
@@ -553,7 +551,7 @@ function ReportsTab({ basePath }: { basePath: string }) {
         className="mb-5 max-w-sm"
       />
       {query.isLoading ? (
-        <TableSkeleton rows={3} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

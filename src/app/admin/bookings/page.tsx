@@ -14,13 +14,13 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   PageHeader,
   Pagination,
   SearchInput,
   Select,
   StatusBadge,
   Table,
-  TableSkeleton,
 } from '@/components/ui';
 import { BarChart, ChartCard, DonutChart, DonutLegend, RankingList } from '@/components/admin/charts';
 import { KpiCard } from '@/components/admin/KpiCard';
@@ -275,7 +275,7 @@ function BookingsInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={6} cols={7} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

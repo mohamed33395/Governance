@@ -19,6 +19,7 @@ import {
   ConfirmDialog,
   CopyButton,
   ErrorState,
+  LogoLoader,
   Modal,
   PriceTag,
   StatusBadge,
@@ -117,9 +118,7 @@ function DetailsInner() {
 
   if (query.isLoading) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (query.isError || !booking) return <ErrorState onRetry={() => query.refetch()} />;

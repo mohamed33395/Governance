@@ -23,6 +23,7 @@ import {
   ErrorState,
   FileDrop,
   Input,
+  LogoLoader,
   Modal,
   PageHeader,
   Pagination,
@@ -30,7 +31,6 @@ import {
   Select,
   Switch,
   Table,
-  TableSkeleton,
   Textarea,
   useToast,
 } from '@/components/ui';
@@ -122,7 +122,7 @@ function TeamInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={5} cols={5} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

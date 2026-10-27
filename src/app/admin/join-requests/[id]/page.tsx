@@ -9,7 +9,7 @@ import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePermissions } from '@/lib/permissions';
 import { downloadFile, useBlobUrl } from '@/lib/files';
 import { RequirePermission } from '@/components/admin/RequirePermission';
-import { Avatar, Badge, Button, ErrorState, Input, useToast } from '@/components/ui';
+import { Avatar, Badge, Button, ErrorState, Input, LogoLoader, useToast } from '@/components/ui';
 import type { JoinRequest } from '@/types/api';
 
 export default function JoinRequestDetailPage() {
@@ -65,9 +65,7 @@ function JoinRequestDetailInner() {
 
   if (query.isLoading) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (query.isError || !request) {

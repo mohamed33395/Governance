@@ -18,11 +18,11 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   Pagination,
   Select,
   Switch,
   Table,
-  TableSkeleton,
   useToast,
 } from '@/components/ui';
 import type { Paginated, TimeOff } from '@/types/api';
@@ -65,7 +65,7 @@ export function TimeOffsTab({ basePath }: { basePath: string }) {
 
       <div className="mt-6">
         {query.isLoading ? (
-          <TableSkeleton rows={3} />
+          <LogoLoader />
         ) : query.isError || !data ? (
           <ErrorState onRetry={() => query.refetch()} />
         ) : data.data.length === 0 ? (

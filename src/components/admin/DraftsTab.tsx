@@ -8,14 +8,14 @@ import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import {
   Button,
+  type Column,
   EmptyState,
   ErrorState,
+  LogoLoader,
   Pagination,
   SearchInput,
   Table,
-  TableSkeleton,
   useToast,
-  type Column,
 } from '@/components/ui';
 import type { Paginated } from '@/types/api';
 
@@ -123,7 +123,7 @@ export function DraftsTab<T extends DraftedRow>({
       </div>
 
       {query.isLoading ? (
-        <TableSkeleton rows={5} cols={allColumns.length} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

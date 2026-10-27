@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import { FilterPanel } from '@/components/admin/FilterPanel';
-import { Badge, EmptyState, ErrorState, Pagination, SearchInput, Select, Table, TableSkeleton } from '@/components/ui';
+import { Badge, EmptyState, ErrorState, LogoLoader, Pagination, SearchInput, Select, Table } from '@/components/ui';
 import type { Paginated, Review, ReviewStatus } from '@/types/api';
 
 const STATUSES: ReviewStatus[] = ['pending', 'approved', 'rejected'];
@@ -77,7 +77,7 @@ function ReviewsInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={6} cols={5} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

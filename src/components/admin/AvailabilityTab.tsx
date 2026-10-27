@@ -13,7 +13,7 @@ import {
   validateAvailability,
   type EditorDay,
 } from './AvailabilityEditor';
-import { Alert, Button, ErrorState, useToast } from '@/components/ui';
+import { Alert, Button, ErrorState, LogoLoader, useToast } from '@/components/ui';
 import type { AvailabilityDay } from '@/types/api';
 
 // §13.5 tab 2 / §13.6 — availability editor against any base path
@@ -60,9 +60,7 @@ export function AvailabilityTab({ basePath }: { basePath: string }) {
 
   if (query.isLoading || !days) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (query.isError) return <ErrorState onRetry={() => query.refetch()} />;

@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePermissions } from '@/lib/permissions';
-import { EmptyState, ErrorState, PageHeader, StatusBadge } from '@/components/ui';
+import { EmptyState, ErrorState, LogoLoader, PageHeader, StatusBadge } from '@/components/ui';
 import { ChartCard, DonutChart, DonutLegend, BarChart } from '@/components/admin/charts';
 import { KpiCard } from '@/components/admin/KpiCard';
 import { CATEGORY_COLOR, FAMILY } from '@/components/admin/registry';
@@ -28,9 +28,7 @@ export default function AdminDashboardPage() {
   }
   if (statsQuery.isLoading) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (statsQuery.isError || !stats) {

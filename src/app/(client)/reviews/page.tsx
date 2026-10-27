@@ -10,7 +10,7 @@ import { isApiError } from '@/lib/errors';
 import { applyValidationErrors } from '@/lib/form-errors';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { reviewSchema, type ReviewValues } from '@/schemas/reviews';
-import { Badge, Button, EmptyState, ErrorState, Input, Modal, Textarea, useToast } from '@/components/ui';
+import { Badge, Button, EmptyState, ErrorState, Input, LogoLoader, Modal, Textarea, useToast } from '@/components/ui';
 import type { Paginated, Review } from '@/types/api';
 
 export default function ReviewsPage() {
@@ -66,7 +66,7 @@ export default function ReviewsPage() {
       </div>
 
       {listQuery.isLoading ? (
-        <div className="page-loader"><span className="spinner" /></div>
+        <LogoLoader />
       ) : listQuery.isError || !data ? (
         <ErrorState onRetry={() => listQuery.refetch()} />
       ) : data.data.length === 0 ? (

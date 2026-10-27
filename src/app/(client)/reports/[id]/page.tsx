@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { downloadFile } from '@/lib/files';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { Button, ErrorState, PageHeader } from '@/components/ui';
+import { Button, ErrorState, LogoLoader, PageHeader } from '@/components/ui';
 import type { Report } from '@/types/api';
 
 // §12.4 — report details (CLI-RPT-02). URL contract: the email button lands here.
@@ -23,9 +23,7 @@ export default function ClientReportDetailsPage() {
 
   if (query.isLoading) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (query.isError || !report) return <ErrorState onRetry={() => query.refetch()} />;
