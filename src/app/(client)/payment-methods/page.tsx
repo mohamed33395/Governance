@@ -14,6 +14,7 @@ import {
   ConfirmDialog,
   EmptyState,
   ErrorState,
+  LogoLoader,
   Modal,
   PageHeader,
   useToast,
@@ -68,9 +69,7 @@ export default function PaymentMethodsPage() {
       />
 
       {query.isLoading ? (
-        <div className="page-loader">
-          <span className="spinner" />
-        </div>
+        <LogoLoader />
       ) : query.isError || !cards ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : cards.length === 0 ? (

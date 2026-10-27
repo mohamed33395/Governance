@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 import { useWizard } from '@/stores/wizard';
 import { useClientAuth } from '@/stores/client-auth';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { EmptyState, ErrorState, useToast } from '@/components/ui';
+import { EmptyState, ErrorState, LogoLoader, useToast } from '@/components/ui';
 import { WizardSummary } from '@/components/wizard/WizardSummary';
 import { StepAccount } from '@/components/wizard/StepAccount';
 import { StepConsultant } from '@/components/wizard/StepConsultant';
@@ -179,9 +179,7 @@ export default function BookingWizardPage() {
 
   if (pkgQuery.isLoading || (pkgQuery.isError && !!token && subsQuery.isLoading)) {
     return (
-      <div className="page-loader" style={{ minHeight: '50vh' }}>
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (!pkgQuery.data && !fallbackPkg) {

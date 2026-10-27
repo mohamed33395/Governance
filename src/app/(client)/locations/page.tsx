@@ -16,6 +16,7 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   Modal,
   PageHeader,
   Switch,
@@ -70,9 +71,7 @@ export default function LocationsPage() {
       />
 
       {query.isLoading ? (
-        <div className="page-loader">
-          <span className="spinner" />
-        </div>
+        <LogoLoader />
       ) : query.isError || !locations ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : locations.length === 0 ? (

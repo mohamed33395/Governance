@@ -17,12 +17,12 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   PageHeader,
   Pagination,
   SearchInput,
   Select,
   Table,
-  TableSkeleton,
   useToast,
 } from '@/components/ui';
 import { ChartCard, BarChart, RankingList } from '@/components/admin/charts';
@@ -211,7 +211,7 @@ function ReportsInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={5} cols={6} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

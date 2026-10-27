@@ -1,5 +1,7 @@
 'use client';
 
+
+import { LogoLoader } from '@/components/ui';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -10,8 +12,6 @@ export default function CreateSupportTicketPage() {
     router.replace('/support-tickets');
   }, [router]);
   return (
-    <div className="page-loader">
-      <span className="spinner" />
-    </div>
+    <LogoLoader />
   );
 }

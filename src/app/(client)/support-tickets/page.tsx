@@ -16,11 +16,11 @@ import {
   Button,
   EmptyState,
   ErrorState,
+  LogoLoader,
   Modal,
   Pagination,
   Select,
   Table,
-  TableSkeleton,
   Textarea,
   useToast,
   VoiceRecorderButton,
@@ -69,7 +69,7 @@ export default function SupportTicketsPage() {
       </div>
 
       {query.isLoading ? (
-        <TableSkeleton rows={5} cols={4} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

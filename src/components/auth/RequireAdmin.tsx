@@ -1,5 +1,7 @@
 'use client';
 
+
+import { LogoLoader } from '@/components/ui';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -37,9 +39,7 @@ export function RequireAdmin({ children }: { children: ReactNode }) {
   }, [me.data, setUser]);
 
   const loader = (
-    <div className="page-loader" role="status" aria-live="polite">
-      <span className="spinner" aria-hidden="true" />
-    </div>
+    <LogoLoader />
   );
 
   if (!hydrated) return loader;

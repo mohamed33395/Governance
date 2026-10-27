@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useWizard } from '@/stores/wizard';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { Avatar, EmptyState, ErrorState, Pagination, SearchInput } from '@/components/ui';
+import { Avatar, EmptyState, ErrorState, LogoLoader, Pagination, SearchInput } from '@/components/ui';
 import type { Paginated, PublicConsultant } from '@/types/api';
 
 // §11.2 step 3 — pick a consultant (PUB-03)
@@ -50,9 +50,7 @@ export function StepConsultant() {
       </div>
 
       {query.isLoading ? (
-        <div className="page-loader">
-          <span className="spinner" />
-        </div>
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

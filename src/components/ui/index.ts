@@ -16,6 +16,7 @@ export { Drawer } from './Drawer';
 export { Tabs } from './Tabs';
 export { Table, TableSkeleton } from './Table';
 export type { Column } from './Table';
+export { LogoLoader } from './LogoLoader';
 export { Pagination } from './Pagination';
 export { SearchInput } from './SearchInput';
 export { DatePicker } from './DatePicker';

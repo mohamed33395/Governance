@@ -21,6 +21,7 @@ import {
   Badge,
   Button,
   ErrorState,
+  LogoLoader,
   Textarea,
   useToast,
   VoiceRecorderButton,
@@ -83,7 +84,7 @@ export default function SupportTicketDetailPage() {
   });
 
   if (query.isLoading) {
-    return <div className="page-loader"><span className="spinner" /></div>;
+    return <LogoLoader />;
   }
   if (query.isError || !ticket) {
     return <ErrorState onRetry={() => query.refetch()} />;

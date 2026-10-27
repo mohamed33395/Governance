@@ -24,14 +24,15 @@ import { RequirePermission } from '@/components/admin/RequirePermission';
 import { FilterPanel } from '@/components/admin/FilterPanel';
 import { DraftsTab, useTrashedCount } from '@/components/admin/DraftsTab';
 import {
-  Avatar,
   ActionsMenu,
+  Avatar,
   Button,
   ConfirmDialog,
   EmptyState,
   ErrorState,
   FileDrop,
   Input,
+  LogoLoader,
   Modal,
   PageHeader,
   Pagination,
@@ -39,7 +40,6 @@ import {
   Select,
   Switch,
   Table,
-  TableSkeleton,
   Tabs,
   Textarea,
   useToast,
@@ -221,7 +221,7 @@ function ConsultantsInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={4} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

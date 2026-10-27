@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { downloadFile } from '@/lib/files';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { Button, EmptyState, ErrorState, Input, PageHeader, SearchInput, Table, TableSkeleton } from '@/components/ui';
+import { Button, EmptyState, ErrorState, Input, LogoLoader, PageHeader, SearchInput, Table } from '@/components/ui';
 import type { Report } from '@/types/api';
 
 // §12.4 — my reports (CLI-RPT-01)
@@ -47,7 +47,7 @@ export default function ClientReportsPage() {
       </div>
 
       {query.isLoading ? (
-        <TableSkeleton rows={4} />
+        <LogoLoader />
       ) : query.isError || !reports ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : reports.length === 0 ? (

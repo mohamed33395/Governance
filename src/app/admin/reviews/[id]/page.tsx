@@ -11,7 +11,7 @@ import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePermissions } from '@/lib/permissions';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import { useBreadcrumbLabel } from '@/components/admin/Breadcrumbs';
-import { Alert, Avatar, Badge, Button, ErrorState, Modal, Textarea, useToast } from '@/components/ui';
+import { Alert, Avatar, Badge, Button, ErrorState, LogoLoader, Modal, Textarea, useToast } from '@/components/ui';
 import type { Review } from '@/types/api';
 
 const card = 'bg-surface border border-border rounded-2xl p-5';
@@ -69,9 +69,7 @@ function ReviewDetailInner() {
 
   if (query.isLoading) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (query.isError || !review) {

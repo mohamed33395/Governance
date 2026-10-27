@@ -9,7 +9,7 @@ import { api } from '@/lib/api';
 import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { RequirePermission } from '@/components/admin/RequirePermission';
-import { Button, ErrorState, PageHeader, Select } from '@/components/ui';
+import { Button, ErrorState, LogoLoader, PageHeader, Select } from '@/components/ui';
 import type { BookingCalendarItem, BookingStatus, Consultant, Paginated } from '@/types/api';
 
 const STATUS_COLORS: Record<BookingStatus, string> = {
@@ -114,9 +114,7 @@ function CalendarInner() {
       </div>
 
       {query.isLoading ? (
-        <div className="page-loader">
-          <span className="spinner" />
-        </div>
+        <LogoLoader />
       ) : query.isError || !items ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (

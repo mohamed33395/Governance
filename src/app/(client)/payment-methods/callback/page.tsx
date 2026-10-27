@@ -7,7 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { isApiError } from '@/lib/errors';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { Alert, Button } from '@/components/ui';
+import { Alert, Button, LogoLoader } from '@/components/ui';
 
 // Return page after the 3DS verification of a reusable Moyasar token.
 // The backend re-fetches the token with the secret key; if it is not active it answers 422.
@@ -41,9 +41,7 @@ export default function CardCallbackPage() {
 
   if (!error) {
     return (
-      <div className="page-loader" style={{ minHeight: '40vh' }}>
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
 

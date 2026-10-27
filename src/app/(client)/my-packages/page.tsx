@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePublicMeta } from '@/lib/meta';
-import { Button, EmptyState, ErrorState, PageHeader, Pagination, PriceTag, StatusBadge, Tabs } from '@/components/ui';
+import { Button, EmptyState, ErrorState, LogoLoader, PageHeader, Pagination, PriceTag, StatusBadge, Tabs } from '@/components/ui';
 import { BookSessionModal, canBookSession } from '@/components/client/BookSessionModal';
 import type { Paginated, Subscription } from '@/types/api';
 
@@ -50,9 +50,7 @@ export default function MyPackagesPage() {
       />
 
       {query.isLoading ? (
-        <div className="page-loader">
-          <span className="spinner" />
-        </div>
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

@@ -17,13 +17,13 @@ import {
   ConfirmDialog,
   EmptyState,
   ErrorState,
+  LogoLoader,
   PageHeader,
   Pagination,
   SearchInput,
   Select,
   Switch,
   Table,
-  TableSkeleton,
   Tabs,
   useToast,
 } from '@/components/ui';
@@ -214,7 +214,7 @@ function ClientsInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={5} cols={6} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

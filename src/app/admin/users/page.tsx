@@ -21,6 +21,7 @@ import {
   ErrorState,
   FileDrop,
   Input,
+  LogoLoader,
   Modal,
   PageHeader,
   Pagination,
@@ -28,7 +29,6 @@ import {
   Select,
   Switch,
   Table,
-  TableSkeleton,
   Tabs,
   Textarea,
   useToast,
@@ -243,7 +243,7 @@ function UsersInner() {
           </FilterPanel>
 
           {query.isLoading ? (
-            <TableSkeleton rows={5} />
+            <LogoLoader />
           ) : query.isError || !data ? (
             <ErrorState onRetry={() => query.refetch()} />
           ) : (

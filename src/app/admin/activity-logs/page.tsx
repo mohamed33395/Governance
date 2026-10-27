@@ -14,12 +14,12 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   PageHeader,
   Pagination,
   SearchInput,
   Select,
   Table,
-  TableSkeleton,
 } from '@/components/ui';
 import type { BadgeColor } from '@/components/ui';
 import type { ActivityLog, ActivityLogsMeta, Client, Paginated, User } from '@/types/api';
@@ -195,7 +195,7 @@ function ActivityLogsInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={8} cols={6} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (

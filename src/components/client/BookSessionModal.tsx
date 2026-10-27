@@ -14,6 +14,7 @@ import {
   DatePicker,
   EmptyState,
   ErrorState,
+  LogoLoader,
   Modal,
   Pagination,
   SearchInput,
@@ -206,9 +207,7 @@ export function BookSessionModal({ subscription, onClose }: { subscription: Subs
                 className="mb-5"
               />
               {consultantsQuery.isLoading ? (
-                <div className="page-loader">
-                  <span className="spinner" />
-                </div>
+                <LogoLoader />
               ) : consultantsQuery.isError || !consultants ? (
                 <ErrorState onRetry={() => consultantsQuery.refetch()} />
               ) : consultants.data.length === 0 ? (
@@ -279,9 +278,7 @@ export function BookSessionModal({ subscription, onClose }: { subscription: Subs
                 {!date ? (
                   <p className="text-muted text-[0.9rem] py-4">{t('wizard.pickDateFirst')}</p>
                 ) : slotsQuery.isLoading ? (
-                  <div className="page-loader">
-                    <span className="spinner" />
-                  </div>
+                  <LogoLoader />
                 ) : slotsQuery.isError ? (
                   <ErrorState onRetry={() => slotsQuery.refetch()} />
                 ) : (
@@ -295,9 +292,7 @@ export function BookSessionModal({ subscription, onClose }: { subscription: Subs
             <div className="flex flex-col gap-5">
               <h4 className="text-[0.95rem] text-muted font-medium">{t('wizard.chooseLocation')}</h4>
               {locationsQuery.isLoading ? (
-                <div className="page-loader">
-                  <span className="spinner" />
-                </div>
+                <LogoLoader />
               ) : locationsQuery.isError || !locations ? (
                 <ErrorState onRetry={() => locationsQuery.refetch()} />
               ) : locations.length === 0 ? (

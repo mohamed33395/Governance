@@ -23,12 +23,12 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   Modal,
   Pagination,
   PriceTag,
   StatusBadge,
   Table,
-  TableSkeleton,
   Tabs,
   useToast,
 } from '@/components/ui';
@@ -59,9 +59,7 @@ function DetailsInner() {
 
   if (query.isLoading) {
     return (
-      <div className="page-loader">
-        <span className="spinner" />
-      </div>
+      <LogoLoader />
     );
   }
   if (query.isError || !client) return <ErrorState onRetry={() => query.refetch()} />;
@@ -227,7 +225,7 @@ function ClientBookingsTab({ clientId }: { clientId: number }) {
   });
   const data = query.data;
 
-  if (query.isLoading) return <TableSkeleton rows={3} />;
+  if (query.isLoading) return <LogoLoader />;
   if (query.isError || !data) return <ErrorState onRetry={() => query.refetch()} />;
   if (data.data.length === 0) return <EmptyState title={t('bookings.empty')} />;
 
@@ -274,7 +272,7 @@ function ClientReportsTab({ clientId }: { clientId: number }) {
   });
   const data = query.data;
 
-  if (query.isLoading) return <TableSkeleton rows={3} />;
+  if (query.isLoading) return <LogoLoader />;
   if (query.isError || !data) return <ErrorState onRetry={() => query.refetch()} />;
   if (data.data.length === 0) return <EmptyState title={t('reports.empty')} />;
 
@@ -327,7 +325,7 @@ function ClientSubscriptionsTab({ clientId }: { clientId: number }) {
   });
   const data = query.data;
 
-  if (query.isLoading) return <TableSkeleton rows={3} />;
+  if (query.isLoading) return <LogoLoader />;
   if (query.isError || !data) return <ErrorState onRetry={() => query.refetch()} />;
   if (data.data.length === 0) return <EmptyState title={t('myPackages.empty')} />;
 

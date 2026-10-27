@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useWizard } from '@/stores/wizard';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { DatePicker, ErrorState, SlotPicker } from '@/components/ui';
+import { DatePicker, ErrorState, LogoLoader, SlotPicker } from '@/components/ui';
 import type { Slot } from '@/types/api';
 
 // §11.3 step 4 — date & time. Only dates from available-dates are enabled;
@@ -62,9 +62,7 @@ export function StepDateTime() {
         {!date ? (
           <p className="text-muted text-[0.9rem] py-4">{t('wizard.pickDateFirst')}</p>
         ) : slotsQuery.isLoading ? (
-          <div className="page-loader">
-            <span className="spinner" />
-          </div>
+          <LogoLoader />
         ) : slotsQuery.isError ? (
           <ErrorState onRetry={() => slotsQuery.refetch()} />
         ) : (

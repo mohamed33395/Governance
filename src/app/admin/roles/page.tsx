@@ -17,12 +17,12 @@ import {
   EmptyState,
   ErrorState,
   Input,
+  LogoLoader,
   Modal,
   PageHeader,
   Pagination,
   SearchInput,
   Table,
-  TableSkeleton,
   useToast,
 } from '@/components/ui';
 import { RequirePermission } from '@/components/admin/RequirePermission';
@@ -99,7 +99,7 @@ function RolesInner() {
       </FilterPanel>
 
       {query.isLoading ? (
-        <TableSkeleton rows={3} />
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (
@@ -293,9 +293,7 @@ function RoleFormModal({ role, onClose, onSaved }: { role: Role | null; onClose:
 
         {can('view-permissions') &&
           (groupsQuery.isLoading || (isEdit && roleQuery.isLoading) ? (
-            <div className="page-loader">
-              <span className="spinner" />
-            </div>
+            <LogoLoader />
           ) : groups ? (
             <div className="flex flex-col gap-5">
               {groups.map((group) => {
@@ -354,9 +352,7 @@ function RoleUsersDrawer({ role, onClose }: { role: Role; onClose: () => void })
         className="mb-4"
       />
       {query.isLoading ? (
-        <div className="page-loader">
-          <span className="spinner" />
-        </div>
+        <LogoLoader />
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (
