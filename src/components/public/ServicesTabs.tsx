@@ -56,7 +56,7 @@ export function ServicesTabs() {
               }`}
             >
               <span className="flex items-center gap-2">
-                {g.featured && <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-accent" />}
+                <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-accent" />
                 {tx(g.label ?? g.title)}
               </span>
               <span aria-hidden="true" className={`text-xs ${selected ? "text-muted" : "text-white/60"}`}>
