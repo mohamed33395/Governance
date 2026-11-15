@@ -30,6 +30,7 @@ export default function ClientReportsPage() {
   const reports = query.data;
 
   const download = async (report: Report) => {
+    if (!report.file) return;
     await downloadFile(`/client/reports/${report.id}/download`, report.file.name);
     // the first download marks it read
     queryClient.invalidateQueries({ queryKey: ['client', 'reports'] });
@@ -67,17 +68,24 @@ export default function ClientReportsPage() {
                 </span>
               ),
             },
-            { key: 'consultant', header: t('reports.consultant'), render: (r) => r.consultant.name },
+            { key: 'consultant', header: t('reports.consultant'), render: (r) => r.consultant?.name ?? '—' },
             {
               key: 'date',
               header: t('common.date'),
-              render: (r) => (
-                <span>
-                  {r.booking.date} · <bdi dir="ltr">{r.booking.time}</bdi>
-                </span>
-              ),
+              render: (r) =>
+                r.booking ? (
+                  <span>
+                    {r.booking.date} · <bdi dir="ltr">{r.booking.time}</bdi>
+                  </span>
+                ) : (
+                  '—'
+                ),
             },
-            { key: 'size', header: t('reports.file'), render: (r) => <span dir="ltr">{r.file.size_human}</span> },
+            {
+              key: 'size',
+              header: t('reports.file'),
+              render: (r) => (r.file ? <span dir="ltr">{r.file.size_human}</span> : '—'),
+            },
             {
               key: 'actions',
               header: t('common.actions'),

@@ -34,5 +34,23 @@ export const consultantSchema = z.object({
   bio: z.string().max(2000).optional().or(z.literal('')),
   password: password.optional().or(z.literal('')),
   is_active: z.boolean().default(true),
+  // payout financials — price is entered in SAR, converted to halalas on submit.
+  // union order matters: '' must match before coerce turns it into 0.
+  consultation_price_sar: z.union([z.literal(''), z.coerce.number().min(0, 'invalidNumber')]).optional(),
+  platform_fee_percent: z.union([z.literal(''), z.coerce.number().min(0, 'invalidNumber').max(100, 'invalidNumber')]).optional(),
 });
 export type ConsultantValues = z.input<typeof consultantSchema>;
+
+// SET-02 — platform settings (all keys optional on the wire, the form sends both)
+export const settingsSchema = z.object({
+  platform_fee_percent: z.coerce.number().min(0, 'invalidNumber').max(100, 'invalidNumber'),
+  payout_auto_transfer: z.boolean().default(false),
+});
+export type SettingsValues = z.input<typeof settingsSchema>;
+
+// PO-03 — release a payout (records the manual transfer / triggers the gateway)
+export const payoutReleaseSchema = z.object({
+  transfer_reference: z.string().max(150).optional().or(z.literal('')),
+  note: z.string().max(1000).optional().or(z.literal('')),
+});
+export type PayoutReleaseValues = z.input<typeof payoutReleaseSchema>;

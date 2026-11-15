@@ -41,9 +41,9 @@ export function StepConfirm({
   } = useWizard();
 
   const requote = async () => {
-    if (!pkg) return null;
+    if (!pkg && !consultant) return null;
     const { data } = await api.post('/client/bookings/quote', {
-      package_id: pkg.id,
+      package_id: pkg?.id,
       consultant_id: consultant?.id,
       date,
       time,
@@ -57,7 +57,7 @@ export function StepConfirm({
     mutationFn: () =>
       api
         .post('/client/bookings', {
-          package_id: pkg!.id,
+          ...(pkg ? { package_id: pkg.id } : {}),
           consultant_id: consultant!.id,
           date,
           time,
@@ -146,6 +146,10 @@ export function StepConfirm({
           }
           onTerminal({ kind: 'confirming', bookingId: 0 });
           break;
+        case 'CONSULTANT_PRICE_REQUIRED':
+        case 'CONSULTANT_PRICE_MISSING':
+          toast.error(e.message);
+          break;
         case 'VALIDATION_ERROR':
           toast.error(Object.values(e.errors)[0]?.[0] ?? e.message);
           break;
@@ -155,7 +159,7 @@ export function StepConfirm({
     },
   });
 
-  if (!pkg || !consultant || !date || !time || !location) return null;
+  if (!consultant || !date || !time || !location) return null;
 
   return (
     <div className="flex flex-col gap-6">

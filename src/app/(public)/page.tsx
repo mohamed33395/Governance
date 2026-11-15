@@ -20,6 +20,7 @@ import { PackageGrid } from "@/components/public/PackageGrid";
 import { ExpertCard } from "@/components/public/ExpertCard";
 import { Testimonials } from "@/components/public/Testimonials";
 import { TeamSection } from "@/components/public/TeamSection";
+import { ConsultantsSection } from "@/components/public/ConsultantsSection";
 import { VisionValues } from "@/components/public/VisionValues";
 import { CountUp } from "@/components/public/CountUp";
 import { FLUID, FOCUS } from "@/components/public/tokens";
@@ -233,6 +234,20 @@ export default function HomePage() {
           <Reveal>
             <PackageGrid withDetails />
           </Reveal>
+        </Container>
+      </section>
+
+      {/* CONSULTANTS — book a consultant directly */}
+      <section id="consultants" className="py-24">
+        <Container>
+          <Reveal>
+            <SectionHead
+              eyebrow={t("consultants.eyebrow")}
+              title={t("lp.consultantsTitle")}
+              lead={t("lp.consultantsDesc")}
+            />
+          </Reveal>
+          <ConsultantsSection />
         </Container>
       </section>
 

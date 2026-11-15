@@ -17,6 +17,7 @@ import { AvailabilityTab } from '@/components/admin/AvailabilityTab';
 import { TimeOffsTab } from '@/components/admin/TimeOffsTab';
 import { SlotPreviewTab } from '@/components/admin/SlotPreviewTab';
 import { ReportUploadModal } from '@/components/admin/ReportUploadModal';
+import { PayoutDrawer } from '@/components/admin/PayoutDrawer';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import {
   ActionsMenu,
@@ -30,6 +31,7 @@ import {
   LogoLoader,
   PageHeader,
   Pagination,
+  PriceTag,
   SearchInput,
   Select,
   StatusBadge,
@@ -39,7 +41,7 @@ import {
   Textarea,
   useToast,
 } from '@/components/ui';
-import type { Booking, Client, Consultant, Paginated, Report } from '@/types/api';
+import type { Booking, Client, Consultant, Paginated, Payout, Report } from '@/types/api';
 
 type ConsultantStats = {
   pending_bookings: number;
@@ -103,6 +105,7 @@ function DetailsInner() {
           { key: 'reports', label: t('consultants.tabReports') },
         ]
       : []),
+    ...(can('view-payouts') ? [{ key: 'payouts', label: t('nav.payouts') }] : []),
     ...(can('view-availability') ? [{ key: 'slots', label: t('consultants.tabSlots') }] : []),
   ];
 
@@ -159,6 +162,7 @@ function DetailsInner() {
       {tab === 'bookings' && <BookingsTab basePath={basePath} />}
       {tab === 'pending' && <PendingReportsTab basePath={basePath} />}
       {tab === 'reports' && <ReportsTab basePath={basePath} />}
+      {tab === 'payouts' && <PayoutsTab consultantId={consultant.id} />}
       {tab === 'slots' && <SlotPreviewTab basePath={basePath} />}
     </>
   );
@@ -187,6 +191,9 @@ function ProfileTab({ consultant }: { consultant: Consultant }) {
       specialization: consultant.specialization ?? '',
       bio: consultant.bio ?? '',
       is_active: consultant.is_active,
+      // API returns halalas — the form edits SAR
+      consultation_price_sar: consultant.consultation_price != null ? consultant.consultation_price / 100 : '',
+      platform_fee_percent: consultant.platform_fee_percent ?? '',
     },
   });
 
@@ -194,8 +201,17 @@ function ProfileTab({ consultant }: { consultant: Consultant }) {
 
   const onSubmit = handleSubmit(async (values) => {
     try {
-      const { password, ...rest } = values;
-      await api.put(`/admin/consultants/${consultant.id}`, rest); // JSON; no password on edit
+      const { password, consultation_price_sar, platform_fee_percent, ...rest } = values;
+      await api.put(`/admin/consultants/${consultant.id}`, {
+        ...rest, // JSON; no password on edit
+        // CON-04 accepts halalas; '' clears the value / reverts the fee override to global
+        consultation_price:
+          consultation_price_sar === '' || consultation_price_sar == null
+            ? null
+            : Math.round(Number(consultation_price_sar) * 100),
+        platform_fee_percent:
+          platform_fee_percent === '' || platform_fee_percent == null ? null : Number(platform_fee_percent),
+      });
       toast.success(t('profile.saved'));
       invalidate();
     } catch (e) {
@@ -228,12 +244,28 @@ function ProfileTab({ consultant }: { consultant: Consultant }) {
           [t('auth.phone'), consultant.phone ?? '—'],
           [t('consultants.titleField'), consultant.title ?? '—'],
           [t('consultants.specializationField'), consultant.specialization ?? '—'],
+          [
+            t('consultants.price'),
+            consultant.consultation_price != null ? `${consultant.consultation_price / 100} SAR` : '—',
+          ],
+          [
+            t('consultants.feeOverride'),
+            consultant.platform_fee_percent != null ? `${consultant.platform_fee_percent}%` : '—',
+          ],
         ].map(([label, value]) => (
           <div key={label}>
             <span className="text-muted text-[0.82rem] block">{label}</span>
             <strong className="text-[0.95rem]">{value}</strong>
           </div>
         ))}
+        {consultant.iban && (
+          <div>
+            <span className="text-muted text-[0.82rem] block">{t('payoutsAdmin.iban')}</span>
+            <strong className="text-[0.95rem]" dir="ltr">
+              {consultant.iban}
+            </strong>
+          </div>
+        )}
         {consultant.bio && (
           <div className="sm:col-span-2">
             <span className="text-muted text-[0.82rem] block">{t('consultants.bio')}</span>
@@ -270,6 +302,51 @@ function ProfileTab({ consultant }: { consultant: Consultant }) {
           error={err(errors.bio?.message)}
           {...register('bio')}
         />
+
+        {/* payout financials — CON-04 (bank details are self-service via profile) */}
+        <h4 className="sm:col-span-2 text-[0.92rem] pt-2 border-t border-border">{t('consultants.financial')}</h4>
+        <Input
+          label={t('consultants.price')}
+          hint={t('consultants.priceHint')}
+          type="number"
+          dir="ltr"
+          min={0}
+          step="0.01"
+          error={err(errors.consultation_price_sar?.message)}
+          {...register('consultation_price_sar')}
+        />
+        <Input
+          label={t('consultants.feeOverride')}
+          hint={t('consultants.feeOverrideHint')}
+          type="number"
+          dir="ltr"
+          min={0}
+          max={100}
+          step="0.01"
+          error={err(errors.platform_fee_percent?.message)}
+          {...register('platform_fee_percent')}
+        />
+        {(consultant.iban || consultant.bank_name || consultant.account_name) && (
+          <div className="sm:col-span-2 rounded-xl border border-border p-4 flex flex-wrap gap-x-8 gap-y-2 text-[0.88rem]">
+            <span className="text-muted w-full">{t('payoutsAdmin.bankDetails')}</span>
+            {consultant.account_name && (
+              <span>
+                {t('payoutsAdmin.accountName')}: <strong>{consultant.account_name}</strong>
+              </span>
+            )}
+            {consultant.bank_name && (
+              <span>
+                {t('payoutsAdmin.bankName')}: <strong>{consultant.bank_name}</strong>
+              </span>
+            )}
+            {consultant.iban && (
+              <span>
+                {t('payoutsAdmin.iban')}: <strong dir="ltr">{consultant.iban}</strong>
+              </span>
+            )}
+          </div>
+        )}
+
         <div className="sm:col-span-2">
           <Button type="submit" loading={isSubmitting}>
             {t('common.save')}
@@ -561,9 +638,24 @@ function ReportsTab({ basePath }: { basePath: string }) {
           <Table
             columns={[
               { key: 'title', header: t('reports.details'), render: (r) => <strong>{r.title}</strong> },
-              { key: 'client', header: t('nav.clients'), render: (r) => r.client.company_name },
-              { key: 'date', header: t('common.date'), render: (r) => r.booking.date },
-              { key: 'size', header: t('reports.file'), render: (r) => <span dir="ltr">{r.file.size_human}</span> },
+              { key: 'client', header: t('nav.clients'), render: (r) => r.client?.company_name ?? '—' },
+              { key: 'date', header: t('common.date'), render: (r) => r.booking?.date ?? '—' },
+              {
+                key: 'approval',
+                header: t('common.status'),
+                render: (r) => (
+                  <StatusBadge
+                    kind="reportApproval"
+                    value={r.approval_status}
+                    label={t(`reportApprovalStatus.${r.approval_status}`)}
+                  />
+                ),
+              },
+              {
+                key: 'size',
+                header: t('reports.file'),
+                render: (r) => (r.file ? <span dir="ltr">{r.file.size_human}</span> : '—'),
+              },
               {
                 key: 'actions',
                 header: t('common.actions'),
@@ -571,12 +663,12 @@ function ReportsTab({ basePath }: { basePath: string }) {
                   <ActionsMenu
                     ariaLabel={t('common.actions')}
                     items={[
-                      ...(can('download-reports')
+                      ...(can('download-reports') && r.file
                         ? [
                             {
                               key: 'download',
                               label: t('common.download'),
-                              onClick: () => downloadFile(`/admin/reports/${r.id}/download`, r.file.name),
+                              onClick: () => downloadFile(`/admin/reports/${r.id}/download`, r.file!.name),
                             },
                           ]
                         : []),
@@ -591,6 +683,86 @@ function ReportsTab({ basePath }: { basePath: string }) {
           <Pagination meta={data.meta} onPage={setPage} className="mt-4" />
         </>
       )}
+    </div>
+  );
+}
+
+// ---------- tab 8: his payouts (PO-01 filtered by consultant) ----------
+function PayoutsTab({ consultantId }: { consultantId: number }) {
+  const { t } = useI18n();
+  const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Payout | null>(null);
+
+  const query = useQuery({
+    queryKey: ['admin', 'payouts', 'list', { consultantId, page }],
+    queryFn: () =>
+      api
+        .get('/admin/payouts', { params: { consultant_id: consultantId, page } })
+        .then((r) => r.data as Paginated<Payout>),
+  });
+  const data = query.data;
+
+  return (
+    <div>
+      {query.isLoading ? (
+        <LogoLoader />
+      ) : query.isError || !data ? (
+        <ErrorState onRetry={() => query.refetch()} />
+      ) : data.data.length === 0 ? (
+        <EmptyState title={t('payoutsAdmin.empty')} />
+      ) : (
+        <>
+          <Table
+            columns={[
+              { key: 'id', header: '#', render: (p) => p.id },
+              {
+                key: 'booking',
+                header: t('admin.reference'),
+                render: (p) => <span dir="ltr">{p.booking_reference ?? `#${p.booking_id}`}</span>,
+              },
+              {
+                key: 'gross',
+                header: t('payoutsAdmin.gross'),
+                render: (p) => <PriceTag formatted={p.amount_formatted} />,
+              },
+              {
+                key: 'fee',
+                header: t('payoutsAdmin.fee'),
+                render: (p) => (
+                  <span className="text-muted">
+                    <PriceTag formatted={p.fee_amount_formatted} /> <span dir="ltr">({p.fee_percent}%)</span>
+                  </span>
+                ),
+              },
+              {
+                key: 'net',
+                header: t('payoutsAdmin.net'),
+                render: (p) => (
+                  <strong>
+                    <PriceTag formatted={p.net_amount_formatted} />
+                  </strong>
+                ),
+              },
+              {
+                key: 'status',
+                header: t('common.status'),
+                render: (p) => <StatusBadge kind="payout" value={p.status} label={t(`payoutStatus.${p.status}`)} />,
+              },
+              {
+                key: 'created',
+                header: t('bookingsAdmin.createdAt'),
+                render: (p) => p.created_at.slice(0, 16).replace('T', ' '),
+              },
+            ]}
+            rows={data.data}
+            rowKey={(p) => p.id}
+            onRowClick={(p) => setSelected(p)}
+          />
+          <Pagination meta={data.meta} onPage={setPage} className="mt-4" />
+        </>
+      )}
+
+      <PayoutDrawer payout={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

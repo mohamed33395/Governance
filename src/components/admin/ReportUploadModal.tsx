@@ -10,11 +10,12 @@ import { applyValidationErrors } from '@/lib/form-errors';
 import { REPORT_ACCEPT, REPORT_MAX_MB } from '@/lib/files';
 import { reportUploadSchema, type ReportUploadValues } from '@/schemas/bookings';
 import { useI18n } from '@/lib/i18n/i18n-context';
-import { Alert, Button, FileDrop, Input, Modal, Switch, Textarea, useToast } from '@/components/ui';
+import { Alert, Button, FileDrop, Input, Modal, Textarea, useToast } from '@/components/ui';
 
 // §13.9 — upload a report for a completed booking.
-// POST /admin/bookings/{booking}/report (FormData). 201 = created,
-// 200 = replaced (uploading again replaces the file).
+// POST /admin/bookings/{booking}/report (FormData). Every upload is a new
+// version that enters the review queue (approval_status = pending_review) —
+// the client is only notified after an admin approves it.
 export function ReportUploadModal({
   bookingId,
   hasExistingReport,
@@ -37,10 +38,7 @@ export function ReportUploadModal({
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<ReportUploadValues>({
-    resolver: zodResolver(reportUploadSchema),
-    defaultValues: { notify_client: true },
-  });
+  } = useForm<ReportUploadValues>({ resolver: zodResolver(reportUploadSchema) });
 
   const onSubmit = handleSubmit(async (values) => {
     setFileError(undefined);
@@ -52,10 +50,10 @@ export function ReportUploadModal({
       const fd = new FormData();
       fd.append('title', values.title);
       if (values.summary) fd.append('summary', values.summary);
+      if (values.note) fd.append('note', values.note);
       fd.append('file', file);
-      fd.append('notify_client', values.notify_client ? '1' : '0');
       await api.post(`/admin/bookings/${bookingId}/report`, fd);
-      toast.success(hasExistingReport ? t('reportsAdmin.replaced') : t('reportsAdmin.uploaded'));
+      toast.success(t('reportsAdmin.submitted'));
       queryClient.invalidateQueries({ queryKey: ['admin'] });
       onSaved();
     } catch (e) {
@@ -110,7 +108,13 @@ export function ReportUploadModal({
           />
           {fileError && <p className="text-[0.78rem] text-danger mt-1.5">{fileError}</p>}
         </div>
-        <Switch label={t('reportsAdmin.notifyClient')} {...register('notify_client')} />
+        <Textarea
+          label={t('reportsAdmin.note')}
+          rows={2}
+          maxLength={2000}
+          error={err(errors.note?.message)}
+          {...register('note')}
+        />
       </form>
     </Modal>
   );

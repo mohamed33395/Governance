@@ -11,6 +11,8 @@ const MAPS: Record<string, Record<string, BadgeColor>> = {
   refund: { none: 'gray', requested: 'amber', refunded: 'green' },
   meeting: { none: 'gray', pending: 'amber', created: 'green', failed: 'red' },
   subscription: { active: 'green', expired: 'gray', cancelled: 'red' },
+  payout: { pending: 'amber', released: 'green', failed: 'red' },
+  reportApproval: { pending_review: 'amber', approved: 'green', rejected: 'red', returned: 'blue' },
 };
 
 // Yafa-UI status anatomy: a 6px semantic dot plus plain neutral text — no capsule.
@@ -20,7 +22,7 @@ export function StatusBadge({
   label,
   className = '',
 }: {
-  kind: 'booking' | 'report' | 'payment' | 'bookingPayment' | 'refund' | 'meeting' | 'subscription';
+  kind: 'booking' | 'report' | 'payment' | 'bookingPayment' | 'refund' | 'meeting' | 'subscription' | 'payout' | 'reportApproval';
   value: string;
   label: string;
   className?: string;

@@ -18,6 +18,11 @@ export interface User {
   avatar_url: string | null; avatar_thumb_url: string | null;
   is_active: boolean; last_login_at: string | null;
   consultant_stage?: 'active' | 'training';   // only on consultant records
+  // payout-related financials — only present on consultant records (halalas)
+  consultation_price?: number | null;
+  iban?: string | null;
+  bank_name?: string | null;
+  account_name?: string | null;
   roles: string[];
   permissions?: string[];          // only in /me and /profile
   created_at: string; updated_at: string;
@@ -25,6 +30,7 @@ export interface User {
 }
 
 export interface Consultant extends User {
+  platform_fee_percent?: number | null;   // per-consultant override; null = global setting
   stats?: { pending_bookings: number; completed_bookings: number; pending_reports: number; reports: number; clients: number };
   working_days?: number[];         // 0 = Sunday … 6 = Saturday
 }
@@ -51,6 +57,9 @@ export interface Trainee {
 export interface PublicConsultant {
   id: ID; name: string; title: string | null; specialization: string | null; bio: string | null;
   avatar_url: string | null; avatar_thumb_url: string | null; working_days: number[];
+  consultation_price?: number | null;             // halalas; null = no price → no direct booking
+  consultation_price_formatted?: string | null;
+  currency?: string;
 }
 
 export interface AvailabilityDay {
@@ -177,7 +186,7 @@ export interface BookingCalendarItem {
 }
 
 export interface Quote {
-  package: Package;
+  package: Package | null;        // null for direct consultant bookings
   requires_payment: boolean;
   amount: number; amount_formatted: string; currency: string;
   subscription: Subscription | null;
@@ -185,15 +194,68 @@ export interface Quote {
 }
 
 // ---------- reports ----------
+export type ReportApprovalStatus = 'pending_review' | 'approved' | 'rejected' | 'returned';
+
 export interface Report {
   id: ID; title: string; summary: string | null;
-  booking: { id: ID; reference: string; date: string; time: string };
-  consultant: { id: ID; name: string };
-  client: { id: ID; name: string; company_name: string };
-  file: { name: string; size: number; size_human: string; mime_type: string };
+  approval_status: ReportApprovalStatus;   // only 'approved' reports are visible to the client
+  review_note: string | null;              // note of the latest review decision
+  reviewed_by: { id: ID; name: string } | null;
+  reviewed_at: string | null;
+  booking: { id: ID; reference: string; date: string; time: string } | null;
+  consultant: { id: ID; name: string } | null;
+  client: { id: ID; name: string; company_name: string } | null;
+  file: { name: string; size: number; size_human: string; mime_type: string } | null;   // current version
   download_url: string;             // guard-specific — prefer the blob helper (§14.2)
   client_notified_at: string | null; first_downloaded_at: string | null;
   created_at: string; updated_at: string;
+}
+
+// one entry in GET /admin/reports/{id}/history (submission or decision)
+export interface ReportReviewEntry {
+  id: ID;
+  status: ReportApprovalStatus;     // 'pending_review' = a submission, others = decisions
+  note: string | null;
+  actor: { id: ID; name: string } | null;
+  file: { name: string; size: number; size_human: string; mime_type: string } | null;
+  download_url: string | null;      // /admin/report-reviews/{id}/download — null without a file
+  created_at: string;
+}
+
+// ---------- payouts (PO-01..03) ----------
+export type PayoutStatus = 'pending' | 'released' | 'failed';
+
+export interface Payout {
+  id: ID;
+  booking_id: ID; booking_reference: string | null;
+  consultant?: { id: ID; name: string; iban: string | null; bank_name: string | null; account_name: string | null } | null;
+  amount: number; amount_formatted: string;             // gross consultation price (snapshot)
+  fee_percent: number;                                   // snapshot of the applied fee %
+  fee_amount: number; fee_amount_formatted: string;      // platform share
+  net_amount: number; net_amount_formatted: string;      // payable to the consultant
+  currency: string;
+  status: PayoutStatus;
+  driver: string | null;
+  transfer_reference: string | null;
+  release_note: string | null;
+  released_by?: { id: ID; name: string } | null;
+  released_at: string | null;
+  created_at: string;
+}
+
+export interface AdminPayoutsStats {
+  by_status: {
+    status: string; count: number;
+    net_amount: number; net_amount_formatted: string;
+    fee_amount: number; fee_amount_formatted: string;
+  }[];
+  auto_transfer: boolean;               // mirrors the payout_auto_transfer setting
+}
+
+// ---------- platform settings (SET-01/02) ----------
+export interface PlatformSettings {
+  platform_fee_percent: number;
+  payout_auto_transfer: boolean;
 }
 
 // ---------- roles / permissions ----------
@@ -443,6 +505,8 @@ export interface ActivityLogsMeta {
 export interface PublicMeta {
   booking_statuses: { value: string; label: string }[];
   report_statuses: { value: string; label: string }[];
+  report_approval_statuses: { value: string; label: string }[];
+  payout_statuses: { value: string; label: string }[];
   payment_statuses: { value: string; label: string }[];
   days_of_week: { value: number; name: string }[];   // name is localized via Accept-Language
   booking: { slot_minutes: number; duration_minutes: number; max_advance_days: number; min_notice_minutes: number; client_cancel_hours: number };

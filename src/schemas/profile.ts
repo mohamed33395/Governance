@@ -14,8 +14,14 @@ export const adminProfileSchema = clientProfileSchema.omit({ company_name: true 
   title: z.string().max(150).optional().or(z.literal('')),
   specialization: z.string().max(150).optional().or(z.literal('')),
   bio: z.string().max(2000).optional().or(z.literal('')),
+  // consultant payout financials (price entered in SAR, sent as halalas;
+  // union order matters — '' must match before coerce turns it into 0)
+  consultation_price_sar: z.union([z.literal(''), z.coerce.number().min(0, 'invalidNumber')]).optional(),
+  iban: z.string().max(34).optional().or(z.literal('')),
+  bank_name: z.string().max(150).optional().or(z.literal('')),
+  account_name: z.string().max(150).optional().or(z.literal('')),
 });
-export type AdminProfileValues = z.infer<typeof adminProfileSchema>;
+export type AdminProfileValues = z.input<typeof adminProfileSchema>;
 
 export const changePasswordSchema = z
   .object({

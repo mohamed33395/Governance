@@ -9,9 +9,11 @@ import {
   History,
   KeyRound,
   LayoutDashboard,
+  Settings,
   ShieldCheck,
   Star,
   UserPlus,
+  Wallet,
   UserRound,
   Users,
   UsersRound,
@@ -69,6 +71,7 @@ export const ROUTES: RouteIdentity[] = [
   { key: 'nav.bookings', href: '/admin/bookings', icon: CalendarDays, family: 'gold', perm: 'view-bookings' },
   { key: 'nav.reports', href: '/admin/reports', icon: FileText, family: 'sage', perm: 'view-reports' },
   { key: 'nav.payments', href: '/admin/payments', icon: CreditCard, family: 'moss', perm: 'view-payments' },
+  { key: 'nav.payouts', href: '/admin/payouts', icon: Wallet, family: 'gold', perm: 'view-payouts' },
   { key: 'nav.clients', href: '/admin/clients', icon: Users, family: 'bronze', perm: 'view-clients' },
   { key: 'nav.consultants', href: '/admin/consultants', icon: UserRound, family: 'pine', perm: 'view-consultants' },
   { key: 'nav.training', href: '/admin/training', icon: GraduationCap, family: 'gold', perm: 'view-training' },
@@ -88,6 +91,7 @@ export const ROUTES: RouteIdentity[] = [
   { key: 'nav.users', href: '/admin/users', icon: ShieldCheck, family: 'gold', perm: 'view-users' },
   { key: 'nav.roles', href: '/admin/roles', icon: KeyRound, family: 'sage', perm: 'view-roles' },
   { key: 'nav.activity_logs', href: '/admin/activity-logs', icon: History, family: 'sage', perm: 'view-activity-logs' },
+  { key: 'nav.settings', href: '/admin/settings', icon: Settings, family: 'sage', perm: 'view-settings' },
 ];
 
 export interface NavGroup {
@@ -102,12 +106,12 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     key: 'navGroup.operations',
     family: 'gold',
-    hrefs: ['/admin/bookings', '/admin/my-availability', '/admin/reports', '/admin/payments'],
+    hrefs: ['/admin/bookings', '/admin/my-availability', '/admin/reports', '/admin/payments', '/admin/payouts'],
   },
   { key: 'navGroup.people', family: 'bronze', hrefs: ['/admin/clients', '/admin/consultants', '/admin/training', '/admin/team'] },
   { key: 'navGroup.catalog', family: 'sand', hrefs: ['/admin/packages'] },
   { key: 'navGroup.support', family: 'bronze', hrefs: ['/admin/support-tickets', '/admin/join-requests', '/admin/reviews'] },
-  { key: 'navGroup.access', family: 'sage', hrefs: ['/admin/users', '/admin/roles', '/admin/activity-logs'] },
+  { key: 'navGroup.access', family: 'sage', hrefs: ['/admin/users', '/admin/roles', '/admin/activity-logs', '/admin/settings'] },
 ];
 
 // Longest-prefix match so /admin/clients/5 resolves to the clients route.

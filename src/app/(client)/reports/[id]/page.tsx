@@ -29,6 +29,7 @@ export default function ClientReportDetailsPage() {
   if (query.isError || !report) return <ErrorState onRetry={() => query.refetch()} />;
 
   const download = async () => {
+    if (!report.file) return;
     await downloadFile(`/client/reports/${report.id}/download`, report.file.name);
     queryClient.invalidateQueries({ queryKey: ['client', 'reports'] });
     queryClient.invalidateQueries({ queryKey: ['client', 'dashboard'] });
@@ -47,8 +48,8 @@ export default function ClientReportDetailsPage() {
         title={report.title}
         subtitle={
           <>
-            {t('reports.booking')}: <span dir="ltr">{report.booking.reference}</span> · {report.booking.date} ·{' '}
-            {t('reports.consultant')}: {report.consultant.name}
+            {t('reports.booking')}: <span dir="ltr">{report.booking?.reference ?? '—'}</span> ·{' '}
+            {report.booking?.date ?? '—'} · {t('reports.consultant')}: {report.consultant?.name ?? '—'}
           </>
         }
       />
@@ -75,10 +76,10 @@ export default function ClientReportDetailsPage() {
             </span>
             <div>
               <strong className="block text-[0.92rem]" dir="ltr">
-                {report.file.name}
+                {report.file?.name ?? '—'}
               </strong>
               <span className="text-muted text-[0.82rem]" dir="ltr">
-                {report.file.size_human}
+                {report.file?.size_human ?? '—'}
               </span>
             </div>
           </div>

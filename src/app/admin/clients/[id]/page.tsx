@@ -281,9 +281,13 @@ function ClientReportsTab({ clientId }: { clientId: number }) {
       <Table
         columns={[
           { key: 'title', header: t('reports.details'), render: (r) => <strong>{r.title}</strong> },
-          { key: 'consultant', header: t('reports.consultant'), render: (r) => r.consultant.name },
-          { key: 'date', header: t('common.date'), render: (r) => r.booking.date },
-          { key: 'size', header: t('reports.file'), render: (r) => <span dir="ltr">{r.file.size_human}</span> },
+          { key: 'consultant', header: t('reports.consultant'), render: (r) => r.consultant?.name ?? '—' },
+          { key: 'date', header: t('common.date'), render: (r) => r.booking?.date ?? '—' },
+          {
+            key: 'size',
+            header: t('reports.file'),
+            render: (r) => (r.file ? <span dir="ltr">{r.file.size_human}</span> : '—'),
+          },
           {
             key: 'actions',
             header: t('common.actions'),
@@ -291,12 +295,12 @@ function ClientReportsTab({ clientId }: { clientId: number }) {
               <ActionsMenu
                 ariaLabel={t('common.actions')}
                 items={[
-                  ...(can('download-reports')
+                  ...(can('download-reports') && r.file
                     ? [
                         {
                           key: 'download',
                           label: t('common.download'),
-                          onClick: () => downloadFile(`/admin/reports/${r.id}/download`, r.file.name),
+                          onClick: () => downloadFile(`/admin/reports/${r.id}/download`, r.file!.name),
                         },
                       ]
                     : []),

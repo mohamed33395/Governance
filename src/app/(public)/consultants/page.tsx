@@ -1,16 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePublicMeta } from '@/lib/meta';
-import { Avatar, EmptyState, ErrorState, SearchInput } from '@/components/ui';
+import { EmptyState, ErrorState, SearchInput } from '@/components/ui';
 import { Container, PageHero } from '@/components/public/Section';
 import { HorizontalCarousel } from '@/components/public/HorizontalCarousel';
-import { PersonCard } from '@/components/public/PersonCard';
-import { FIELD, FOCUS } from '@/components/public/tokens';
+import { ConsultantCard } from '@/components/public/ConsultantCard';
+import { FIELD } from '@/components/public/tokens';
 import type { Paginated, PublicConsultant } from '@/types/api';
 
 // §10.2 — public consultant list (PUB-03). No email/phone is returned.
@@ -63,25 +62,20 @@ export default function ConsultantsPage() {
             <HorizontalCarousel>
               {result.data.map((c) => (
                 <li key={c.id} className="w-[88%] shrink-0 snap-start sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)]">
-                  <Link href={`/consultants/${c.id}`} className={`block h-full rounded-2xl ${FOCUS}`}>
-                    <PersonCard
-                      avatar={<Avatar src={c.avatar_thumb_url ?? c.avatar_url} name={c.name} size="lg" />}
-                      name={c.name}
-                      role={c.title}
-                      field={c.specialization}
-                      footer={
-                        c.working_days.length > 0 ? (
-                          <span className="mt-4 flex flex-wrap justify-center gap-1">
-                            {c.working_days.map((d) => (
-                              <span key={d} className="ui-badge" data-color="green">
-                                {dayName(d)}
-                              </span>
-                            ))}
-                          </span>
-                        ) : null
-                      }
-                    />
-                  </Link>
+                  <ConsultantCard
+                    consultant={c}
+                    footer={
+                      c.working_days.length > 0 ? (
+                        <span className="mt-4 flex flex-wrap justify-center gap-1">
+                          {c.working_days.map((d) => (
+                            <span key={d} className="ui-badge" data-color="green">
+                              {dayName(d)}
+                            </span>
+                          ))}
+                        </span>
+                      ) : null
+                    }
+                  />
                 </li>
               ))}
             </HorizontalCarousel>

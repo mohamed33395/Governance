@@ -7,12 +7,13 @@ import { isApiError } from '@/lib/errors';
 import { downloadFile } from '@/lib/files';
 import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
+import { usePublicMeta } from '@/lib/meta';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import { FilterPanel } from '@/components/admin/FilterPanel';
+import { ReportDrawer } from '@/components/admin/ReportDrawer';
 import {
   ActionsMenu,
   Badge,
-  Button,
   ConfirmDialog,
   EmptyState,
   ErrorState,
@@ -22,7 +23,9 @@ import {
   Pagination,
   SearchInput,
   Select,
+  StatusBadge,
   Table,
+  Tabs,
   useToast,
 } from '@/components/ui';
 import { ChartCard, BarChart, RankingList } from '@/components/admin/charts';
@@ -44,24 +47,33 @@ function ReportsInner() {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { can, type } = usePermissions();
+  const meta = usePublicMeta();
 
+  const [tab, setTab] = useState<'all' | 'inbox'>('all');
   const [search, setSearch] = useState('');
   const [consultantId, setConsultantId] = useState('');
   const [clientId, setClientId] = useState('');
+  const [approvalStatus, setApprovalStatus] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
   const [deleting, setDeleting] = useState<Report | null>(null);
+  const [selected, setSelected] = useState<Report | null>(null);
+
+  // RPT-01c — reviewers get a dedicated pending_review inbox; everyone else
+  // uses the main list with the approval_status filter.
+  const canReview = type === 'admin' && can('approve-reports');
 
   const query = useQuery({
-    queryKey: ['admin', 'reports', { search, consultantId, clientId, dateFrom, dateTo, page }],
+    queryKey: ['admin', 'reports', tab, { search, consultantId, clientId, approvalStatus, dateFrom, dateTo, page }],
     queryFn: () =>
       api
-        .get('/admin/reports', {
+        .get(tab === 'inbox' ? '/admin/reports/inbox' : '/admin/reports', {
           params: {
             search: search || undefined,
             consultant_id: consultantId || undefined,
             client_id: clientId || undefined,
+            approval_status: tab === 'all' ? approvalStatus || undefined : undefined,
             date_from: dateFrom || undefined,
             date_to: dateTo || undefined,
             sort: '-created_at',
@@ -115,9 +127,27 @@ function ReportsInner() {
 
   const resetPage = () => setPage(1);
 
+  const approvalLabel = (value: string) =>
+    meta.data?.report_approval_statuses.find((s) => s.value === value)?.label ?? t(`reportApprovalStatus.${value}`);
+
   return (
     <>
       <PageHeader title={t('nav.reports')} />
+
+      {canReview && (
+        <Tabs
+          tabs={[
+            { key: 'all', label: t('reportReview.all') },
+            { key: 'inbox', label: t('reportReview.inbox') },
+          ]}
+          active={tab}
+          onChange={(k) => {
+            setTab(k as 'all' | 'inbox');
+            resetPage();
+          }}
+          className="mb-5"
+        />
+      )}
 
       {can('view-reports') && statsQuery.data && (
         <>
@@ -188,6 +218,18 @@ function ReportsInner() {
             />
           </>
         )}
+        {tab === 'all' && (
+          <Select
+            options={(meta.data?.report_approval_statuses ?? []).map((s) => ({ value: s.value, label: s.label }))}
+            placeholder={t('reportApprovalStatus.pending_review')}
+            value={approvalStatus}
+            onChange={(e) => {
+              setApprovalStatus(e.target.value);
+              resetPage();
+            }}
+            style={{ maxWidth: 170 }}
+          />
+        )}
         <Input
           type="date"
           value={dateFrom}
@@ -215,7 +257,7 @@ function ReportsInner() {
       ) : query.isError || !data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : data.data.length === 0 ? (
-        <EmptyState title={t('reports.empty')} />
+        <EmptyState title={tab === 'inbox' ? t('reportReview.inboxEmpty') : t('reports.empty')} />
       ) : (
         <>
           <Table
@@ -224,15 +266,29 @@ function ReportsInner() {
               {
                 key: 'booking',
                 header: t('reports.booking'),
+                render: (r) =>
+                  r.booking ? (
+                    <span>
+                      <span dir="ltr">{r.booking.reference}</span> · {r.booking.date}
+                    </span>
+                  ) : (
+                    '—'
+                  ),
+              },
+              { key: 'consultant', header: t('bookings.consultant'), render: (r) => r.consultant?.name ?? '—' },
+              { key: 'client', header: t('nav.clients'), render: (r) => r.client?.company_name ?? '—' },
+              {
+                key: 'approval',
+                header: t('common.status'),
                 render: (r) => (
-                  <span>
-                    <span dir="ltr">{r.booking.reference}</span> · {r.booking.date}
-                  </span>
+                  <StatusBadge kind="reportApproval" value={r.approval_status} label={approvalLabel(r.approval_status)} />
                 ),
               },
-              { key: 'consultant', header: t('bookings.consultant'), render: (r) => r.consultant.name },
-              { key: 'client', header: t('nav.clients'), render: (r) => r.client.company_name },
-              { key: 'size', header: t('reports.file'), render: (r) => <span dir="ltr">{r.file.size_human}</span> },
+              {
+                key: 'size',
+                header: t('reports.file'),
+                render: (r) => (r.file ? <span dir="ltr">{r.file.size_human}</span> : '—'),
+              },
               {
                 key: 'read',
                 header: t('reportsAdmin.clientRead'),
@@ -250,21 +306,27 @@ function ReportsInner() {
                   <ActionsMenu
                     ariaLabel={t('common.actions')}
                     items={[
-                      ...(can('download-reports')
+                      {
+                        key: 'view',
+                        label: t('common.view'),
+                        onClick: () => setSelected(r),
+                      },
+                      ...(can('download-reports') && r.file
                         ? [
                             {
                               key: 'download',
                               label: t('common.download'),
-                              onClick: () => downloadFile(`/admin/reports/${r.id}/download`, r.file.name),
+                              onClick: () => downloadFile(`/admin/reports/${r.id}/download`, r.file!.name),
                             },
                           ]
                         : []),
+                      // RPT-06 → 422 REPORT_REVIEW_NOT_ALLOWED unless approved
                       ...(can('upload-reports')
                         ? [
                             {
                               key: 'resend',
                               label: t('reportsAdmin.resend'),
-                              disabled: resend.isPending,
+                              disabled: resend.isPending || r.approval_status !== 'approved',
                               onClick: () => resend.mutate(r.id),
                             },
                           ]
@@ -286,10 +348,13 @@ function ReportsInner() {
             ]}
             rows={data.data}
             rowKey={(r) => r.id}
+            onRowClick={(r) => setSelected(r)}
           />
           <Pagination meta={data.meta} onPage={setPage} className="mt-6" />
         </>
       )}
+
+      <ReportDrawer report={selected} onClose={() => setSelected(null)} />
 
       <ConfirmDialog
         open={!!deleting}

@@ -55,8 +55,18 @@ export default function ConsultantProfilePage() {
                 ))}
               </ul>
             )}
+            {c.consultation_price != null && c.consultation_price_formatted && (
+              <p className="mt-6 text-xl font-bold text-accent" dir="ltr">
+                {c.consultation_price_formatted}
+              </p>
+            )}
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/packages" className="btn btn-primary">
+              {c.consultation_price != null && (
+                <Link href={`/book/consultant/${c.id}`} className="btn btn-primary">
+                  {t('bookNow')}
+                </Link>
+              )}
+              <Link href="/packages" className={`btn ${c.consultation_price != null ? 'btn-outline' : 'btn-primary'}`}>
                 {t('bookConsultation')}
               </Link>
               <Link href="/consultants" className="btn btn-outline">

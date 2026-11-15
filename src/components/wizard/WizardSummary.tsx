@@ -30,7 +30,12 @@ export function WizardSummary({ className = '' }: { className?: string }) {
             <dt className="text-muted">{t('wizard.stepConsultant')}</dt>
             <dd className="flex items-center gap-2.5">
               <Avatar src={consultant.avatar_thumb_url} name={consultant.name} size="sm" />
-              <strong className="text-text">{consultant.name}</strong>
+              <span>
+                <strong className="block text-text">{consultant.name}</strong>
+                {!pkg && consultant.consultation_price_formatted && (
+                  <PriceTag formatted={consultant.consultation_price_formatted} className="text-[0.85rem] text-accent" />
+                )}
+              </span>
             </dd>
           </div>
         )}

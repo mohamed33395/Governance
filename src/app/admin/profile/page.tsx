@@ -73,12 +73,25 @@ function ProfileForm() {
       title: user?.title ?? '',
       specialization: user?.specialization ?? '',
       bio: user?.bio ?? '',
+      // API returns halalas — the form edits SAR
+      consultation_price_sar: user?.consultation_price != null ? user.consultation_price / 100 : '',
+      iban: user?.iban ?? '',
+      bank_name: user?.bank_name ?? '',
+      account_name: user?.account_name ?? '',
     },
   });
 
   const onSubmit = handleSubmit(async (values) => {
     try {
-      const { data } = await api.put('/admin/profile', values);
+      const { consultation_price_sar, ...rest } = values;
+      const { data } = await api.put('/admin/profile', {
+        ...rest,
+        // halalas on the wire; '' clears the price (no payout without it)
+        consultation_price:
+          consultation_price_sar === '' || consultation_price_sar == null
+            ? null
+            : Math.round(Number(consultation_price_sar) * 100),
+      });
       setUser(data.data as User);
       toast.success(t('profile.saved'));
     } catch (e) {
@@ -105,6 +118,32 @@ function ProfileForm() {
               {...register('specialization')}
             />
             <Textarea label={t('consultants.bio')} rows={4} error={err(errors.bio?.message)} {...register('bio')} />
+
+            {/* payout financials — self-service (platform_fee_percent is admin-only) */}
+            <h4 className="text-[0.92rem] pt-2 border-t border-border">{t('consultants.financial')}</h4>
+            <Input
+              label={t('consultants.price')}
+              hint={t('consultants.priceHint')}
+              type="number"
+              dir="ltr"
+              min={0}
+              step="0.01"
+              error={err(errors.consultation_price_sar?.message)}
+              {...register('consultation_price_sar')}
+            />
+            <Input
+              label={t('consultants.accountName')}
+              error={err(errors.account_name?.message)}
+              {...register('account_name')}
+            />
+            <Input label={t('consultants.bankName')} error={err(errors.bank_name?.message)} {...register('bank_name')} />
+            <Input
+              label={t('consultants.iban')}
+              dir="ltr"
+              maxLength={34}
+              error={err(errors.iban?.message)}
+              {...register('iban')}
+            />
           </>
         )}
         <Button type="submit" loading={isSubmitting} className="self-start">
