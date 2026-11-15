@@ -249,15 +249,8 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* TEAM — admin-managed members; grid hides itself when empty */}
-      <section id="team" className="py-24">
-        <Container>
-          <Reveal>
-            <SectionHead title={t("lp.teamTitle")} lead={t("lp.teamDesc")} />
-          </Reveal>
-          <TeamSection />
-        </Container>
-      </section>
+      {/* TEAM — admin-managed members; section hides itself when empty */}
+      <TeamSection />
 
       {/* TESTIMONIALS */}
       <section id="testimonials" className="py-24">

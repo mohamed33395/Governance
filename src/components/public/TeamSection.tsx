@@ -5,6 +5,8 @@ import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/i18n-context";
+import { Reveal } from "./Reveal";
+import { Container, SectionHead } from "./Section";
 import { FLUID, FOCUS } from "./tokens";
 import type { TeamMember } from "@/types/api";
 
@@ -87,64 +89,71 @@ export function TeamSection() {
   const step = (delta: 1 | -1) => setActive((a) => (a + delta + count) % count);
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
-    >
-      <div className="relative">
-        {/* Invisible sizer — keeps the deck height equal to the active card */}
-        <div aria-hidden="true" className="invisible mx-auto w-[86%] sm:w-[64%] lg:w-[56%]">
-          {card(members[active % count])}
-        </div>
-        <ul className="absolute inset-0">
-          {members.map((m, i) => {
-            let d = i - active;
-            if (d > count / 2) d -= count;
-            if (d < -count / 2) d += count;
-            const off = Math.abs(d);
-            const hidden = off > 1;
-            return (
-              <li
-                key={m.id}
-                aria-hidden={hidden ? true : undefined}
-                onClick={off > 0 && !hidden ? () => setActive(i) : undefined}
-                className={`absolute top-0 left-1/2 h-full w-[86%] transition-all duration-700 ease-out sm:w-[64%] lg:w-[56%] ${off > 0 && !hidden ? "cursor-pointer" : ""}`}
-                style={{
-                  transform: `translateX(calc(-50% + ${d * sign * 42}%)) scale(${off === 0 ? 1 : 0.85})`,
-                  zIndex: hidden ? 0 : 30 - off * 5,
-                  opacity: hidden ? 0 : off === 0 ? 1 : 0.9,
-                  pointerEvents: hidden ? "none" : "auto",
-                }}
+    <section id="team" className="py-24">
+      <Container>
+        <Reveal>
+          <SectionHead title={t("lp.teamTitle")} lead={t("lp.teamDesc")} />
+        </Reveal>
+        <div
+          className="relative"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocusCapture={() => setPaused(true)}
+          onBlurCapture={() => setPaused(false)}
+        >
+          <div className="relative">
+            {/* Invisible sizer — keeps the deck height equal to the active card */}
+            <div aria-hidden="true" className="invisible mx-auto w-[86%] sm:w-[64%] lg:w-[56%]">
+              {card(members[active % count])}
+            </div>
+            <ul className="absolute inset-0">
+              {members.map((m, i) => {
+                let d = i - active;
+                if (d > count / 2) d -= count;
+                if (d < -count / 2) d += count;
+                const off = Math.abs(d);
+                const hidden = off > 1;
+                return (
+                  <li
+                    key={m.id}
+                    aria-hidden={hidden ? true : undefined}
+                    onClick={off > 0 && !hidden ? () => setActive(i) : undefined}
+                    className={`absolute top-0 left-1/2 h-full w-[86%] transition-all duration-700 ease-out sm:w-[64%] lg:w-[56%] ${off > 0 && !hidden ? "cursor-pointer" : ""}`}
+                    style={{
+                      transform: `translateX(calc(-50% + ${d * sign * 42}%)) scale(${off === 0 ? 1 : 0.85})`,
+                      zIndex: hidden ? 0 : 30 - off * 5,
+                      opacity: hidden ? 0 : off === 0 ? 1 : 0.9,
+                      pointerEvents: hidden ? "none" : "auto",
+                    }}
+                  >
+                    {card(m)}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          {count > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => step(-1)}
+                aria-label={t("common.prev")}
+                className={`absolute top-1/2 left-2 z-40 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface text-text shadow-lg hover:border-accent hover:text-primary md:-left-14 ${FOCUS}`}
               >
-                {card(m)}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      {count > 1 && (
-        <>
-          <button
-            type="button"
-            onClick={() => step(-1)}
-            aria-label={t("common.prev")}
-            className={`absolute top-1/2 left-2 z-40 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface text-text shadow-lg hover:border-accent hover:text-primary md:-left-14 ${FOCUS}`}
-          >
-            <CaretLeft size={22} weight="bold" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={() => step(1)}
-            aria-label={t("common.next")}
-            className={`absolute top-1/2 right-2 z-40 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface text-text shadow-lg hover:border-accent hover:text-primary md:-right-14 ${FOCUS}`}
-          >
-            <CaretRight size={22} weight="bold" aria-hidden="true" />
-          </button>
-        </>
-      )}
-    </div>
+                <CaretLeft size={22} weight="bold" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => step(1)}
+                aria-label={t("common.next")}
+                className={`absolute top-1/2 right-2 z-40 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface text-text shadow-lg hover:border-accent hover:text-primary md:-right-14 ${FOCUS}`}
+              >
+                <CaretRight size={22} weight="bold" aria-hidden="true" />
+              </button>
+            </>
+          )}
+        </div>
+      </Container>
+    </section>
   );
 }
