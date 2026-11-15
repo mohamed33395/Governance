@@ -224,19 +224,8 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* CONSULTANTS — book a consultant directly */}
-      <section id="consultants" className="py-24">
-        <Container>
-          <Reveal>
-            <SectionHead
-              eyebrow={t("consultants.eyebrow")}
-              title={t("lp.consultantsTitle")}
-              lead={t("lp.consultantsDesc")}
-            />
-          </Reveal>
-          <ConsultantsSection />
-        </Container>
-      </section>
+      {/* CONSULTANTS — book a consultant directly; hides entirely when empty */}
+      <ConsultantsSection />
 
       {/* EXPERT */}
       <section id="expert" className="border-y border-border bg-surface py-24">
