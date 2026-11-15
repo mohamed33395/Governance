@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowLeft } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/i18n-context";
 import { ConsultantCard } from "./ConsultantCard";
+import { HorizontalCarousel } from "./HorizontalCarousel";
 import type { Paginated, PublicConsultant } from "@/types/api";
 
 // Home page — all consultants with price and a direct "Book now" button.
@@ -23,16 +25,25 @@ export function ConsultantsSection() {
 
   return (
     <>
-      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <HorizontalCarousel autoAdvanceMs={6000}>
         {consultants.map((c) => (
-          <li key={c.id}>
+          <li key={c.id} className="w-[88%] shrink-0 snap-start sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)]">
             <ConsultantCard consultant={c} />
           </li>
         ))}
-      </ul>
-      <div className="mt-10 text-center">
-        <Link href="/consultants" className="btn btn-outline">
+      </HorizontalCarousel>
+      <div className="mt-8 text-center">
+        <Link
+          href="/consultants"
+          className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-accent dark:text-accent-soft"
+        >
           {t("lp.consultantsAll")}
+          <ArrowLeft
+            size={16}
+            weight="bold"
+            aria-hidden="true"
+            className="transition-transform duration-300 group-hover:-translate-x-1 ltr:rotate-180"
+          />
         </Link>
       </div>
     </>
