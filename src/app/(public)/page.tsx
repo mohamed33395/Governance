@@ -16,7 +16,6 @@ import { Reveal } from "@/components/public/Reveal";
 import { TaglineReveal } from "@/components/public/TaglineReveal";
 import { Container, SectionHead } from "@/components/public/Section";
 import { ServicesTabs } from "@/components/public/ServicesTabs";
-import { PackageGrid } from "@/components/public/PackageGrid";
 import { ExpertCard } from "@/components/public/ExpertCard";
 import { Testimonials } from "@/components/public/Testimonials";
 import { TeamSection } from "@/components/public/TeamSection";
@@ -221,18 +220,6 @@ export default function HomePage() {
           </Reveal>
           <Reveal>
             <ServicesTabs />
-          </Reveal>
-        </Container>
-      </section>
-
-      {/* PACKAGES */}
-      <section id="packages" className="py-24">
-        <Container>
-          <Reveal>
-            <SectionHead eyebrow={t("packagesEyebrow")} title={t("packagesTitle")} lead={t("packagesDesc")} />
-          </Reveal>
-          <Reveal>
-            <PackageGrid withDetails />
           </Reveal>
         </Container>
       </section>

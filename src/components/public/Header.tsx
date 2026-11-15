@@ -17,7 +17,6 @@ import type { ClientMe } from "@/types/api";
 const LINKS = [
   { href: "/", key: "home" },
   { href: "/services", key: "services" },
-  { href: "/packages", key: "packages" },
   { href: "/consultants", key: "nav.consultants" },
   { href: "/about", key: "about" },
   { href: "/join", key: "join" },
