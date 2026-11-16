@@ -202,7 +202,7 @@ export function Header() {
               {t("appDownload")}
             </Link>
 
-            <Link href="/packages" className="btn btn-primary hidden sm:inline-flex">
+            <Link href="/consultants" className="btn btn-primary hidden sm:inline-flex">
               {t("bookConsultation")}
               <ArrowLeft size={16} weight="bold" aria-hidden="true" className="ltr:rotate-180" />
             </Link>
@@ -279,7 +279,7 @@ export function Header() {
             <DeviceMobile size={20} weight="bold" aria-hidden="true" />
             {t("appDownload")}
           </Link>
-          <Link href="/packages" tabIndex={open ? 0 : -1} className="btn btn-primary">
+          <Link href="/consultants" tabIndex={open ? 0 : -1} className="btn btn-primary">
             {t("bookConsultation")}
           </Link>
           {clientToken ? (

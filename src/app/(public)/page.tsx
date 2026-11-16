@@ -86,7 +86,7 @@ export default function HomePage() {
             </Reveal>
             <Reveal delay={300}>
               <div className="mt-8 flex flex-wrap items-center gap-4">
-                <Link href="/packages" className="btn btn-primary">
+                <Link href="/consultants" className="btn btn-primary">
                   {t("lp.heroCta")}
                   <ArrowLeft size={18} weight="bold" aria-hidden="true" className="ltr:rotate-180" />
                 </Link>
@@ -313,7 +313,7 @@ export default function HomePage() {
             <div className="flex flex-col items-center rounded-3xl border border-white/15 bg-secondary p-12 text-center text-white">
               <h2 className="max-w-[680px] text-3xl font-bold text-white text-balance md:text-4xl">{t("lp.finalTitle")}</h2>
               <p className="mt-4 max-w-[680px] text-lg text-white/70 text-pretty">{t("lp.finalBody")}</p>
-              <Link href="/packages" className="btn btn-gold mt-8">
+              <Link href="/consultants" className="btn btn-gold mt-8">
                 {t("lp.heroCta")}
                 <ArrowLeft size={18} weight="bold" aria-hidden="true" className="ltr:rotate-180" />
               </Link>

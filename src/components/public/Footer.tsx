@@ -28,7 +28,7 @@ const COMPANY_LINKS = [
   { href: "/services", key: "services" },
   { href: "/join", key: "join" },
   { href: "/contact", key: "contact" },
-  { href: "/packages", key: "bookConsultation" },
+  { href: "/consultants", key: "bookConsultation" },
 ] as const;
 
 const PHONES = [
