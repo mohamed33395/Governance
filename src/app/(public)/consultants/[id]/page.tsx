@@ -42,10 +42,15 @@ export default function ConsultantProfilePage() {
             name={c.name}
             role={c.title}
             sub={c.specialization}
-            bio={c.bio}
             photo={c.avatar_url}
             photoAlt={c.name}
           >
+            {c.bio && (
+              <div className="mt-6 border-t border-border pt-6">
+                <h3 className="text-sm font-bold text-text">{t('consultants.description')}</h3>
+                <p className="mt-2 text-sm text-muted text-pretty">{c.bio}</p>
+              </div>
+            )}
             {c.working_days.length > 0 && (
               <ul className="mt-6 flex flex-wrap gap-2 border-t border-border pt-6">
                 {c.working_days.map((d) => (

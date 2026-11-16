@@ -12,8 +12,8 @@ import type { PublicConsultant } from "@/types/api";
 export function ConsultantCard({ consultant: c, footer }: { consultant: PublicConsultant; footer?: React.ReactNode }) {
   const { t } = useI18n();
   const hasPrice = c.consultation_price != null && !!c.consultation_price_formatted;
-  // priced consultants book directly — the whole card opens the wizard
-  const href = hasPrice ? `/book/consultant/${c.id}` : `/consultants/${c.id}`;
+  // the card opens the consultant profile; the "Book now" button below opens the wizard
+  const href = `/consultants/${c.id}`;
 
   return (
     <div className="flex h-full flex-col gap-3">
