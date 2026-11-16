@@ -71,9 +71,6 @@ export default function ConsultantProfilePage() {
                   {t('bookNow')}
                 </Link>
               )}
-              <Link href="/packages" className={`btn ${c.consultation_price != null ? 'btn-outline' : 'btn-primary'}`}>
-                {t('bookConsultation')}
-              </Link>
               <Link href="/consultants" className="btn btn-outline">
                 {t('common.back')}
               </Link>
