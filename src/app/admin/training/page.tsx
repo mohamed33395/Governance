@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { jsPDF } from 'jspdf';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +17,7 @@ import {
   Avatar,
   Badge,
   Button,
+  CopyButton,
   EmptyState,
   ErrorState,
   Input,
@@ -67,10 +69,10 @@ function TrainingInner() {
   };
 
   const promote = useMutation({
-    mutationFn: (id: number) => api.post(`/admin/training/${id}/promote`),
+    mutationFn: ({ id, password }: { id: number; password: string }) =>
+      api.post(`/admin/training/${id}/promote`, { password }),
     onSuccess: () => {
-      toast.success(t('training.promoted'));
-      setPromoting(null);
+      toast.success(t('training.promoteSuccess'));
       invalidate();
     },
     onError: (e) => isApiError(e) && toast.error(e.message),
@@ -251,24 +253,13 @@ function TrainingInner() {
       {/* Schedule form */}
       {scheduling && <ScheduleModal trainee={scheduling} onClose={() => setScheduling(null)} onSaved={invalidate} />}
 
-      {/* Promote confirm */}
+      {/* Promote with password */}
       {promoting && (
-        <div className="modal-backdrop open">
-          <div className="modal-card" style={{ maxWidth: 460 }}>
-            <h3>{t('training.promote')}</h3>
-            <p className="text-sm text-muted mb-4">
-              {promoting.name} — {t('training.promoteConfirm')}
-            </p>
-            <div className="flex gap-3 mt-6">
-              <Button variant="ghost" onClick={() => setPromoting(null)}>
-                {t('common.cancel')}
-              </Button>
-              <Button variant="gold" onClick={() => promote.mutate(promoting.id)} loading={promote.isPending}>
-                {t('training.promote')}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <PromoteModal
+          trainee={promoting}
+          promote={promote}
+          onClose={() => setPromoting(null)}
+        />
       )}
 
       {/* Delete session confirm */}
@@ -374,6 +365,175 @@ function ScheduleModal({
             </Button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function generateRandomPassword(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  let pwd = '';
+  for (let i = 0; i < 12; i++) pwd += chars[Math.floor(Math.random() * chars.length)];
+  return pwd + '1A';
+}
+
+function downloadCredentialsPDF(name: string, email: string, password: string) {
+  const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();
+
+  // Header bar
+  doc.setFillColor(26, 65, 46);
+  doc.rect(0, 0, pageW, 40, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('GCMC', pageW / 2, 18, { align: 'center' });
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Consultant Account Credentials', pageW / 2, 28, { align: 'center' });
+
+  // Body
+  doc.setTextColor(40, 40, 40);
+  let y = 60;
+  doc.setFontSize(13);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Consultant Account Details', 20, y);
+  y += 12;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.text(`Name: ${name}`, 20, y); y += 8;
+  doc.text(`Email: ${email}`, 20, y); y += 8;
+  doc.text(`Password: ${password}`, 20, y); y += 16;
+
+  doc.setFontSize(10);
+  doc.setTextColor(120, 120, 120);
+  doc.text('Please log in and change your password after first login.', 20, y); y += 8;
+  doc.text('Login URL: ' + (typeof window !== 'undefined' ? window.location.origin + '/login' : '/login'), 20, y);
+
+  // Footer bar
+  const pageH = doc.internal.pageSize.getHeight();
+  doc.setFillColor(193, 155, 74);
+  doc.rect(0, pageH - 12, pageW, 12, 'F');
+
+  doc.save(`GCMC-Credentials-${name.replace(/\s+/g, '-')}.pdf`);
+}
+
+function PromoteModal({
+  trainee,
+  promote,
+  onClose,
+}: {
+  trainee: Trainee;
+  promote: {
+    mutate: (variables: { id: number; password: string }, options?: { onSuccess?: () => void }) => void;
+    isPending: boolean;
+  };
+  onClose: () => void;
+}) {
+  const { t } = useI18n();
+  const [password, setPassword] = useState('');
+  const [done, setDone] = useState(false);
+
+  const handlePromote = () => {
+    if (!password) return;
+    promote.mutate(
+      { id: trainee.id, password },
+      { onSuccess: () => setDone(true) },
+    );
+  };
+
+  const handleDownload = () => {
+    downloadCredentialsPDF(trainee.name, trainee.email, password);
+  };
+
+  return (
+    <div className="modal-backdrop open">
+      <div className="modal-card" style={{ maxWidth: 480 }}>
+        <h3>{t('training.setPassword')} — {trainee.name}</h3>
+
+        {!done ? (
+          <>
+            <p className="text-sm text-muted mt-2 mb-4">{t('training.setPasswordHint')}</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">{t('training.emailLabel')}</label>
+                <div className="flex items-center gap-2">
+                  <code dir="ltr" className="flex-1 text-sm bg-muted/30 px-3 py-2 rounded-lg">{trainee.email}</code>
+                  <CopyButton text={trainee.email} />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">{t('training.passwordLabel')}</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    dir="ltr"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="flex-1 text-sm bg-muted/30 px-3 py-2 rounded-lg border border-border outline-none focus:border-gold"
+                    placeholder="••••••••"
+                  />
+                  <CopyButton text={password} />
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPassword(generateRandomPassword())}
+              >
+                {t('training.generatePassword')}
+              </Button>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button variant="ghost" onClick={onClose}>
+                {t('common.cancel')}
+              </Button>
+              <Button
+                variant="gold"
+                onClick={handlePromote}
+                loading={promote.isPending}
+                disabled={!password}
+              >
+                {t('training.promote')}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-green-700 mt-2 mb-4 font-medium">{t('training.credentialsReady')}</p>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">{t('training.emailLabel')}</label>
+                <div className="flex items-center gap-2">
+                  <code dir="ltr" className="flex-1 text-sm bg-muted/30 px-3 py-2 rounded-lg">{trainee.email}</code>
+                  <CopyButton text={trainee.email} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">{t('training.passwordLabel')}</label>
+                <div className="flex items-center gap-2">
+                  <code dir="ltr" className="flex-1 text-sm bg-muted/30 px-3 py-2 rounded-lg">{password}</code>
+                  <CopyButton text={password} />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button variant="outline" onClick={handleDownload}>
+                {t('training.downloadCredentials')}
+              </Button>
+              <Button variant="ghost" onClick={onClose}>
+                {t('common.close')}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
