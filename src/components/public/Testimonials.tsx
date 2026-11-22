@@ -64,8 +64,6 @@ export function Testimonials() {
   );
 }
 
-const INITIALS = ["م.ر", "ن.ع", "ف.ح"] as const;
-
 function StaticTestimonials() {
   const { t } = useI18n();
   return (
@@ -87,7 +85,7 @@ function StaticTestimonials() {
                   aria-hidden="true"
                   className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-accent-soft"
                 >
-                  {INITIALS[i - 1]}
+                  {t(`testimonial${i}Init`)}
                 </span>
                 <span className="flex flex-col">
                   <strong className="text-base font-bold text-text">{t(`testimonial${i}Name`)}</strong>

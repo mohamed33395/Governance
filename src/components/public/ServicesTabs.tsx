@@ -78,7 +78,7 @@ export function ServicesTabs() {
             tabIndex={0}
             className={`rounded-lg ${FOCUS}`}
           >
-            {g.kicker && <span className="text-sm font-semibold text-primary dark:text-accent-soft">{g.kicker}</span>}
+            {g.kicker && <span className="text-sm font-semibold text-primary dark:text-accent-soft">{tx(g.kicker)}</span>}
             <h3 className="mt-2 text-2xl font-bold text-text text-balance">{tx(g.title)}</h3>
             <ul className="mt-6 flex flex-col gap-4">
               {g.items.map((item, i) => (
