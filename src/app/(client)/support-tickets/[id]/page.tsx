@@ -78,7 +78,7 @@ export default function SupportTicketDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['client', 'support-tickets', ticketId] });
     },
     onError: (e) => {
-      if (isApiError(e) && e.code === 'VALIDATION_ERROR') applyValidationErrors(setError, e);
+      if (isApiError(e) && e.code === 'VALIDATION_ERROR') { applyValidationErrors(setError, e); toast.error(e.message); }
       else if (isApiError(e)) toast.error(e.message);
     },
   });

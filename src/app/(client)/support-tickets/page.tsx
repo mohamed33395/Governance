@@ -191,7 +191,7 @@ function CreateTicketModal({
       onCreated(ticket.id);
     },
     onError: (e) => {
-      if (isApiError(e) && e.code === 'VALIDATION_ERROR') applyValidationErrors(setError, e);
+      if (isApiError(e) && e.code === 'VALIDATION_ERROR') { applyValidationErrors(setError, e); toast.error(e.message); }
       else if (isApiError(e)) toast.error(e.message);
     },
   });
