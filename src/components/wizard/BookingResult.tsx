@@ -85,6 +85,8 @@ export function BookingResult({ kind, bookingId }: { kind: 'success' | 'confirmi
                 </a>
                 <CopyButton text={booking.meeting.url} />
               </span>
+            ) : booking.meeting.status === 'failed' ? (
+              <span className="text-muted text-[0.85rem]">{t('bookings.meetingFailed')}</span>
             ) : (
               <span className="text-muted text-[0.85rem]">{t('wizard.meetingPending')}</span>
             )}

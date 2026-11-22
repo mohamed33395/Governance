@@ -65,6 +65,11 @@ export default function DashboardPage() {
                 {t('dashboard.meetingPending')}
               </span>
             )}
+            {next.meeting.status === 'failed' && (
+              <span style={{ marginInlineStart: 'auto', color: 'var(--danger)', fontSize: '.85rem' }}>
+                {t('bookings.meetingFailed')}
+              </span>
+            )}
           </div>
         ) : (
           <p>
