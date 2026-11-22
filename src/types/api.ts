@@ -436,6 +436,19 @@ export interface TeamMember {
   updated_at: string;
 }
 
+// ---------- certificates ----------
+export interface Certificate {
+  id: ID;
+  name: string;
+  issuer: string | null;
+  image_url: string | null;
+  image_thumb_url: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // ---------- reviews ----------
 export type ReviewStatus = 'pending' | 'approved' | 'rejected';
 
