@@ -30,12 +30,14 @@ api.interceptors.response.use(
       if (url.startsWith('/admin')) {
         useAdminAuth.getState().clear();
         if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin/login')) {
-          window.location.href = '/admin/login';
+          const next = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `/admin/login?next=${next}`;
         }
       } else if (url.startsWith('/client')) {
         useClientAuth.getState().clear();
         if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-          window.location.href = '/login';
+          const next = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `/login?next=${next}`;
         }
       }
     }

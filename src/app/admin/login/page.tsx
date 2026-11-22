@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '@/lib/api';
@@ -16,9 +16,18 @@ import { Alert, Button, Input, useToast } from '@/components/ui';
 import type { User } from '@/types/api';
 
 export default function AdminLoginPage() {
+  return (
+    <Suspense>
+      <AdminLoginForm />
+    </Suspense>
+  );
+}
+
+function AdminLoginForm() {
   const { t } = useI18n();
   const toast = useToast();
   const router = useRouter();
+  const params = useSearchParams();
   const setAuth = useAdminAuth((s) => s.setAuth);
   const [disabled, setDisabled] = useState(false);
 
@@ -34,7 +43,7 @@ export default function AdminLoginPage() {
     try {
       const { data } = await api.post('/admin/auth/login', { ...values, device_name: 'web' });
       setAuth(data.data.token, data.data.user as User);
-      router.replace('/admin');
+      router.replace(params.get('next') ?? '/admin');
     } catch (e) {
       if (!isApiError(e)) return;
       if (e.code === 'INVALID_CREDENTIALS') {
