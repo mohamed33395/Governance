@@ -3,7 +3,7 @@
 
 import { LogoLoader } from '@/components/ui';
 import { useEffect, useState, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useClientAuth } from '@/stores/client-auth';
@@ -13,6 +13,7 @@ import type { ClientMe } from '@/types/api';
 export function RequireClient({ children }: { children: ReactNode }) {
   const { token, setUser } = useClientAuth();
   const router = useRouter();
+  const pathname = usePathname();
   // zustand persist hydrates async — don't trust `token` until storage is read.
   // `.persist` only exists client-side (storage is unavailable during SSR).
   const [hydrated, setHydrated] = useState(false);
@@ -30,8 +31,9 @@ export function RequireClient({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    if (hydrated && !token) router.replace('/login');
-  }, [hydrated, token, router]);
+    // Carry the requested page so /login?next= returns the user to it after sign-in.
+    if (hydrated && !token) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+  }, [hydrated, token, router, pathname]);
 
   // keep the store fresh (default_location, subscriptions…)
   useEffect(() => {
