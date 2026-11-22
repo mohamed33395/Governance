@@ -19,6 +19,7 @@ import { ServicesTabs } from "@/components/public/ServicesTabs";
 import { ExpertCard } from "@/components/public/ExpertCard";
 import { Testimonials } from "@/components/public/Testimonials";
 import { TeamSection } from "@/components/public/TeamSection";
+import { CertificatesSection } from "@/components/public/CertificatesSection";
 import { ConsultantsSection } from "@/components/public/ConsultantsSection";
 import { VisionValues } from "@/components/public/VisionValues";
 import { CountUp } from "@/components/public/CountUp";
@@ -251,6 +252,9 @@ export default function HomePage() {
 
       {/* TEAM — admin-managed members; section hides itself when empty */}
       <TeamSection />
+
+      {/* CERTIFICATES — admin-managed; hides itself when empty */}
+      <CertificatesSection />
 
       {/* TESTIMONIALS */}
       <section id="testimonials" className="py-24">

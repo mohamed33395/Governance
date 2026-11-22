@@ -1,4 +1,5 @@
 import {
+  Award,
   Boxes,
   CalendarClock,
   CalendarDays,
@@ -76,6 +77,7 @@ export const ROUTES: RouteIdentity[] = [
   { key: 'nav.consultants', href: '/admin/consultants', icon: UserRound, family: 'pine', perm: 'view-consultants' },
   { key: 'nav.training', href: '/admin/training', icon: GraduationCap, family: 'gold', perm: 'view-training' },
   { key: 'nav.team', href: '/admin/team', icon: UsersRound, family: 'moss', perm: 'view-team' },
+  { key: 'nav.certificates', href: '/admin/certificates', icon: Award, family: 'clay', perm: 'view-certificates' },
   {
     key: 'nav.my_availability',
     href: '/admin/my-availability',
@@ -109,7 +111,7 @@ export const NAV_GROUPS: NavGroup[] = [
     hrefs: ['/admin/bookings', '/admin/my-availability', '/admin/reports', '/admin/payments', '/admin/payouts'],
   },
   { key: 'navGroup.people', family: 'bronze', hrefs: ['/admin/clients', '/admin/consultants', '/admin/training', '/admin/team'] },
-  { key: 'navGroup.catalog', family: 'sand', hrefs: ['/admin/packages'] },
+  { key: 'navGroup.catalog', family: 'sand', hrefs: ['/admin/packages', '/admin/certificates'] },
   { key: 'navGroup.support', family: 'bronze', hrefs: ['/admin/support-tickets', '/admin/join-requests', '/admin/reviews'] },
   { key: 'navGroup.access', family: 'sage', hrefs: ['/admin/users', '/admin/roles', '/admin/activity-logs', '/admin/settings'] },
 ];
