@@ -103,7 +103,7 @@ function SupportTicketDetailInner() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'support-tickets', ticketId] });
     },
     onError: (e) => {
-      if (isApiError(e) && e.code === 'VALIDATION_ERROR') applyValidationErrors(setError, e);
+      if (isApiError(e) && e.code === 'VALIDATION_ERROR') { applyValidationErrors(setError, e); toast.error(e.message); }
       else if (isApiError(e)) toast.error(e.message);
     },
   });
