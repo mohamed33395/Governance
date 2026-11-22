@@ -12,7 +12,7 @@ export interface ServiceGroup {
   /** short label used in the tab list (falls back to title) */
   label?: Txt;
   featured?: boolean;
-  kicker?: string;
+  kicker?: Txt;
   items: ServiceItem[];
   href: string;
   hrefLabel?: Txt;
@@ -24,23 +24,23 @@ const simple = (prefix: string, count: number): ServiceItem[] =>
 export const SERVICE_GROUPS: ServiceGroup[] = [
   {
     id: "t7",
-    title: "الخدمات الاستشارية لمنصة خبرة",
+    title: { k: "svc.t7.title" },
     featured: true,
-    kicker: "خدمات منصة خبرة",
+    kicker: { k: "svc.t7.kicker" },
     href: "/details#license-1",
-    hrefLabel: "عرض تفاصيل الاعتماد",
+    hrefLabel: { k: "svc.t7.hrefLabel" },
     items: [
       {
-        title: "إعداد تقارير الخبرة القضائية",
-        body: "تقديم دراسات فنية دقيقة حول القضايا والنزاعات الإدارية المحالة من الدوائر القضائية، وصياغة حلول مهنية محايدة.",
+        title: { k: "svc.t7.i1t" },
+        body: { k: "svc.t7.i1b" },
       },
       {
-        title: "تقديم الآراء في النزاعات التعاقدية",
-        body: "فحص وتحليل النزاعات المتعلقة بالعقود الإدارية والهياكل التنظيمية وإجراءات التشغيل داخل المنشآت، ومقارنتها باللوائح والأنظمة المعمول بها.",
+        title: { k: "svc.t7.i2t" },
+        body: { k: "svc.t7.i2b" },
       },
       {
-        title: "تقديم العروض الفنية",
-        body: "تقديم حلول واستشارات فنية من خبراء المنصة بناءً على معايير الطلب المرفوع من الدائرة القضائية.",
+        title: { k: "svc.t7.i3t" },
+        body: { k: "svc.t7.i3b" },
       },
     ],
   },
@@ -54,23 +54,23 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
     items: [
       {
         title: { k: "s4i1" },
-        body: "استقطاب خبرات متخصصة في البرمجيات والأمن السيبراني والذكاء الاصطناعي.",
+        body: { k: "s4i1b" },
       },
       {
         title: { k: "s4i2" },
-        body: "توفير متخصصين في التسويق الإلكتروني وتحليل سلوك المستهلك وإدارة الحملات الرقمية.",
+        body: { k: "s4i2b" },
       },
       {
         title: { k: "s4i3" },
-        body: "استقطاب كفاءات هندسية متخصصة تلائم احتياجات القطاعات التقنية والصناعية.",
+        body: { k: "s4i3b" },
       },
       {
         title: { k: "s4i4" },
-        body: "توفير قيادات ومديري مشاريع وكفاءات إدارية عليا لدعم استراتيجيات المؤسسات.",
+        body: { k: "s4i4b" },
       },
       {
         title: { k: "s4i5" },
-        body: "استقطاب محترفي المبيعات وتطوير الأعمال القادرين على بناء الفرص وتنمية الإيرادات.",
+        body: { k: "s4i5b" },
       },
     ],
   },
@@ -81,23 +81,23 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
     items: [
       {
         title: { k: "s5i1" },
-        body: "اختيار المنهجية المناسبة لبيئة المنشأة وآلية تنفيذ المهام وتخطيط الأنشطة المطلوبة.",
+        body: { k: "s5i1b" },
       },
       {
         title: { k: "s5i2" },
-        body: "تحديد أصحاب المصلحة وأدوارهم ومسؤولياتهم، وبناء آليات تواصل فعّالة معهم.",
+        body: { k: "s5i2b" },
       },
       {
         title: { k: "s5i3" },
-        body: "وضع القواعد المنظمة لاتخاذ القرارات وتغيير المتطلبات واعتمادها.",
+        body: { k: "s5i3b" },
       },
       {
         title: { k: "s5i4" },
-        body: "تحديد كيفية تخزين وتنظيم وحفظ المعلومات والوثائق المرتبطة بالمتطلبات.",
+        body: { k: "s5i4b" },
       },
       {
         title: { k: "s5i5" },
-        body: "وضع معايير واضحة لقياس جودة وفاعلية أعمال تحليل الأعمال وتقييم نتائجها.",
+        body: { k: "s5i5b" },
       },
     ],
   },

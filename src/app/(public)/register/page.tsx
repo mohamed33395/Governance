@@ -45,7 +45,7 @@ function RegisterForm() {
   });
 
   return (
-    <AuthCard title={t('auth.register')} subtitle={t('auth.registerSubtitle')}>
+    <AuthCard title={t('auth.registerTitle')} subtitle={t('auth.registerSubtitle')}>
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         <Input
           label={t('auth.name')}
