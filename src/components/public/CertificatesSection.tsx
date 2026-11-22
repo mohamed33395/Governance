@@ -132,7 +132,7 @@ export function CertificatesSection() {
               {strip.map((c, i) => (
                 <li key={`${c.id}-${i}`} aria-hidden={i >= count} className="w-56 shrink-0 sm:w-64">
                   <article
-                    className={`group flex h-full flex-col overflow-hidden rounded-2xl bg-white text-center ring-1 ring-border ${FLUID} hover:-translate-y-1 hover:shadow-md dark:bg-white/95`}
+                    className={`group relative aspect-[3/4] overflow-hidden rounded-2xl bg-white ring-1 ring-border ${FLUID} hover:-translate-y-1 hover:shadow-md dark:bg-white/95`}
                   >
                     {c.image_url || c.image_thumb_url ? (
                       <a
@@ -140,22 +140,22 @@ export function CertificatesSection() {
                         target="_blank"
                         rel="noreferrer"
                         title={c.name}
-                        className="block overflow-hidden bg-surface"
+                        className="block h-full w-full"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={c.image_thumb_url ?? c.image_url ?? ""}
                           alt={c.name}
                           loading="lazy"
-                          className="aspect-[3/4] w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                         />
                       </a>
                     ) : (
-                      <div className="flex aspect-[3/4] w-full items-center justify-center bg-surface">
+                      <div className="flex h-full w-full items-center justify-center bg-surface">
                         <CertificateIcon size={56} weight="duotone" aria-hidden="true" className="text-accent/70" />
                       </div>
                     )}
-                    <h3 className="mt-auto px-4 pb-5 pt-4 text-sm font-semibold leading-snug text-text text-balance">{c.name}</h3>
+                    <h3 className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-white via-white/85 to-transparent px-4 pb-4 pt-10 text-center text-sm font-semibold leading-snug text-text text-balance">{c.name}</h3>
                   </article>
                 </li>
               ))}
