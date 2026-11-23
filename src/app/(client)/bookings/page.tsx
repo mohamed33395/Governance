@@ -6,7 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { usePublicMeta } from '@/lib/meta';
-import { EmptyState, ErrorState, LogoLoader, PageHeader, StatusBadge, Switch, Table, Tabs } from '@/components/ui';
+import { Button, EmptyState, ErrorState, LogoLoader, PageHeader, StatusBadge, Switch, Table, Tabs } from '@/components/ui';
+import { NewBookingModal } from '@/components/client/NewBookingModal';
 import type { Booking } from '@/types/api';
 
 // §12.2 — my bookings (CLI-BKG-03)
@@ -16,6 +17,7 @@ export default function ClientBookingsPage() {
   const meta = usePublicMeta();
   const [status, setStatus] = useState('');
   const [upcoming, setUpcoming] = useState(false);
+  const [newOpen, setNewOpen] = useState(false);
 
   const query = useQuery({
     queryKey: ['client', 'bookings', { status, upcoming }],
@@ -35,7 +37,15 @@ export default function ClientBookingsPage() {
 
   return (
     <>
-      <PageHeader title={t('bookings.title')} />
+      <PageHeader
+        title={t('bookings.title')}
+        actions={
+          <Button size="sm" onClick={() => setNewOpen(true)}>
+            {t('bookings.new')}
+          </Button>
+        }
+      />
+      <NewBookingModal open={newOpen} onClose={() => setNewOpen(false)} />
 
       <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
         <Tabs tabs={statusTabs} active={status} onChange={setStatus} />
