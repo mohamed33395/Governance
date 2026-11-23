@@ -231,6 +231,9 @@ function notificationBody(n: Notification, t: (key: string) => string) {
       break;
     case 'support_ticket_created':
     case 'support_ticket_message':
+    case 'transfer_requested':
+    case 'transfer_approved':
+    case 'transfer_rejected':
       text = String(d.reference ?? '');
       break;
   }
@@ -272,6 +275,11 @@ function notificationLink(n: Notification, guard: 'admin' | 'client'): string | 
     case 'support_ticket_created':
     case 'support_ticket_message':
       return typeof d.ticket_id === 'number' ? `${base}/support-tickets/${d.ticket_id}` : null;
+    case 'transfer_requested':
+      return guard === 'admin' ? '/admin/transfers' : null;
+    case 'transfer_approved':
+    case 'transfer_rejected':
+      return typeof d.booking_id === 'number' ? `${base}/bookings/${d.booking_id}` : null;
     default:
       return null;
   }

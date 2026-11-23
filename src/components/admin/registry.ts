@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   Award,
   Boxes,
   CalendarClock,
@@ -70,6 +71,7 @@ export interface RouteIdentity {
 export const ROUTES: RouteIdentity[] = [
   { key: 'nav.dashboard', href: '/admin', icon: LayoutDashboard, family: 'pine', perm: 'view-dashboard' },
   { key: 'nav.bookings', href: '/admin/bookings', icon: CalendarDays, family: 'gold', perm: 'view-bookings' },
+  { key: 'nav.transfers', href: '/admin/transfers', icon: ArrowLeftRight, family: 'gold', perm: 'view-booking-transfers' },
   { key: 'nav.reports', href: '/admin/reports', icon: FileText, family: 'sage', perm: 'view-reports' },
   { key: 'nav.payments', href: '/admin/payments', icon: CreditCard, family: 'moss', perm: 'view-payments' },
   { key: 'nav.payouts', href: '/admin/payouts', icon: Wallet, family: 'gold', perm: 'view-payouts' },
@@ -108,7 +110,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     key: 'navGroup.operations',
     family: 'gold',
-    hrefs: ['/admin/bookings', '/admin/my-availability', '/admin/reports', '/admin/payments', '/admin/payouts'],
+    hrefs: ['/admin/bookings', '/admin/transfers', '/admin/my-availability', '/admin/reports', '/admin/payments', '/admin/payouts'],
   },
   { key: 'navGroup.people', family: 'bronze', hrefs: ['/admin/clients', '/admin/consultants', '/admin/training', '/admin/team'] },
   { key: 'navGroup.catalog', family: 'sand', hrefs: ['/admin/packages', '/admin/certificates'] },

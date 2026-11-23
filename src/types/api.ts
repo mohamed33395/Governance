@@ -172,10 +172,47 @@ export interface Booking {
   payments?: Payment[];                            // admin details
   report?: { id: ID; title: string; file_name: string; uploaded_at: string } | null;
   client_notes: string | null;
-  can: { complete: boolean; cancel: boolean; upload_report: boolean };
+  pending_transfer?: PendingBookingTransfer | null;   // admin side only
+  can: { complete: boolean; cancel: boolean; upload_report: boolean; request_transfer: boolean };
   expires_at: string | null; completed_at: string | null;
   cancelled_at: string | null; cancellation_reason: string | null;
   created_at: string;
+}
+
+// ---------- booking transfers (consultant handoff requests) ----------
+export type TransferStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
+
+// embedded in Booking.pending_transfer (admin side)
+export interface PendingBookingTransfer {
+  id: ID;
+  status: TransferStatus;
+  status_label: string;
+  to_consultant: { id: ID; name: string } | null;
+  reason: string;
+  created_at: string | null;
+}
+
+export interface BookingTransfer {
+  id: ID;
+  status: TransferStatus;
+  status_label: string;
+  reason: string;
+  decision_note: string | null;
+  booking: {
+    id: ID; reference: string; status: BookingStatus; date: string; time: string;
+    client: { id: ID; name: string; company_name: string } | null;
+  } | null;
+  from_consultant: { id: ID; name: string; title: string | null; specialization: string | null } | null;
+  to_consultant: { id: ID; name: string; title: string | null; specialization: string | null } | null;
+  requested_by: { id: ID; name: string } | null;
+  decided_by: { id: ID; name: string } | null;
+  decided_at: string | null;
+  created_at: string | null;
+}
+
+// GET /admin/booking-transfers/targets pick-list entry
+export interface TransferTarget {
+  id: ID; name: string; title: string | null; specialization: string | null;
 }
 
 export interface BookingCalendarItem {
@@ -339,7 +376,10 @@ export type NotificationType =
   | 'review_submitted'
   | 'payment_paid'
   | 'support_ticket_created'
-  | 'support_ticket_message';
+  | 'support_ticket_message'
+  | 'transfer_requested'
+  | 'transfer_approved'
+  | 'transfer_rejected';
 
 export interface NotificationRecipient {
   type: 'client' | 'user';

@@ -22,3 +22,16 @@ export const reportReviewSchema = z.object({
   note: z.string().max(2000).optional().or(z.literal('')),
 });
 export type ReportReviewValues = z.input<typeof reportReviewSchema>;
+
+// consultant → asks admin to hand the booking to another consultant
+export const transferRequestSchema = z.object({
+  to_consultant_id: z.string().min(1, 'required'), // select value, cast on submit
+  reason: z.string().min(5, 'transfers.reasonTooShort').max(500),
+});
+export type TransferRequestValues = z.infer<typeof transferRequestSchema>;
+
+// admin reject — optional note shown to the requesting consultant
+export const rejectTransferSchema = z.object({
+  note: z.string().max(500).optional().or(z.literal('')),
+});
+export type RejectTransferValues = z.input<typeof rejectTransferSchema>;
