@@ -132,7 +132,7 @@ export function CertificatesSection() {
               {strip.map((c, i) => (
                 <li key={`${c.id}-${i}`} aria-hidden={i >= count} className="w-56 shrink-0 sm:w-64">
                   <article
-                    className={`group relative aspect-[4/3] overflow-hidden rounded-2xl bg-white ring-1 ring-border ${FLUID} hover:-translate-y-1 hover:shadow-md dark:bg-white/95`}
+                    className={`group relative aspect-[4/5] overflow-hidden rounded-2xl bg-white ring-1 ring-border ${FLUID} hover:-translate-y-1 hover:shadow-md dark:bg-white/95`}
                   >
                     {c.image_url || c.image_thumb_url ? (
                       <a
@@ -147,7 +147,7 @@ export function CertificatesSection() {
                           src={c.image_thumb_url ?? c.image_url ?? ""}
                           alt={c.name}
                           loading="lazy"
-                          className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                         />
                       </a>
                     ) : (
@@ -155,7 +155,7 @@ export function CertificatesSection() {
                         <CertificateIcon size={56} weight="duotone" aria-hidden="true" className="text-accent/70" />
                       </div>
                     )}
-                    <h3 className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-white via-white/85 to-transparent px-4 pb-4 pt-10 text-center text-sm font-semibold leading-snug text-text text-balance">{c.name}</h3>
+                    <h3 className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pb-4 pt-10 text-center text-sm font-semibold leading-snug text-white text-balance">{c.name}</h3>
                   </article>
                 </li>
               ))}
