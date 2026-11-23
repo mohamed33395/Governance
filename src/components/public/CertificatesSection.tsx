@@ -126,13 +126,13 @@ export function CertificatesSection() {
             <ul
               ref={viewportRef}
               onTransitionEnd={onTrackTransitionEnd}
-              className={`flex w-max gap-4 lg:gap-6 ${anim ? "transition-transform duration-700 ease-out" : ""}`}
+              className={`flex w-max gap-6 lg:gap-10 ${anim ? "transition-transform duration-700 ease-out" : ""}`}
               style={{ transform: `translateX(${offset}px)` }}
             >
               {strip.map((c, i) => (
                 <li key={`${c.id}-${i}`} aria-hidden={i >= count} className="w-56 shrink-0 sm:w-64">
                   <article
-                    className={`group relative aspect-[4/5] overflow-hidden rounded-2xl bg-white ring-1 ring-border ${FLUID} hover:-translate-y-1 hover:shadow-md dark:bg-white/95`}
+                    className={`group relative aspect-[4/5] overflow-hidden rounded-2xl bg-white p-3 ring-1 ring-border ${FLUID} hover:-translate-y-1 hover:shadow-md dark:bg-white/95`}
                   >
                     {c.image_url || c.image_thumb_url ? (
                       <a
@@ -140,7 +140,7 @@ export function CertificatesSection() {
                         target="_blank"
                         rel="noreferrer"
                         title={c.name}
-                        className="block h-full w-full"
+                        className="block h-full w-full overflow-hidden rounded-xl"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -151,11 +151,11 @@ export function CertificatesSection() {
                         />
                       </a>
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-surface">
+                      <div className="flex h-full w-full items-center justify-center rounded-xl bg-surface">
                         <CertificateIcon size={56} weight="duotone" aria-hidden="true" className="text-accent/70" />
                       </div>
                     )}
-                    <h3 className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pb-4 pt-10 text-center text-sm font-semibold leading-snug text-white text-balance">{c.name}</h3>
+                    <h3 className="pointer-events-none absolute inset-x-3 bottom-3 rounded-b-xl bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pb-4 pt-10 text-center text-sm font-semibold leading-snug text-white text-balance">{c.name}</h3>
                   </article>
                 </li>
               ))}
