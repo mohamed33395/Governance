@@ -1015,6 +1015,10 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // ===== client bookings =====
     "bookings.title": "حجوزاتي",
+    "bookings.new": "حجز جديد",
+    "newBooking.pickConsultant": "اختر مستشاراً للحجز",
+    "newBooking.empty": "لا يوجد مستشارون متاحون",
+    "newBooking.notBookable": "غير متاح للحجز",
     "bookings.upcomingOnly": "القادمة فقط",
     "bookings.empty": "لا توجد حجوزات",
     "bookings.details": "تفاصيل الحجز",
@@ -3023,6 +3027,10 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // ===== client bookings =====
     "bookings.title": "My bookings",
+    "bookings.new": "New booking",
+    "newBooking.pickConsultant": "Pick a consultant to book",
+    "newBooking.empty": "No consultants available",
+    "newBooking.notBookable": "Not bookable",
     "bookings.upcomingOnly": "Upcoming only",
     "bookings.empty": "No bookings",
     "bookings.details": "Booking details",
