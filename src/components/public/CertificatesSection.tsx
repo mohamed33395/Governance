@@ -126,28 +126,36 @@ export function CertificatesSection() {
             <ul
               ref={viewportRef}
               onTransitionEnd={onTrackTransitionEnd}
-              className={`flex w-max gap-4 lg:gap-6 ${anim ? "transition-transform duration-700 ease-out" : ""}`}
+              className={`flex w-max gap-6 lg:gap-10 ${anim ? "transition-transform duration-700 ease-out" : ""}`}
               style={{ transform: `translateX(${offset}px)` }}
             >
               {strip.map((c, i) => (
                 <li key={`${c.id}-${i}`} aria-hidden={i >= count} className="w-56 shrink-0 sm:w-64">
                   <article
-                    className={`group flex h-full flex-col items-center rounded-2xl bg-white px-4 pb-5 pt-4 text-center ring-1 ring-border ${FLUID} hover:-translate-y-1 hover:shadow-md dark:bg-white/95`}
+                    className={`group relative aspect-[4/5] overflow-hidden rounded-2xl bg-white p-3 ring-1 ring-border ${FLUID} hover:-translate-y-1 hover:shadow-md dark:bg-white/95`}
                   >
                     {c.image_url || c.image_thumb_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={c.image_url ?? c.image_thumb_url ?? ""}
-                        alt={c.name}
-                        loading="lazy"
-                        className="h-32 w-full object-contain"
-                      />
+                      <a
+                        href={c.image_url ?? c.image_thumb_url ?? "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        title={c.name}
+                        className="block h-full w-full overflow-hidden rounded-xl"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={c.image_thumb_url ?? c.image_url ?? ""}
+                          alt={c.name}
+                          loading="lazy"
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                        />
+                      </a>
                     ) : (
-                      <div className="flex h-32 w-full items-center justify-center">
+                      <div className="flex h-full w-full items-center justify-center rounded-xl bg-surface">
                         <CertificateIcon size={56} weight="duotone" aria-hidden="true" className="text-accent/70" />
                       </div>
                     )}
-                    <h3 className="mt-auto pt-4 text-sm font-semibold leading-snug text-text text-balance">{c.name}</h3>
+                    <h3 className="pointer-events-none absolute inset-x-3 bottom-3 rounded-b-xl bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pb-4 pt-10 text-center text-sm font-semibold leading-snug text-white text-balance">{c.name}</h3>
                   </article>
                 </li>
               ))}

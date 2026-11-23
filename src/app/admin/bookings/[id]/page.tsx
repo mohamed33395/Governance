@@ -11,6 +11,7 @@ import { downloadFile } from '@/lib/files';
 import { usePermissions } from '@/lib/permissions';
 import { useI18n } from '@/lib/i18n/i18n-context';
 import { ReportUploadModal } from '@/components/admin/ReportUploadModal';
+import { TransferRequestModal } from '@/components/admin/TransferRequestModal';
 import { RequirePermission } from '@/components/admin/RequirePermission';
 import {
   Alert,
@@ -53,6 +54,7 @@ function DetailsInner() {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
   const [notes, setNotes] = useState('');
   const [reason, setReason] = useState('');
   const [reasonError, setReasonError] = useState<string>();
@@ -129,6 +131,7 @@ function DetailsInner() {
   const showMeeting = booking.status === 'pending' && can('manage-meetings');
   const showRefund = booking.refund_status === 'requested' && can('refund-payments');
   const showUpload = booking.can.upload_report && can('upload-reports');
+  const showTransfer = booking.can.request_transfer && can('request-booking-transfers');
 
   return (
     <>
@@ -159,6 +162,11 @@ function DetailsInner() {
               {t('reportsAdmin.upload')}
             </Button>
           )}
+          {showTransfer && (
+            <Button size="sm" variant="outline" onClick={() => setTransferOpen(true)}>
+              {t('transfers.requestTransfer')}
+            </Button>
+          )}
           {showCancel && (
             <Button size="sm" variant="danger" onClick={() => setCancelOpen(true)}>
               {t('bookings.cancel')}
@@ -167,6 +175,14 @@ function DetailsInner() {
         </div>
       </div>
 
+      {booking.pending_transfer && (
+        <Alert
+          color="warning"
+          title={t('transfers.pendingTitle')}
+          body={t('transfers.pendingBody').replace('{name}', booking.pending_transfer.to_consultant?.name ?? '—')}
+          className="mb-5"
+        />
+      )}
       {booking.refund_status === 'requested' && (
         <Alert
           color="warning"
@@ -439,6 +455,17 @@ function DetailsInner() {
         danger
         loading={markRefunded.isPending}
       />
+
+      {transferOpen && (
+        <TransferRequestModal
+          bookingId={booking.id}
+          onClose={() => setTransferOpen(false)}
+          onSaved={() => {
+            setTransferOpen(false);
+            invalidate();
+          }}
+        />
+      )}
 
       {uploadOpen && (
         <ReportUploadModal
